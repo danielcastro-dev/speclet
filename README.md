@@ -12,6 +12,7 @@ Speclet is a structured workflow for developing features with AI assistants (Cla
 - **Atomic commits**: 1 story = 1 commit
 - **Trackable progress**: JSON specs with `passes: true/false` for each story
 - **Autonomous loop**: Run unattended with model fallback and build verification
+- **Learning mode**: Generate lessons from completed stories to develop coding fluency
 
 ## Quick Start
 
@@ -45,7 +46,8 @@ your-project/
 ├── .opencode/skill/              # OpenCode skills
 │   ├── speclet-draft/SKILL.md
 │   ├── speclet-spec/SKILL.md
-│   └── speclet-loop/SKILL.md
+│   ├── speclet-loop/SKILL.md
+│   └── speclet-learn/SKILL.md
 ├── .speclet/
 │   ├── GUIDE.md                  # LLM instructions (permanent)
 │   ├── DECISIONS.md              # Architecture decisions (permanent)
@@ -67,6 +69,7 @@ your-project/
 | **speclet-draft** | `Use the speclet-draft skill for [feature]` | Generate draft.md with clarifying questions |
 | **speclet-spec** | `Use the speclet-spec skill` | Convert draft to spec.json |
 | **speclet-loop** | `Use the speclet-loop skill` | Implement one story autonomously |
+| **speclet-learn** | `Use the speclet-learn skill` | Generate lesson from last completed story |
 
 ### Complete Workflow
 
@@ -218,6 +221,60 @@ At completion:
 1. Prompts to create PR
 2. If not authenticated: prompts for token
 3. Uses `gh pr create --fill`
+
+## Learning Mode
+
+After completing stories, use `speclet-learn` to generate explanatory lessons that help you understand and internalize the code.
+
+### Usage
+
+```
+Use the speclet-learn skill
+```
+
+Or invoke directly: `/speclet-learn`
+
+### What It Generates
+
+For each completed story, it creates `.speclet/lessons/STORY-X.md` containing:
+
+| Section | Purpose |
+|---------|---------|
+| **Technical Decisions** | Why X was chosen over Y (alternatives considered) |
+| **Concepts Explained** | Adaptive depth based on complexity detected |
+| **Common Errors** | Mistakes to avoid with before/after examples |
+| **Practice Exercise** | 10-15 min hands-on task (no LLM allowed) |
+
+### Adaptive Complexity
+
+The skill detects code patterns and adjusts explanation depth:
+
+| Level | Patterns | Explanation |
+|-------|----------|-------------|
+| 🟢 Basic | Variables, loops, conditionals | 1-2 lines, "you know this" |
+| 🟡 Intermediate | Classes, decorators, comprehensions | 5-10 lines + example |
+| 🔴 Advanced | Async, generics, metaclasses | 10-20 lines + multiple examples |
+
+### Practice Exercises
+
+Each lesson includes a hands-on exercise:
+- **Time:** 10-15 minutes
+- **Rule:** No LLM assistance
+- **Hints:** 3 progressive hints (structure → concept → almost-solution)
+- **No solutions:** Compare with real code when done
+
+### Ideal Workflow
+
+```
+# Morning routine (30 min before work):
+1. Review yesterday's stories
+2. /speclet-learn → generates lesson
+3. Read lesson (15 min)
+4. Do exercise (15 min)
+5. Compare with real code
+```
+
+**Goal:** Develop mechanical coding fluency instead of just consuming AI-generated code.
 
 ## Workflow Phases
 

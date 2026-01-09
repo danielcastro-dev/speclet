@@ -21,10 +21,11 @@ Speclet is a structured workflow for developing features with AI assistants (Cla
 git clone https://github.com/danielcastro-dev/speclet.git /tmp/speclet
 
 # Copy to your project
-mkdir -p .speclet/templates .speclet/tickets .speclet/archive
+mkdir -p .speclet/templates .speclet/tickets .speclet/archive .speclet/skills
 cp /tmp/speclet/GUIDE.md .speclet/
 cp /tmp/speclet/loop.md .speclet/
 cp /tmp/speclet/templates/* .speclet/templates/
+cp -r /tmp/speclet/skills/* .speclet/skills/
 
 # Add to .gitignore (optional - keeps planning files out of repo)
 echo ".speclet/" >> .gitignore
@@ -48,6 +49,10 @@ your-project/
 │   ├── GUIDE.md              # LLM instructions (permanent)
 │   ├── DECISIONS.md          # Architecture decisions (permanent)
 │   ├── loop.md               # Autonomous loop instructions
+│   ├── skills/               # Skill prompts
+│   │   ├── draft/prompt.md   # Draft generation skill
+│   │   ├── spec/prompt.md    # Spec conversion skill
+│   │   └── loop/prompt.md    # Loop execution skill
 │   ├── templates/            # Templates for docs
 │   │   ├── draft.md          # Collaborative planning (markdown)
 │   │   ├── spec.json         # Execution plan (JSON)
@@ -61,7 +66,44 @@ your-project/
 
 ## Usage
 
-### Starting a New Session
+### Using Skills (Recommended)
+
+Speclet provides three skills that work with any LLM:
+
+| Skill | Command | Purpose |
+|-------|---------|---------|
+| **draft** | `Load the draft skill for [feature]` | Generate draft.md with clarifying questions |
+| **spec** | `Load the spec skill, convert draft.md` | Convert draft to spec.json |
+| **loop** | `Load the loop skill, execute iteration` | Implement one story autonomously |
+
+#### Complete Workflow with Skills
+
+```
+# Step 1: Create draft with clarifying questions
+Load the draft skill for "add user authentication"
+
+# Step 2: Convert to executable spec
+Load the spec skill and convert draft.md to spec.json
+
+# Step 3: Implement (repeat until COMPLETE)
+Load the loop skill and execute one iteration
+```
+
+#### Installing Skills
+
+Copy skills to your project or LLM config:
+
+```bash
+# Option 1: Copy to project
+cp -r /tmp/speclet/skills .speclet/
+
+# Option 2: Copy to Amp config (if using Amp)
+cp -r /tmp/speclet/skills/* ~/.config/amp/skills/
+```
+
+### Manual Mode (without skills)
+
+#### Starting a New Session
 
 Tell your LLM:
 

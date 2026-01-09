@@ -4,7 +4,15 @@
 
 > "Read `.speclet/GUIDE.md` and let's start with Phase 0"
 
-**For autonomous loop:** Once you have a `spec.json`, use:
+**Using Skills (recommended):**
+
+| Skill | Command | Purpose |
+|-------|---------|---------|
+| `draft` | "Load the draft skill for [feature]" | Generate draft.md with clarifying questions |
+| `spec` | "Load the spec skill, convert draft.md" | Convert draft to spec.json |
+| `loop` | "Load the loop skill, execute iteration" | Implement one story autonomously |
+
+**Manual loop:** Once you have a `spec.json`:
 
 > "Read `.speclet/loop.md` and execute one iteration."
 

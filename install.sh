@@ -21,6 +21,7 @@ cp "$SCRIPT_DIR/loop.md" .speclet/
 cp "$SCRIPT_DIR/templates/"* .speclet/templates/
 cp -r "$SCRIPT_DIR/skills/"* .opencode/skill/
 cp "$SCRIPT_DIR/speclet.sh" ./
+cp "$SCRIPT_DIR/speclet.ps1" ./
 
 chmod +x speclet.sh
 
@@ -50,6 +51,7 @@ echo "  .opencode/skill/speclet-draft/"
 echo "  .opencode/skill/speclet-spec/"
 echo "  .opencode/skill/speclet-loop/"
 echo "  ./speclet.sh"
+echo "  ./speclet.ps1"
 echo ""
 echo -e "${GREEN}Ready! Usage:${NC}"
 echo "  Use the speclet-draft skill for [feature]"

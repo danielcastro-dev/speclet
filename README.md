@@ -92,6 +92,29 @@ Use the speclet-spec skill
 Use the speclet-loop skill
 ```
 
+#### Fully Autonomous Mode (speclet.sh)
+
+Run the entire workflow unattended:
+
+```bash
+# Copy script to your project
+cp /tmp/speclet/speclet.sh .
+
+# Run (default: 10 iterations max)
+./speclet.sh
+
+# Or specify max iterations
+./speclet.sh 20
+```
+
+The script will:
+1. Read `spec.json` and switch to the correct branch
+2. Run OpenCode with `speclet-loop` skill repeatedly
+3. Stop when all stories pass or max iterations reached
+4. Offer to archive files and create PR
+
+**Requirements:** `jq` and `opencode` CLI installed.
+
 #### Installing Skills
 
 Skills use OpenCode/Claude compatible format (`SKILL.md` with frontmatter).

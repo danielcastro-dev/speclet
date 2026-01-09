@@ -21,9 +21,10 @@ Speclet is a structured workflow for developing features with AI assistants (Cla
 git clone https://github.com/danielcastro-dev/speclet.git /tmp/speclet
 
 # Copy to your project
-mkdir -p .speclet
+mkdir -p .speclet/templates .speclet/tickets .speclet/archive
 cp /tmp/speclet/GUIDE.md .speclet/
-cp -r /tmp/speclet/templates .speclet/
+cp /tmp/speclet/loop.md .speclet/
+cp /tmp/speclet/templates/* .speclet/templates/
 
 # Add to .gitignore (optional - keeps planning files out of repo)
 echo ".speclet/" >> .gitignore
@@ -46,6 +47,7 @@ your-project/
 ├── .speclet/
 │   ├── GUIDE.md              # LLM instructions (permanent)
 │   ├── DECISIONS.md          # Architecture decisions (permanent)
+│   ├── loop.md               # Autonomous loop instructions
 │   ├── templates/            # Templates for docs
 │   │   ├── draft.md          # Collaborative planning (markdown)
 │   │   ├── spec.json         # Execution plan (JSON)
@@ -70,6 +72,23 @@ Context: [describe your problem in 1-2 sentences]
 
 Let's start with Phase 0.
 ```
+
+### Autonomous Loop Mode
+
+Once you have a `spec.json`, you can run Speclet in autonomous loop mode:
+
+```
+Read .speclet/loop.md and execute one iteration.
+```
+
+Keep sending the same prompt until you see `✅ COMPLETE`. Each iteration:
+1. Picks the highest priority story where `passes: false`
+2. Implements it
+3. Runs quality checks
+4. Commits and updates `passes: true`
+5. Appends to progress.md
+
+This is inspired by [snarktank/ralph](https://github.com/snarktank/ralph) autonomous agent pattern.
 
 ### Continuing a Session
 

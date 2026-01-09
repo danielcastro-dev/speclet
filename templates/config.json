@@ -10,5 +10,8 @@
   "maxStoryFailures": 3,
   "buildCommand": "npm run build",
   "verifyBuild": true,
+  "testCommand": "",
+  "verifyTests": false,
+  "storyTimeoutMinutes": 30,
   "logFile": ".speclet/loop.log"
 }

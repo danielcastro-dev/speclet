@@ -35,8 +35,18 @@ $script:MAX_RETRIES = 3
 $script:MAX_STORY_FAILURES = 3
 $script:BUILD_COMMAND = "npm run build"
 $script:VERIFY_BUILD = $true
+$script:TEST_COMMAND = ""
+$script:VERIFY_TESTS = $false
+$script:STORY_TIMEOUT_MINUTES = 30
 $script:CurrentModelIdx = 0
 $script:StoryFailures = @{}
+
+$script:SessionStartTime = $null
+$script:BuildFailures = 0
+$script:TestFailures = 0
+$script:StoriesCompleted = 0
+$script:ModelsUsed = @()
+$script:StoryTimes = @()
 
 function Write-ColorOutput {
     param([string]$Message, [string]$Color = "White")
@@ -63,6 +73,9 @@ function Import-Config {
             if ($config.buildCommand) { $script:BUILD_COMMAND = $config.buildCommand }
             if ($null -ne $config.verifyBuild) { $script:VERIFY_BUILD = $config.verifyBuild }
             if ($config.logFile) { $script:LOG_FILE = $config.logFile }
+            if ($config.testCommand) { $script:TEST_COMMAND = $config.testCommand }
+            if ($null -ne $config.verifyTests) { $script:VERIFY_TESTS = $config.verifyTests }
+            if ($config.storyTimeoutMinutes) { $script:STORY_TIMEOUT_MINUTES = $config.storyTimeoutMinutes }
         } catch {
             Write-ColorOutput "Warning: Could not parse config file" "Yellow"
         }
@@ -161,6 +174,39 @@ function Show-Models {
     }
 }
 
+function Show-SessionSummary {
+    $endTime = Get-Date
+    $duration = $endTime - $script:SessionStartTime
+    $minutes = [math]::Floor($duration.TotalMinutes)
+    $seconds = $duration.Seconds
+    
+    $uniqueModels = $script:ModelsUsed | Select-Object -Unique
+    $avgTime = 0
+    if ($script:StoryTimes.Count -gt 0) {
+        $totalTime = ($script:StoryTimes | Measure-Object -Sum).Sum
+        $avgTime = [math]::Round($totalTime / $script:StoryTimes.Count)
+    }
+    
+    $spec = Get-SpecData
+    $blocked = ($spec.stories | Where-Object { $_.blocked -eq $true }).Count
+    
+    Write-Host ""
+    Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Cyan"
+    Write-ColorOutput "                      SESSION SUMMARY                       " "Cyan"
+    Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Cyan"
+    Write-Host "Total time:         ${minutes}m ${seconds}s" -ForegroundColor Blue
+    Write-Host "Stories completed:  $($script:StoriesCompleted)" -ForegroundColor Blue
+    Write-Host "Stories blocked:    $blocked" -ForegroundColor Blue
+    Write-Host "Build failures:     $($script:BuildFailures)" -ForegroundColor Blue
+    Write-Host "Test failures:      $($script:TestFailures)" -ForegroundColor Blue
+    Write-Host "Avg time/story:     ${avgTime}s" -ForegroundColor Blue
+    Write-Host "Models used:" -ForegroundColor Blue
+    foreach ($m in $uniqueModels) {
+        Write-Host "  - $m"
+    }
+    Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Cyan"
+}
+
 function Save-Checkpoint {
     param([string]$StoryId, [int]$Iteration, [int]$Failures)
     
@@ -229,61 +275,116 @@ function Test-Build {
     }
 }
 
+function Test-Tests {
+    if (-not $script:VERIFY_TESTS -or [string]::IsNullOrEmpty($script:TEST_COMMAND)) { 
+        return $true 
+    }
+    
+    Write-Log "Running tests: $script:TEST_COMMAND" "Cyan"
+    
+    try {
+        $output = Invoke-Expression $script:TEST_COMMAND 2>&1
+        $output | Add-Content -Path $LOG_FILE -ErrorAction SilentlyContinue
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "Tests passed ✓" "Green"
+            return $true
+        } else {
+            Write-Log "Tests FAILED ✗" "Red"
+            return $false
+        }
+    } catch {
+        Write-Log "Tests FAILED: $_" "Red"
+        return $false
+    }
+}
+
 function Undo-Changes {
     Write-Log "Reverting uncommitted changes..." "Yellow"
     git checkout . 2>$null
     git clean -fd 2>$null
 }
 
+function Test-StoryCompletion {
+    param([string]$StoryId)
+    
+    $spec = Get-SpecData
+    $story = $spec.stories | Where-Object { $_.id -eq $StoryId } | Select-Object -First 1
+    
+    if ($story -and $story.passes -eq $true) {
+        Write-Log "Story $StoryId marked complete ✓" "Green"
+        return $true
+    } else {
+        Write-Log "Story $StoryId not marked complete, counting as failure" "Yellow"
+        return $false
+    }
+}
+
 function Invoke-OpenCodeWithFallback {
     $retries = 0
     $delay = 5
+    $timeoutSeconds = $script:STORY_TIMEOUT_MINUTES * 60
+    $tempLogFile = [System.IO.Path]::GetTempFileName()
     
     while ($true) {
         $model = $script:MODELS[$script:CurrentModelIdx]
         
-        Write-Log "Using model: $model" "Cyan"
+        Write-Log "Using model: $model (timeout: $($script:STORY_TIMEOUT_MINUTES)m)" "Cyan"
+        $script:ModelsUsed += $model
         
         try {
-            & opencode -m $model -p "Use the speclet-loop skill" 2>&1 | Add-Content -Path $LOG_FILE -ErrorAction SilentlyContinue
-            if ($LASTEXITCODE -eq 0) {
+            $process = Start-Process -FilePath "opencode" -ArgumentList "-m", $model, "-p", "Use the speclet-loop skill" -PassThru -NoNewWindow -Wait:$false -RedirectStandardError $tempLogFile
+            $completed = $process.WaitForExit($timeoutSeconds * 1000)
+            
+            if (Test-Path $tempLogFile) {
+                Get-Content $tempLogFile | Add-Content -Path $LOG_FILE -ErrorAction SilentlyContinue
+            }
+            
+            if (-not $completed) {
+                try { $process.Kill() } catch { }
+                Write-Log "Story timed out after $($script:STORY_TIMEOUT_MINUTES) minutes" "Red"
+            } elseif ($process.ExitCode -eq 0) {
                 return $true
+            } else {
+                throw "OpenCode exited with code $($process.ExitCode)"
             }
-            throw "OpenCode exited with code $LASTEXITCODE"
         } catch {
-            $retries++
             Write-Log "OpenCode failed: $_" "Yellow"
-            
-            if ($retries -lt $script:MAX_RETRIES) {
-                Write-Log "Retry $retries/$script:MAX_RETRIES with $model (waiting ${delay}s)..." "Yellow"
-                Start-Sleep -Seconds $delay
-                $delay = $delay * 3
-                continue
-            }
-            
-            $script:CurrentModelIdx++
-            $retries = 0
-            $delay = 5
-            
-            if ($script:CurrentModelIdx -ge $script:MODELS.Count) {
-                Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Red"
-                Write-Log "All models exhausted" "Red"
-                foreach ($m in $script:MODELS) {
-                    Write-ColorOutput "  - $m" "Red"
-                }
-                Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Red"
-                return $false
-            }
-            
-            Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Yellow"
-            Write-Log "Switching to fallback model: $($script:MODELS[$script:CurrentModelIdx])" "Yellow"
-            Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Yellow"
         }
+        
+        $retries++
+        
+        if ($retries -lt $script:MAX_RETRIES) {
+            Write-Log "Retry $retries/$script:MAX_RETRIES with $model (waiting ${delay}s)..." "Yellow"
+            Start-Sleep -Seconds $delay
+            $delay = $delay * 3
+            continue
+        }
+        
+        $script:CurrentModelIdx++
+        $retries = 0
+        $delay = 5
+        
+        if ($script:CurrentModelIdx -ge $script:MODELS.Count) {
+            Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Red"
+            Write-Log "All models exhausted" "Red"
+            foreach ($m in $script:MODELS) {
+                Write-ColorOutput "  - $m" "Red"
+            }
+            Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Red"
+            return $false
+        }
+        
+        Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Yellow"
+        Write-Log "Switching to fallback model: $($script:MODELS[$script:CurrentModelIdx])" "Yellow"
+        Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Yellow"
     }
 }
 
 function Invoke-Iteration {
     param([int]$Iteration)
+    
+    $storyStartTime = Get-Date
     
     Write-Host ""
     Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Green"
@@ -320,10 +421,17 @@ function Invoke-Iteration {
         return 2
     }
     
+    if (-not (Test-StoryCompletion -StoryId $storyId)) {
+        $script:StoryFailures[$storyId] = $currentFailures + 1
+        Write-Log "Story $storyId failure count: $($script:StoryFailures[$storyId])/$script:MAX_STORY_FAILURES" "Yellow"
+        return 1
+    }
+    
     if ($script:VERIFY_BUILD) {
         if (-not (Test-Build)) {
             Write-Log "Build failed after story implementation, reverting..." "Red"
             Undo-Changes
+            $script:BuildFailures++
             
             $script:StoryFailures[$storyId] = $currentFailures + 1
             Write-Log "Story $storyId failure count: $($script:StoryFailures[$storyId])/$script:MAX_STORY_FAILURES" "Yellow"
@@ -331,6 +439,23 @@ function Invoke-Iteration {
             return 1
         }
     }
+    
+    if (-not (Test-Tests)) {
+        Write-Log "Tests failed after story implementation, reverting..." "Red"
+        Undo-Changes
+        $script:TestFailures++
+        
+        $script:StoryFailures[$storyId] = $currentFailures + 1
+        Write-Log "Story $storyId failure count: $($script:StoryFailures[$storyId])/$script:MAX_STORY_FAILURES" "Yellow"
+        
+        return 1
+    }
+    
+    # Track story completion metrics
+    $storyEndTime = Get-Date
+    $storyDuration = ($storyEndTime - $storyStartTime).TotalSeconds
+    $script:StoryTimes += [int]$storyDuration
+    $script:StoriesCompleted++
     
     $script:StoryFailures[$storyId] = 0
     
@@ -409,6 +534,9 @@ function Main {
         New-Item -ItemType Directory -Path $logDir -Force | Out-Null
     }
     
+    # Initialize session tracking
+    $script:SessionStartTime = Get-Date
+    
     Write-ColorOutput @"
 
 ╔═══════════════════════════════════════════════════════════╗
@@ -448,6 +576,7 @@ function Main {
             Write-ColorOutput "╚═══════════════════════════════════════════════════════════╝" "Green"
             Write-Host ""
             Get-StoryCount | Out-Null
+            Show-SessionSummary
             Write-Log "All stories complete!" "Green"
             
             Write-Host ""
@@ -465,6 +594,7 @@ function Main {
             exit 0
         } elseif ($result -eq 2) {
             Write-Log "Cannot continue - all models failed" "Red"
+            Show-SessionSummary
             exit 1
         }
         
@@ -474,6 +604,7 @@ function Main {
     Write-Host ""
     Write-Log "Max iterations ($MaxIterations) reached" "Yellow"
     Get-StoryCount | Out-Null
+    Show-SessionSummary
     Write-ColorOutput "Run again to continue: .\speclet.ps1" "Yellow"
     exit 1
 }

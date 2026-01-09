@@ -114,6 +114,9 @@ Create `.speclet/config.json`:
   "maxStoryFailures": 3,
   "buildCommand": "npm run build",
   "verifyBuild": true,
+  "testCommand": "npm test",
+  "verifyTests": false,
+  "storyTimeoutMinutes": 30,
   "logFile": ".speclet/loop.log"
 }
 ```
@@ -125,6 +128,9 @@ Create `.speclet/config.json`:
 | `maxStoryFailures` | 3 | Failures before marking story blocked |
 | `buildCommand` | `npm run build` | Command to verify build |
 | `verifyBuild` | true | Run build after each story |
+| `testCommand` | `""` | Command to run tests (optional) |
+| `verifyTests` | false | Run tests after build (if testCommand set) |
+| `storyTimeoutMinutes` | 30 | Kill story if exceeds this time |
 | `logFile` | `.speclet/loop.log` | Log file path |
 
 ## Features
@@ -143,6 +149,27 @@ After each story:
 2. If passes: continue to next story
 3. If fails: revert changes, increment failure count
 
+### Test Verification (Optional)
+
+If `verifyTests: true` and `testCommand` configured:
+1. Run `testCommand` after successful build
+2. If passes: continue to next story
+3. If fails: revert changes, increment failure count
+
+### Story Timeout
+
+Prevents stuck stories:
+1. Each story has `storyTimeoutMinutes` limit (default: 30)
+2. If exceeded: kill the process, count as failure
+3. Bash uses `timeout` command, PowerShell uses `WaitForExit`
+
+### Story Completion Verification
+
+After each iteration:
+1. Read `spec.json` and check if `passes: true` for current story
+2. If not marked complete: count as failure
+3. Ensures agent actually completed the work
+
 ### Skip Blocked Stories
 
 If a story fails 3 times:
@@ -156,6 +183,15 @@ If the script crashes or is interrupted:
 1. State saved to `.speclet/checkpoint.json`
 2. On restart: resume from last story
 3. No lost progress
+
+### Session Summary
+
+At end of session (complete, max iterations, or failure):
+- Total time elapsed
+- Stories completed / blocked
+- Build failures / test failures
+- Average time per story
+- Models used during session
 
 ### Logging
 
@@ -282,18 +318,6 @@ Every spec must define what it will NOT do. Critical for preventing scope creep.
 | Commits/hour | 3-4 |
 | Questions/story | ≤2 |
 
-## Comparison with Ralph
-
-See [RALPH_COMPARISON.md](./RALPH_COMPARISON.md) for detailed comparison with [snarktank/ralph](https://github.com/snarktank/ralph).
-
-**Speclet advantages:**
-- JSON tracking (programmatic)
-- Non-Goals (scope control)
-- Lettered questions (faster UX)
-- Tiered complexity (efficiency)
-- Model fallback (resilience)
-- Build verification (safety)
-- Cross-platform (Bash + PowerShell)
 
 ## Philosophy
 
@@ -301,7 +325,7 @@ Speclet is inspired by:
 - **Spec-Driven Development**: Specification before code
 - **BDD**: Acceptance criteria, Gherkin-style scenarios
 - **ADR**: Architecture Decision Records
-- **[Ralph pattern](https://ghuntley.com/ralph/)**: Story sizing, JSON tracking
+- **[Ralph](https://ghuntley.com/ralph/)**: Story sizing, JSON tracking
 
 The key insight: **LLMs work better with structured context**. Speclet provides that structure while staying lightweight.
 

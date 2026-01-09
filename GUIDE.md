@@ -67,10 +67,37 @@
 **Goal:** Understand the problem BEFORE writing code.
 
 1. Create `.speclet/draft.md` with the template below
-2. Ask clarifying questions (max 3 rounds)
-3. Document answers in the draft table
+2. **Ask 3-5 clarifying questions with lettered options** (see format below)
+3. Document answers in the draft
 4. Identify affected files
 5. Estimate complexity
+
+#### Clarifying Questions Format
+
+Ask only critical questions where the initial prompt is ambiguous. Use lettered options for quick responses:
+
+```
+1. What is the primary goal of this feature?
+   A. Improve user experience
+   B. Fix existing bug
+   C. Add new functionality
+   D. Refactor/cleanup
+   E. Other: [please specify]
+
+2. What is the scope?
+   A. Minimal viable version
+   B. Full-featured implementation
+   C. Just the backend/API
+   D. Just the UI
+```
+
+**User can respond:** "1C, 2A" for quick iteration.
+
+**Focus questions on:**
+- **Problem/Goal:** What problem does this solve?
+- **Core Functionality:** What are the key actions?
+- **Scope/Boundaries:** What should it NOT do?
+- **Success Criteria:** How do we know it's done?
 
 **When user confirms:** Move to Phase 2.
 
@@ -84,6 +111,51 @@
 2. Divide into atomic stories (1 story = 1 commit)
 3. Define "Done" criteria per story
 4. Verify with user: "Shall we start?"
+
+#### Story Sizing Rule (CRITICAL)
+
+**If you cannot describe the change in 2-3 sentences, it's too big. Split it.**
+
+✅ **Right-sized stories:**
+- Add a database column and migration
+- Add a UI component to an existing page
+- Update a server action with new logic
+- Add a filter dropdown to a list
+
+❌ **Too big (split these):**
+- "Build the entire dashboard" → Split into: schema, queries, UI components, filters
+- "Add authentication" → Split into: schema, middleware, login UI, session handling
+- "Refactor the API" → Split into one story per endpoint or pattern
+
+#### Story Order: Dependencies First
+
+Stories execute in priority order. Earlier stories must not depend on later ones.
+
+**Correct order:**
+1. Schema/database changes (migrations)
+2. Server actions / backend logic
+3. UI components that use the backend
+4. Dashboard/summary views that aggregate data
+
+#### Acceptance Criteria: Must Be Verifiable
+
+Each criterion must be something that can be CHECKED, not something vague.
+
+✅ **Good criteria (verifiable):**
+- "Add `status` column to tasks table with default 'pending'"
+- "Filter dropdown has options: All, Active, Completed"
+- "Clicking delete shows confirmation dialog"
+- "Typecheck passes"
+
+❌ **Bad criteria (vague):**
+- "Works correctly"
+- "User can do X easily"
+- "Good UX"
+- "Handles edge cases"
+
+**Always include as final criteria:**
+- `Build/typecheck passes` (always)
+- `Verify in browser` (if UI changes)
 
 **When approved:** Move to Phase 3.
 
@@ -173,7 +245,7 @@
 
 ## Done
 - [x] Build passes
-- [x] [Specific criterion]
+- [x] [Specific verifiable criterion]
 ```
 
 ### Template: draft.md
@@ -193,13 +265,20 @@
 
 ---
 
-## Questions and Answers
+## Clarifying Questions
 
-| #   | Question | Answer |
-| --- | -------- | ------ |
-| 1   |          |        |
-| 2   |          |        |
-| 3   |          |        |
+1. [Question with options]
+   A. Option A
+   B. Option B
+   C. Option C
+   D. Other: ___
+
+   **Answer:** [User's choice]
+
+2. [Next question]
+   A. ...
+
+   **Answer:** 
 
 ---
 
@@ -209,9 +288,9 @@
 
 -
 
-### Excluded (out of scope)
+### Non-Goals (Out of Scope)
 
--
+- [What this feature will NOT include - critical for managing scope]
 
 ---
 
@@ -225,9 +304,9 @@
 
 ## Stories (Draft)
 
-1. **STORY-1:**
-2. **STORY-2:**
-3. **STORY-3:**
+1. **STORY-1:** [2-3 sentence description max]
+2. **STORY-2:** [2-3 sentence description max]
+3. **STORY-3:** [2-3 sentence description max]
 
 ---
 
@@ -253,6 +332,21 @@
 
 ---
 
+## Non-Goals (Out of Scope)
+
+- [What this feature will NOT do]
+- [Critical for preventing scope creep]
+
+---
+
+## Functional Requirements
+
+- FR-1: The system must [specific requirement]
+- FR-2: When user does X, the system must [response]
+- FR-3: [Be explicit and unambiguous]
+
+---
+
 ## Stories
 
 ### STORY-1: [Title]
@@ -261,13 +355,14 @@
 
 **Changes:**
 
--
+- [2-3 sentences max - if more, split the story]
 
 **Done Criteria:**
 
-- [ ] Build passes
-- [ ] lsp_diagnostics clean
-- [ ] [Specific criterion]
+- [ ] [Specific verifiable criterion]
+- [ ] [Another specific criterion]
+- [ ] Build/typecheck passes
+- [ ] [If UI] Verify in browser
 
 ---
 
@@ -320,9 +415,10 @@
 1. **Atomic commits** - 1 story = 1 commit
 2. **Build before push** - Always `npm run build`
 3. **Push immediately** - Don't accumulate changes
-4. **Ask if in doubt** - Max 3 questions per round
+4. **Ask if in doubt** - Max 3-5 questions with lettered options
 5. **Respect UX decisions** - Don't question visual preferences
 6. **Document decisions** - In draft.md or comments
+7. **Size stories correctly** - 2-3 sentences max per story
 
 ### ❌ DON'T
 
@@ -331,6 +427,7 @@
 3. **Don't refactor while fixing** - Minimal fix, separate refactor
 4. **Don't ignore build errors** - Fix before continuing
 5. **Don't implement without confirming** - Always verify understanding
+6. **No vague acceptance criteria** - "Works correctly" ❌ → "Shows confirmation dialog" ✅
 
 ---
 

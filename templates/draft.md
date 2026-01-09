@@ -12,13 +12,35 @@
 
 ---
 
-## Questions and Answers
+## Clarifying Questions
 
-| #   | Question | Answer |
-| --- | -------- | ------ |
-| 1   |          |        |
-| 2   |          |        |
-| 3   |          |        |
+<!-- 
+Ask 3-5 critical questions with lettered options.
+User can respond quickly: "1A, 2C, 3B"
+-->
+
+1. What is the primary goal of this feature?
+   A. Improve user experience
+   B. Fix existing bug
+   C. Add new functionality
+   D. Refactor/cleanup
+   E. Other: ___
+
+   **Answer:** 
+
+2. What is the scope?
+   A. Minimal viable version
+   B. Full-featured implementation
+   C. Just the backend/API
+   D. Just the UI
+
+   **Answer:** 
+
+3. [Add more questions as needed]
+   A. ...
+   B. ...
+
+   **Answer:** 
 
 ---
 
@@ -28,9 +50,10 @@
 
 -
 
-### Excluded (out of scope)
+### Non-Goals (Out of Scope)
 
--
+- [What this feature will NOT include]
+- [Critical for managing scope and preventing creep]
 
 ---
 
@@ -44,9 +67,20 @@
 
 ## Stories (Draft)
 
-1. **STORY-1:**
-2. **STORY-2:**
-3. **STORY-3:**
+<!--
+Each story should be describable in 2-3 sentences max.
+If it needs more, split it into smaller stories.
+
+Order by dependencies:
+1. Schema/database first
+2. Backend logic second
+3. UI components third
+4. Dashboard/aggregations last
+-->
+
+1. **STORY-1:** [2-3 sentence description]
+2. **STORY-2:** [2-3 sentence description]
+3. **STORY-3:** [2-3 sentence description]
 
 ---
 

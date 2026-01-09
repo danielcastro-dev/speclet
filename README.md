@@ -55,11 +55,13 @@ your-project/
 │   ├── templates/                # Templates for docs
 │   ├── tickets/                  # Ticket backlog
 │   │   ├── index.json            # Ticket index with status
-│   │   ├── TICKET-1.json         # Ticket metadata
-│   │   ├── TICKET-1/             # Per-ticket artifacts
-│   │   │   ├── draft.md          # Preserved draft
-│   │   │   └── spec.json         # Preserved spec
-│   │   └── TICKET-2.json
+│   │   ├── TICKET-1/             # Per-ticket folder
+│   │   │   ├── ticket.json       # Ticket metadata
+│   │   │   ├── ticket-draft.md   # Context from general draft
+│   │   │   ├── draft.md          # Refined draft (after speclet-draft)
+│   │   │   └── spec.json         # Spec (after speclet-spec)
+│   │   └── TICKET-2/
+│   │       └── ...
 │   └── archive/                  # Completed specs (non-ticket workflow)
 ├── speclet.sh                    # Bash runner
 └── speclet.ps1                   # PowerShell runner

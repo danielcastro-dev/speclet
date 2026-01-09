@@ -45,11 +45,11 @@ When user says something like "speclet-draft for TICKET-1":
 #### 1. Locate and validate the ticket
 
 ```
-Read .speclet/tickets/TICKET-N.json
+Read .speclet/tickets/TICKET-N/ticket.json
 ```
 
 **Validation (CRITICAL):**
-- Check if file exists
+- Check if file exists at `.speclet/tickets/TICKET-N/ticket.json`
 - Check if `"specletVersion"` field exists and equals `"1.0"`
 
 **If validation fails:**
@@ -57,7 +57,7 @@ Read .speclet/tickets/TICKET-N.json
 ❌ TICKET-N is not a valid speclet ticket.
 
 Either:
-- The file doesn't exist at .speclet/tickets/TICKET-N.json
+- The file doesn't exist at .speclet/tickets/TICKET-N/ticket.json
 - The ticket is missing "specletVersion": "1.0" (not created by speclet-ticket)
 
 Please verify the ticket exists and was created with speclet-ticket skill.
@@ -253,7 +253,7 @@ When asking questions with options, ALWAYS:
 User: "speclet-draft for TICKET-1"
      │
      ▼
-Validate .speclet/tickets/TICKET-1.json
+Validate .speclet/tickets/TICKET-1/ticket.json
      │
      ├── Has "specletVersion": "1.0"? 
      │   ├── NO → Error message, stop

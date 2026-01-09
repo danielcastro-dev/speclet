@@ -15,10 +15,11 @@ Convert a large draft document into individual tickets for isolated implementati
 ## What I Do
 
 - Read `.speclet/draft.md` and identify discrete work items
-- Generate individual ticket files in `.speclet/tickets/TICKET-N.json`
-- Create ticket folders with `ticket-draft.md` (copy of general draft)
+- Create ticket folders at `.speclet/tickets/TICKET-N/`
+- Generate ticket metadata at `.speclet/tickets/TICKET-N/ticket.json`
+- Copy general draft to `.speclet/tickets/TICKET-N/ticket-draft.md`
 - Create/update `.speclet/tickets/index.json` for centralized status tracking
-- Delete root `draft.md` after successful ticket creation
+- Delete root `draft.md` **only after ALL tickets are successfully created**
 - Enable ticket-by-ticket workflow: one ticket → one session → full speclet cycle
 
 ## When to Use Me
@@ -80,7 +81,9 @@ For each discrete item:
 
 1. **Create ticket folder:** `.speclet/tickets/TICKET-N/`
 2. **Copy draft to folder:** `.speclet/tickets/TICKET-N/ticket-draft.md`
-3. **Create ticket JSON:** `.speclet/tickets/TICKET-N.json`
+3. **Create ticket JSON:** `.speclet/tickets/TICKET-N/ticket.json`
+
+**IMPORTANT:** Complete ALL tickets before proceeding to Step 4. Do NOT delete draft.md until all tickets exist.
 
 #### Ticket JSON Structure
 
@@ -170,13 +173,28 @@ Create or update `.speclet/tickets/index.json`:
 
 **Note:** The `source` field in index.json should point to the **original source document**, not `.speclet/draft.md`.
 
-### Step 5: Delete Root Draft
+### Step 5: Delete Root Draft (ONLY AFTER ALL TICKETS CREATED)
 
-After successfully creating all tickets, **delete the root draft**:
+**Pre-condition check (MANDATORY):**
+
+Before deleting, verify:
+1. All ticket folders exist: `.speclet/tickets/TICKET-1/`, `.speclet/tickets/TICKET-2/`, etc.
+2. Each folder has `ticket.json` and `ticket-draft.md`
+3. `index.json` exists and lists all tickets
+
+```bash
+# Verification command
+ls .speclet/tickets/*/ticket.json | wc -l  # Should equal number of tickets
+ls .speclet/tickets/*/ticket-draft.md | wc -l  # Should equal number of tickets
+```
+
+**Only if verification passes:**
 
 ```bash
 rm .speclet/draft.md
 ```
+
+**If verification fails:** STOP. Do not delete draft.md. Report which tickets are missing.
 
 This ensures:
 - No confusion about which draft to use
@@ -198,12 +216,12 @@ After creating tickets, summarize:
 📁 Structure created:
 .speclet/tickets/
 ├── index.json
-├── TICKET-1.json
 ├── TICKET-1/
+│   ├── ticket.json
 │   └── ticket-draft.md
-├── TICKET-2.json
-└── TICKET-2/
-    └── ticket-draft.md
+├── TICKET-2/
+│   ├── ticket.json
+│   └── ticket-draft.md
 
 🗑️ Deleted: .speclet/draft.md
 
@@ -227,10 +245,11 @@ speclet-draft (general analysis)
      ▼
 speclet-ticket (this skill)
      │
-     ├── Creates .speclet/tickets/TICKET-N.json (with specletVersion)
+     ├── Creates .speclet/tickets/TICKET-N/ticket.json
      ├── Creates .speclet/tickets/TICKET-N/ticket-draft.md
      ├── Creates .speclet/tickets/index.json
-     ├── Deletes .speclet/draft.md
+     ├── Verifies ALL tickets created successfully
+     ├── Deletes .speclet/draft.md (only after verification)
      └── END of session
 
 ════════════════════════════════════════════════════════════
@@ -239,7 +258,7 @@ PHASE 2: Per-ticket work (new session)
 ──────────────────────────────────────
 User: "speclet-draft for TICKET-1"
      │
-     ├── Reads TICKET-1.json (validates specletVersion)
+     ├── Reads .speclet/tickets/TICKET-1/ticket.json (validates specletVersion)
      ├── Reads .speclet/tickets/TICKET-1/ticket-draft.md
      ├── Asks clarifying questions
      └── Creates .speclet/draft.md (refined)
@@ -254,7 +273,7 @@ speclet-loop → implements
 On completion:
 ├── Move draft.md → tickets/TICKET-1/draft.md
 ├── Move spec.json → tickets/TICKET-1/spec.json
-├── Update TICKET-1.json status to "done"
+├── Update ticket.json status to "done"
 └── Ready for next ticket
 ```
 
@@ -270,12 +289,13 @@ mv .speclet/draft.md .speclet/tickets/TICKET-1/draft.md
 mv .speclet/spec.json .speclet/tickets/TICKET-1/spec.json
 
 # Update ticket status
-# Edit TICKET-1.json: "status": "done"
+# Edit .speclet/tickets/TICKET-1/ticket.json: "status": "done"
 ```
 
 Final structure for completed ticket:
 ```
 .speclet/tickets/TICKET-1/
+├── ticket.json        ← Metadata (status: done)
 ├── ticket-draft.md    ← Original context (from speclet-ticket)
 ├── draft.md           ← Refined draft (from speclet-draft for TICKET-1)
 └── spec.json          ← Implementation spec (from speclet-spec)
@@ -295,10 +315,10 @@ Final structure for completed ticket:
 ## Output
 
 - Ticket folders: `.speclet/tickets/TICKET-N/`
+- Ticket metadata: `.speclet/tickets/TICKET-N/ticket.json`
 - Ticket context: `.speclet/tickets/TICKET-N/ticket-draft.md`
-- Ticket metadata: `.speclet/tickets/TICKET-N.json`
 - Central index: `.speclet/tickets/index.json`
-- Root draft: **DELETED**
+- Root draft: **DELETED** (only after all tickets verified)
 
 When complete:
 

@@ -85,12 +85,13 @@ See [Configuration](#configuration) section below for customization.
    ├── draft.md         ← Create in Phase 1 (moves to archive or ticket folder)
    ├── spec.json        ← Create in Phase 2 (moves to archive or ticket folder)
    ├── progress.md      ← Create in Phase 3 (moves to archive)
-   └── tickets/         ← Ticket backlog (if using ticket workflow)
-       ├── index.json
-       ├── TICKET-1.json
-       └── TICKET-1/    ← Per-ticket artifacts preserved here
-           ├── draft.md
-           └── spec.json
+└── tickets/         ← Ticket backlog (if using ticket workflow)
+        ├── index.json
+        └── TICKET-1/    ← Per-ticket folder
+            ├── ticket.json       ← Ticket metadata
+            ├── ticket-draft.md   ← Context from general draft
+            ├── draft.md          ← Refined draft (after speclet-draft)
+            └── spec.json         ← Spec (after speclet-spec)
    ```
 
 5. **Ask the user:**

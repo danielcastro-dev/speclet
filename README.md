@@ -14,7 +14,18 @@ Speclet is a structured workflow for developing features with AI assistants (Cla
 
 ## Quick Start
 
-### Installation
+### Installation (One Command)
+
+```bash
+git clone https://github.com/danielcastro-dev/speclet.git /tmp/speclet && /tmp/speclet/install.sh
+```
+
+This installs:
+- `.speclet/` - Templates, GUIDE, DECISIONS.md
+- `.opencode/skill/` - Skills ready for OpenCode
+- `./speclet.sh` - Autonomous loop runner
+
+### Manual Installation
 
 ```bash
 # Clone the templates

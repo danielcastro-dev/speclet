@@ -45,24 +45,23 @@ When user says something like "speclet-draft for TICKET-1":
 #### 1. Locate and validate the ticket
 
 ```
-Read .speclet/tickets/TICKET-N/ticket-n.json
+Read .speclet/tickets/TICKET-N/ticket.json
 ```
 
 **Validation (CRITICAL):**
 - Check if file exists at `.speclet/tickets/TICKET-N/ticket.json`
 - Check if `"specletVersion"` field exists and equals `"1.0"`
 
-**If validation fails:**
-it will continue with **Normal Mode** (Step 1B)
-```
-❌ TICKET-N is not a valid speclet ticket.
+**If validation fails (file missing OR no specletVersion):**
 
-Either:
-- The file doesn't exist at .speclet/tickets/TICKET-N/ticket-n.json
-- The ticket is missing "specletVersion": "1.0" (not created by speclet-ticket)
-
-the skills proceeds with **Normal Mode** (Step 1B)
+Fallback to Normal Mode gracefully:
 ```
+⚠️ TICKET-N not found or not a speclet ticket.
+
+Proceeding with Normal Mode — treating "TICKET-N" as feature description.
+```
+
+Then continue with **Step 1B: Normal Mode**.
 
 **If validation passes:** Continue to step 2.
 
@@ -254,23 +253,25 @@ When asking questions with options, ALWAYS:
 User: "speclet-draft for TICKET-1"
      │
      ▼
-Validate .speclet/tickets/TICKET-1/ticket-1.json
+Check .speclet/tickets/TICKET-1/ticket.json
      │
-     ├── Has "specletVersion": "1.0"? 
-     │   ├── NO → Error message, stop
-     │   └── YES → Continue
-     │
-     ▼
-Read .speclet/tickets/TICKET-1/ticket-draft.md
-     │
-     ▼
-Read sourceContext document (if exists)
-     │
-     ▼
-Present context + ask clarifying questions
-     │
-     ▼
-Create .speclet/draft.md (refined)
+     ├── File exists AND has "specletVersion": "1.0"? 
+     │   │
+     │   ├── NO → Fallback to Normal Mode (treat as feature description)
+     │   │
+     │   └── YES → Ticket Mode:
+     │        │
+     │        ▼
+     │   Read .speclet/tickets/TICKET-1/ticket-draft.md
+     │        │
+     │        ▼
+     │   Read sourceContext document (if exists)
+     │        │
+     │        ▼
+     │   Present context + ask clarifying questions
+     │        │
+     │        ▼
+     │   Create .speclet/draft.md (refined)
      │
      ▼
 "Ready to convert to spec? Use speclet-spec skill."

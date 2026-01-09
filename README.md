@@ -104,6 +104,69 @@ Implement this ticket.
 | **2** | 15-60 min | Spec Lite | Bug fix, small feature |
 | **3** | > 1 hour | Full flow | Multi-story feature |
 
+## Key Concepts
+
+### Lettered Questions for Fast Clarification
+
+During the draft phase, ask questions with lettered options:
+
+```
+1. What is the primary goal?
+   A. Improve user experience
+   B. Fix existing bug
+   C. Add new functionality
+   D. Other: ___
+
+2. What is the scope?
+   A. Minimal viable version
+   B. Full-featured implementation
+```
+
+Users respond quickly: **"1C, 2A"**
+
+### Story Sizing Rule
+
+**If you cannot describe the change in 2-3 sentences, it's too big. Split it.**
+
+✅ **Right-sized:**
+- Add a database column and migration
+- Add a UI component to an existing page
+- Update a server action with new logic
+
+❌ **Too big (split these):**
+- "Build the entire dashboard"
+- "Add authentication"
+- "Refactor the API"
+
+### Story Order: Dependencies First
+
+1. Schema/database changes (migrations)
+2. Server actions / backend logic
+3. UI components that use the backend
+4. Dashboard/summary views
+
+### Verifiable Acceptance Criteria
+
+Each criterion must be checkable, not vague.
+
+✅ **Good:** "Filter dropdown has options: All, Active, Completed"  
+❌ **Bad:** "Works correctly", "Good UX"
+
+**Always include:**
+- `Build/typecheck passes` (every story)
+- `Verify in browser` (UI stories)
+
+### Non-Goals Section
+
+Every spec must define what it will NOT do. Critical for preventing scope creep.
+
+### Functional Requirements (Numbered)
+
+- FR-1: The system must allow users to...
+- FR-2: When a user clicks X, the system must...
+
+Be explicit and unambiguous.
+
 ## Key Files
 
 ### `GUIDE.md` (Permanent)
@@ -137,12 +200,15 @@ Completed specs moved here with date prefix: `2024-01-15-feature-name.md`
 - Build before push
 - Push immediately
 - Document architectural decisions
+- Size stories correctly (2-3 sentences max)
+- Use lettered options for questions
 
 ### ❌ DON'T
 - Commit `.speclet/` files (add to .gitignore)
 - Refactor while fixing bugs
 - Implement without confirming understanding
 - Ignore build errors
+- Use vague acceptance criteria ("works correctly")
 
 ## Success Metrics
 
@@ -179,6 +245,7 @@ Speclet is inspired by:
 - **BDD**: Acceptance criteria, Gherkin-style scenarios
 - **ADR (Architecture Decision Records)**: Documenting decisions
 - **Session-based workflows**: Optimized for LLM context windows
+- **[Ralph pattern](https://ghuntley.com/ralph/)**: Story sizing and verifiable criteria
 
 The key insight: **LLMs work better with structured context**. Speclet provides that structure while staying lightweight.
 

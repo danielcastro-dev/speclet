@@ -35,6 +35,7 @@ BUILD_COMMAND="npm run build"
 VERIFY_BUILD=true
 TEST_COMMAND=""
 VERIFY_TESTS=false
+STORY_TIMEOUT_MINUTES=30
 CURRENT_MODEL_IDX=0
 
 load_config() {
@@ -67,6 +68,9 @@ load_config() {
         
         val=$(jq -r '.verifyTests // empty' "$CONFIG_FILE" 2>/dev/null)
         [[ "$val" == "true" ]] && VERIFY_TESTS=true
+        
+        val=$(jq -r '.storyTimeoutMinutes // empty' "$CONFIG_FILE" 2>/dev/null)
+        [[ -n "$val" && "$val" != "null" ]] && STORY_TIMEOUT_MINUTES=$val
     fi
 }
 
@@ -250,17 +254,25 @@ verify_story_completion() {
 run_opencode_with_fallback() {
     local retries=0
     local delay=5
+    local timeout_seconds=$((STORY_TIMEOUT_MINUTES * 60))
     
     while true; do
         local model="${MODELS[$CURRENT_MODEL_IDX]}"
         
-        log "Using model: $model" "$CYAN"
+        log "Using model: $model (timeout: ${STORY_TIMEOUT_MINUTES}m)" "$CYAN"
         
-        if opencode -m "$model" -p "Use the speclet-loop skill" 2>> "$LOG_FILE"; then
+        timeout "$timeout_seconds" opencode -m "$model" -p "Use the speclet-loop skill" 2>> "$LOG_FILE"
+        local exit_code=$?
+        
+        if [[ $exit_code -eq 0 ]]; then
             return 0
         fi
         
-        local exit_code=$?
+        if [[ $exit_code -eq 124 ]]; then
+            log "Story timed out after ${STORY_TIMEOUT_MINUTES} minutes" "$RED"
+            return 1
+        fi
+        
         ((retries++))
         
         log "OpenCode failed (exit code: $exit_code)" "$YELLOW"

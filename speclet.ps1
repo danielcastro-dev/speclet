@@ -37,6 +37,7 @@ $script:BUILD_COMMAND = "npm run build"
 $script:VERIFY_BUILD = $true
 $script:TEST_COMMAND = ""
 $script:VERIFY_TESTS = $false
+$script:STORY_TIMEOUT_MINUTES = 30
 $script:CurrentModelIdx = 0
 $script:StoryFailures = @{}
 
@@ -67,6 +68,7 @@ function Import-Config {
             if ($config.logFile) { $script:LOG_FILE = $config.logFile }
             if ($config.testCommand) { $script:TEST_COMMAND = $config.testCommand }
             if ($null -ne $config.verifyTests) { $script:VERIFY_TESTS = $config.verifyTests }
+            if ($config.storyTimeoutMinutes) { $script:STORY_TIMEOUT_MINUTES = $config.storyTimeoutMinutes }
         } catch {
             Write-ColorOutput "Warning: Could not parse config file" "Yellow"
         }
@@ -281,18 +283,27 @@ function Test-StoryCompletion {
 function Invoke-OpenCodeWithFallback {
     $retries = 0
     $delay = 5
+    $timeoutSeconds = $script:STORY_TIMEOUT_MINUTES * 60
     
     while ($true) {
         $model = $script:MODELS[$script:CurrentModelIdx]
         
-        Write-Log "Using model: $model" "Cyan"
+        Write-Log "Using model: $model (timeout: $($script:STORY_TIMEOUT_MINUTES)m)" "Cyan"
         
         try {
-            & opencode -m $model -p "Use the speclet-loop skill" 2>&1 | Add-Content -Path $LOG_FILE -ErrorAction SilentlyContinue
-            if ($LASTEXITCODE -eq 0) {
+            $process = Start-Process -FilePath "opencode" -ArgumentList "-m", $model, "-p", "Use the speclet-loop skill" -PassThru -NoNewWindow -Wait:$false
+            $completed = $process.WaitForExit($timeoutSeconds * 1000)
+            
+            if (-not $completed) {
+                $process.Kill()
+                Write-Log "Story timed out after $($script:STORY_TIMEOUT_MINUTES) minutes" "Red"
+                return $false
+            }
+            
+            if ($process.ExitCode -eq 0) {
                 return $true
             }
-            throw "OpenCode exited with code $LASTEXITCODE"
+            throw "OpenCode exited with code $($process.ExitCode)"
         } catch {
             $retries++
             Write-Log "OpenCode failed: $_" "Yellow"

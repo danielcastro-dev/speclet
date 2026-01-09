@@ -12,6 +12,22 @@
 | `speclet-spec` | "Use the speclet-spec skill" | Convert draft to spec.json |
 | `speclet-loop` | "Use the speclet-loop skill" | Implement one story autonomously |
 
+**Autonomous loop (unattended):**
+
+```bash
+./speclet.ps1      # Windows PowerShell
+./speclet.sh       # Linux/Mac/WSL
+```
+
+Features:
+- **Model fallback**: 5 models with retry (primary → free tiers)
+- **Build verification**: Reverts changes if build fails
+- **Blocked stories**: Skip after 3 failures, continue with next
+- **Checkpoint/resume**: Resume from last story if interrupted
+- **Logging**: All activity to `.speclet/loop.log`
+
+See [Configuration](#configuration) section below for customization.
+
 **Manual loop:** Once you have a `spec.json`:
 
 > "Read `.speclet/loop.md` and execute one iteration."
@@ -486,6 +502,66 @@ A good session has:
 | Reverts         | 0      |
 | Commits/hour    | 3-4    |
 | Questions/story | ≤2     |
+
+---
+
+## Configuration
+
+The autonomous loop can be customized via `.speclet/config.json`:
+
+```json
+{
+  "models": [
+    "github-copilot/claude-opus-4.5",
+    "google/antigravity-claude-opus-4-5-thinking-medium",
+    "openai/gpt-5.2-codex",
+    "opencode/glm-4.7-free",
+    "opencode/minimax-m2.1-free"
+  ],
+  "maxRetries": 3,
+  "maxStoryFailures": 3,
+  "buildCommand": "npm run build",
+  "verifyBuild": true,
+  "logFile": ".speclet/loop.log"
+}
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `models` | 5 models | Fallback chain (primary → free) |
+| `maxRetries` | 3 | Retries per model before fallback |
+| `maxStoryFailures` | 3 | Failures before marking story blocked |
+| `buildCommand` | `npm run build` | Command to verify build |
+| `verifyBuild` | true | Run build after each story |
+| `logFile` | `.speclet/loop.log` | Log file path |
+
+### Model Fallback with Retry
+
+If a model fails (rate limit, timeout, etc.):
+1. Retry 3 times with exponential backoff (5s → 15s → 45s)
+2. Switch to next model in fallback chain
+3. Continue until all models exhausted
+
+### Build Verification
+
+After each story completes:
+1. Run `buildCommand` (e.g., `npm run build`)
+2. If passes: continue to next story
+3. If fails: revert changes with `git checkout .`, increment failure count
+
+### Blocked Stories
+
+If a story fails 3 times (`maxStoryFailures`):
+1. Mark as `"blocked": true` in spec.json
+2. Skip and continue with next story
+3. Report all blocked stories at end of run
+
+### Checkpoint/Resume
+
+If the script crashes or is interrupted:
+1. State saved to `.speclet/checkpoint.json`
+2. On restart: resume from last incomplete story
+3. No lost progress
 
 ---
 

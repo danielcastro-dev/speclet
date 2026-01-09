@@ -40,7 +40,7 @@
    ├── GUIDE.md         ← This file (already exists)
    ├── DECISIONS.md     ← Permanent (create if doesn't exist)
    ├── draft.md         ← Create in Phase 1 (moves to archive)
-   ├── spec.md          ← Create in Phase 2 (moves to archive)
+   ├── spec.json        ← Create in Phase 2 (moves to archive)
    └── progress.md      ← Create in Phase 3 (moves to archive)
    ```
 
@@ -52,12 +52,12 @@
    | Tier | Estimated time | Documentation | Example |
    |------|----------------|---------------|---------|
    | **Tier 1** | < 15 min | Descriptive commit only | Fix typo, add field |
-   | **Tier 2** | 15-60 min | Spec Lite (no draft) | Bug fix, small feature |
-   | **Tier 3** | > 1 hour | Draft + Spec + Progress | Multi-story feature |
+   | **Tier 2** | 15-60 min | spec-lite.json (no draft) | Bug fix, small feature |
+   | **Tier 3** | > 1 hour | Draft + spec.json + Progress | Multi-story feature |
 
    > Ask: "Does this look like Tier 1, 2, or 3?" and adjust flow.
    > - **Tier 1:** Skip to direct implementation
-   > - **Tier 2:** Create Spec Lite, then implement
+   > - **Tier 2:** Create spec-lite.json, then implement
    > - **Tier 3:** Follow complete flow (Phase 1 → 2 → 3)
 
 ---
@@ -105,12 +105,45 @@ Ask only critical questions where the initial prompt is ambiguous. Use lettered 
 
 ### Phase 2: Spec (Execution Plan)
 
-**Goal:** Detailed plan ready to implement.
+**Goal:** Detailed plan ready to implement in JSON format.
 
-1. Convert draft into `.speclet/spec.md`
+1. Convert draft into `.speclet/spec.json`
 2. Divide into atomic stories (1 story = 1 commit)
-3. Define "Done" criteria per story
+3. Define acceptance criteria per story
 4. Verify with user: "Shall we start?"
+
+#### spec.json Structure
+
+```json
+{
+  "feature": "Feature Name",
+  "branch": "feature/branch-name",
+  "date": "YYYY-MM-DD",
+  "summary": "1-2 sentences of the goal",
+  "nonGoals": [
+    "What this feature will NOT do"
+  ],
+  "functionalRequirements": [
+    "FR-1: The system must...",
+    "FR-2: When user does X..."
+  ],
+  "stories": [
+    {
+      "id": "STORY-1",
+      "title": "Short title",
+      "description": "2-3 sentences max",
+      "files": ["path/to/file.ts"],
+      "acceptanceCriteria": [
+        "Specific verifiable criterion",
+        "Build/typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
+```
 
 #### Story Sizing Rule (CRITICAL)
 
@@ -173,14 +206,15 @@ Each criterion must be something that can be CHECKED, not something vague.
    - lsp_diagnostics
 4. Commit: feat(scope): brief description
 5. Push immediately
-6. Mark story completed
-7. Next story
+6. Update spec.json: set "passes": true for completed story
+7. Mark story completed in todo list
+8. Next story
 ```
 
 **When all stories are done:**
 
 1. **Update DECISIONS.md** (see criteria below)
-2. Move `draft.md`, `spec.md`, `progress.md` → `.speclet/archive/YYYY-MM-DD-name-*.md`
+2. Move `draft.md`, `spec.json`, `progress.md` → `.speclet/archive/YYYY-MM-DD-name/`
 3. Create PR if applicable (complete branch)
 
 > **Note:** `DECISIONS.md` and `GUIDE.md` are NOT moved. They're permanent.
@@ -219,33 +253,30 @@ Each criterion must be something that can be CHECKED, not something vague.
 ```
 
 **Stop Condition:**
-> If ALL stories pass: "✅ All stories completed. Shall we create PR?"
+> If ALL stories have `"passes": true`: "✅ All stories completed. Shall we create PR?"
 
 ---
 
 ## Templates
 
-### Template: Spec Lite (Tier 2)
+### Template: spec-lite.json (Tier 2)
 
-```markdown
-# [TICKET-ID]: [Title]
-
-**Date:** YYYY-MM-DD | **Branch:** feature/x | **Actual time:** ~XX min
-
----
-
-## Problem
-[1-2 sentences of the bug or need]
-
-## Solution
-[Description or code]
-
-## Files
-- `path/file.ts` - [change]
-
-## Done
-- [x] Build passes
-- [x] [Specific verifiable criterion]
+```json
+{
+  "feature": "Title",
+  "branch": "feature/x",
+  "date": "YYYY-MM-DD",
+  "actualTime": "~XX min",
+  "problem": "1-2 sentences of the bug or need",
+  "solution": "Description of the fix",
+  "files": ["path/file.ts"],
+  "acceptanceCriteria": [
+    "Build passes",
+    "Specific verifiable criterion"
+  ],
+  "passes": false,
+  "notes": ""
+}
 ```
 
 ### Template: draft.md
@@ -315,76 +346,52 @@ Each criterion must be something that can be CHECKED, not something vague.
 1.
 ```
 
-### Template: spec.md
+### Template: spec.json
 
-```markdown
-# Spec: [Feature Name]
-
-**Date:** YYYY-MM-DD  
-**Branch:** feature/branch-name  
-**Estimate:** X commits, ~Y LOC
-
----
-
-## Summary
-
-[1-2 sentences of the goal]
-
----
-
-## Non-Goals (Out of Scope)
-
-- [What this feature will NOT do]
-- [Critical for preventing scope creep]
-
----
-
-## Functional Requirements
-
-- FR-1: The system must [specific requirement]
-- FR-2: When user does X, the system must [response]
-- FR-3: [Be explicit and unambiguous]
-
----
-
-## Stories
-
-### STORY-1: [Title]
-
-**File(s):** `path/to/file.ts`
-
-**Changes:**
-
-- [2-3 sentences max - if more, split the story]
-
-**Done Criteria:**
-
-- [ ] [Specific verifiable criterion]
-- [ ] [Another specific criterion]
-- [ ] Build/typecheck passes
-- [ ] [If UI] Verify in browser
-
----
-
-### STORY-2: [Title]
-
-...
-
----
-
-## Final Verification
-
-- [ ] All stories completed
-- [ ] Build without errors
-- [ ] Functionality manually tested
-- [ ] Clean commit history (1 commit = 1 story)
-
----
-
-## References
-
-- Key files:
-- Documentation:
+```json
+{
+  "feature": "[Feature Name]",
+  "branch": "feature/branch-name",
+  "date": "YYYY-MM-DD",
+  "summary": "[1-2 sentences of the goal]",
+  "nonGoals": [
+    "[What this feature will NOT do]",
+    "[Critical for preventing scope creep]"
+  ],
+  "functionalRequirements": [
+    "FR-1: The system must [specific requirement]",
+    "FR-2: When user does X, the system must [response]"
+  ],
+  "stories": [
+    {
+      "id": "STORY-1",
+      "title": "[Title]",
+      "description": "[2-3 sentences max]",
+      "files": ["path/to/file.ts"],
+      "acceptanceCriteria": [
+        "[Specific verifiable criterion]",
+        "Build/typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "STORY-2",
+      "title": "[Title]",
+      "description": "[Description]",
+      "files": ["path/to/file.ts"],
+      "acceptanceCriteria": [
+        "[Criterion]",
+        "Build/typecheck passes",
+        "Verify in browser"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
 ```
 
 ### Template: progress.md
@@ -419,6 +426,7 @@ Each criterion must be something that can be CHECKED, not something vague.
 5. **Respect UX decisions** - Don't question visual preferences
 6. **Document decisions** - In draft.md or comments
 7. **Size stories correctly** - 2-3 sentences max per story
+8. **Update spec.json** - Set `"passes": true` after each story
 
 ### ❌ DON'T
 

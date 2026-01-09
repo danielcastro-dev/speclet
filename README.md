@@ -6,10 +6,11 @@ Lightweight spec-driven development workflow for LLM-assisted coding sessions.
 
 Speclet is a structured workflow for developing features with AI assistants (Claude, GPT, etc.). It provides:
 
-- **Phased approach**: Draft → Spec → Implementation → Archive
+- **Phased approach**: Draft (markdown) → Spec (JSON) → Implementation → Archive
 - **Tiered complexity**: Scale documentation based on task size
 - **Context persistence**: Decisions and patterns survive across sessions
 - **Atomic commits**: 1 story = 1 commit
+- **Trackable progress**: JSON specs with `passes: true/false` for each story
 
 ## Quick Start
 
@@ -46,11 +47,11 @@ your-project/
 │   ├── GUIDE.md              # LLM instructions (permanent)
 │   ├── DECISIONS.md          # Architecture decisions (permanent)
 │   ├── templates/            # Templates for docs
-│   │   ├── draft.md
-│   │   ├── spec.md
-│   │   ├── spec-lite.md
-│   │   ├── progress.md
-│   │   └── ticket.md
+│   │   ├── draft.md          # Collaborative planning (markdown)
+│   │   ├── spec.json         # Execution plan (JSON)
+│   │   ├── spec-lite.json    # Quick fixes (JSON)
+│   │   ├── progress.md       # Session learnings
+│   │   └── ticket.md         # Backlog items
 │   ├── tickets/              # Backlog (create as needed)
 │   └── archive/              # Completed specs (create as needed)
 └── ... your code
@@ -73,7 +74,7 @@ Let's start with Phase 0.
 ### Continuing a Session
 
 ```
-Read .speclet/GUIDE.md, spec.md and progress.md
+Read .speclet/GUIDE.md, spec.json and progress.md
 
 Continue where we left off.
 ```
@@ -91,8 +92,8 @@ Implement this ticket.
 | Phase | Purpose | Artifact |
 |-------|---------|----------|
 | **0: Bootstrap** | Setup branch, verify build | - |
-| **1: Draft** | Clarify requirements | `draft.md` |
-| **2: Spec** | Detailed plan with stories | `spec.md` |
+| **1: Draft** | Clarify requirements | `draft.md` (markdown) |
+| **2: Spec** | Detailed plan with stories | `spec.json` (JSON) |
 | **3: Implementation** | Code + atomic commits | `progress.md` |
 | **4: Close** | Document decisions | `DECISIONS.md` |
 
@@ -101,10 +102,50 @@ Implement this ticket.
 | Tier | Time | Documentation | Example |
 |------|------|---------------|---------|
 | **1** | < 15 min | Commit only | Fix typo, add field |
-| **2** | 15-60 min | Spec Lite | Bug fix, small feature |
+| **2** | 15-60 min | spec-lite.json | Bug fix, small feature |
 | **3** | > 1 hour | Full flow | Multi-story feature |
 
 ## Key Concepts
+
+### Hybrid Format: Markdown + JSON
+
+| Phase | Format | Why |
+|-------|--------|-----|
+| **Draft** | Markdown | Human collaboration, Q&A, legible |
+| **Spec** | JSON | Execution tracking, parseable, `passes: true/false` |
+| **Progress** | Markdown | Learnings, context for future sessions |
+
+### spec.json Structure
+
+```json
+{
+  "feature": "Task Priority System",
+  "branch": "feature/task-priority",
+  "date": "2024-01-15",
+  "summary": "Add priority levels to tasks",
+  "nonGoals": ["No priority-based notifications"],
+  "functionalRequirements": [
+    "FR-1: Add priority field to tasks table",
+    "FR-2: Display priority badge on task cards"
+  ],
+  "stories": [
+    {
+      "id": "STORY-1",
+      "title": "Add priority field to database",
+      "description": "Add priority column with default 'medium'",
+      "files": ["migrations/001_add_priority.sql"],
+      "acceptanceCriteria": [
+        "Column created with enum: high, medium, low",
+        "Default is 'medium'",
+        "Build/typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
+```
 
 ### Lettered Questions for Fast Clarification
 
@@ -160,12 +201,16 @@ Each criterion must be checkable, not vague.
 
 Every spec must define what it will NOT do. Critical for preventing scope creep.
 
-### Functional Requirements (Numbered)
+### Tracking Progress
 
-- FR-1: The system must allow users to...
-- FR-2: When a user clicks X, the system must...
-
-Be explicit and unambiguous.
+After completing each story, update spec.json:
+```json
+{
+  "id": "STORY-1",
+  "passes": true,  // ← Update this
+  "notes": "Used existing Badge component"  // ← Optional learnings
+}
+```
 
 ## Key Files
 
@@ -191,7 +236,7 @@ Architectural decisions that affect future code:
 Bugs and features waiting to be worked on. Use `templates/ticket.md`.
 
 ### `archive/` (History)
-Completed specs moved here with date prefix: `2024-01-15-feature-name.md`
+Completed specs moved here: `archive/2024-01-15-feature-name/`
 
 ## Golden Rules
 
@@ -199,6 +244,7 @@ Completed specs moved here with date prefix: `2024-01-15-feature-name.md`
 - Atomic commits (1 story = 1 commit)
 - Build before push
 - Push immediately
+- Update `passes: true` after each story
 - Document architectural decisions
 - Size stories correctly (2-3 sentences max)
 - Use lettered options for questions
@@ -245,7 +291,7 @@ Speclet is inspired by:
 - **BDD**: Acceptance criteria, Gherkin-style scenarios
 - **ADR (Architecture Decision Records)**: Documenting decisions
 - **Session-based workflows**: Optimized for LLM context windows
-- **[Ralph pattern](https://ghuntley.com/ralph/)**: Story sizing and verifiable criteria
+- **[Ralph pattern](https://ghuntley.com/ralph/)**: Story sizing, JSON tracking, verifiable criteria
 
 The key insight: **LLMs work better with structured context**. Speclet provides that structure while staying lightweight.
 

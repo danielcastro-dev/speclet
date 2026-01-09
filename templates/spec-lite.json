@@ -1,0 +1,15 @@
+{
+  "feature": "[Title]",
+  "branch": "feature/x",
+  "date": "YYYY-MM-DD",
+  "actualTime": "~XX min",
+  "problem": "[1-2 sentences of the bug or need]",
+  "solution": "[Description of the fix]",
+  "files": ["path/file.ts"],
+  "acceptanceCriteria": [
+    "Build passes",
+    "[Specific verifiable criterion]"
+  ],
+  "passes": false,
+  "notes": ""
+}

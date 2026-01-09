@@ -1,0 +1,45 @@
+{
+  "feature": "[Feature Name]",
+  "branch": "feature/branch-name",
+  "date": "YYYY-MM-DD",
+  "summary": "[1-2 sentences of the goal]",
+  "nonGoals": [
+    "[What this feature will NOT do]",
+    "[Critical for preventing scope creep]"
+  ],
+  "functionalRequirements": [
+    "FR-1: The system must [specific requirement]",
+    "FR-2: When user does X, the system must [response]",
+    "FR-3: [Be explicit and unambiguous]"
+  ],
+  "stories": [
+    {
+      "id": "STORY-1",
+      "title": "[Title - 2-3 words]",
+      "description": "[2-3 sentences max - if more, split the story]",
+      "files": ["path/to/file.ts"],
+      "acceptanceCriteria": [
+        "[Specific verifiable criterion - not vague]",
+        "[Another specific criterion]",
+        "Build/typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "STORY-2",
+      "title": "[Title]",
+      "description": "[Description]",
+      "files": ["path/to/file.ts"],
+      "acceptanceCriteria": [
+        "[Criterion]",
+        "Build/typecheck passes",
+        "Verify in browser"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

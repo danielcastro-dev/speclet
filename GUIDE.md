@@ -14,6 +14,19 @@
 | `speclet-loop` | "Use the speclet-loop skill" | Implement one story autonomously |
 | `speclet-learn` | "Use the speclet-learn skill" | Generate lessons from completed stories |
 
+**Ticket-Based Workflow (for multiple issues):**
+
+When working with tickets from `speclet-ticket`:
+
+```bash
+# Work on a specific ticket
+Use the speclet-draft skill for TICKET-1
+
+# After completing ticket, artifacts are preserved in:
+# .speclet/tickets/TICKET-1/draft.md
+# .speclet/tickets/TICKET-1/spec.json
+```
+
 **Autonomous loop (unattended):**
 
 ```bash
@@ -69,9 +82,15 @@ See [Configuration](#configuration) section below for customization.
    .speclet/
    ├── GUIDE.md         ← This file (already exists)
    ├── DECISIONS.md     ← Permanent (create if doesn't exist)
-   ├── draft.md         ← Create in Phase 1 (moves to archive)
-   ├── spec.json        ← Create in Phase 2 (moves to archive)
-   └── progress.md      ← Create in Phase 3 (moves to archive)
+   ├── draft.md         ← Create in Phase 1 (moves to archive or ticket folder)
+   ├── spec.json        ← Create in Phase 2 (moves to archive or ticket folder)
+   ├── progress.md      ← Create in Phase 3 (moves to archive)
+   └── tickets/         ← Ticket backlog (if using ticket workflow)
+       ├── index.json
+       ├── TICKET-1.json
+       └── TICKET-1/    ← Per-ticket artifacts preserved here
+           ├── draft.md
+           └── spec.json
    ```
 
 5. **Ask the user:**
@@ -244,7 +263,9 @@ Each criterion must be something that can be CHECKED, not something vague.
 **When all stories are done:**
 
 1. **Update DECISIONS.md** (see criteria below)
-2. Move `draft.md`, `spec.json`, `progress.md` → `.speclet/archive/YYYY-MM-DD-name/`
+2. **Archive artifacts:**
+   - **Standard workflow:** Move `draft.md`, `spec.json`, `progress.md` → `.speclet/archive/YYYY-MM-DD-name/`
+   - **Ticket workflow:** Move `draft.md`, `spec.json` → `.speclet/tickets/TICKET-N/` and update ticket status to `done`
 3. Create PR if applicable (complete branch)
 
 > **Note:** `DECISIONS.md` and `GUIDE.md` are NOT moved. They're permanent.

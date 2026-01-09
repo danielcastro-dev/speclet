@@ -102,12 +102,27 @@ For each discrete item, create `.speclet/tickets/TICKET-N.json`:
 | `title` | Yes | Short title (< 80 chars) |
 | `description` | Yes | 2-3 sentences explaining the problem and desired outcome |
 | `files` | Yes | Array of likely affected files (best guess, refined later) |
-| `sourceContext` | Yes | Reference to origin (code review, user request, etc.) |
+| `sourceContext` | Yes | **Absolute path** to the original source document (e.g., `docs/UX-ANALYSIS.md`, `issues/123.md`). NOT the draft.md path. |
 | `preliminaryCriteria` | Yes | Initial acceptance criteria (refined during speclet-draft) |
 | `priority` | Yes | Numeric priority (1 = highest) |
 | `dependsOn` | No | Array of ticket IDs that must complete first |
 | `retryHints` | No | Accumulated hints from failed attempts |
 | `status` | Yes | One of: `pending`, `in_progress`, `done`, `blocked` |
+
+#### sourceContext Best Practices
+
+The `sourceContext` field must point to the **original source** of the requirement, NOT to intermediate speclet artifacts:
+
+✅ **Good sourceContext values:**
+- `docs/UX-FRICCIONES-ANALISIS.md` — Original analysis document
+- `GitHub Issue #123` — Issue that triggered the work
+- `Code review comment on PR #456` — Specific review finding
+- `User request: "Add dark mode toggle"` — Direct user quote
+
+❌ **Bad sourceContext values:**
+- `.speclet/draft.md` — This is an intermediate artifact that gets overwritten
+- `TICKET-1.json` — Self-referential, provides no context
+- `"From the analysis"` — Too vague, not traceable
 
 ### Step 4: Create/Update Index
 
@@ -159,23 +174,25 @@ Ready to start with TICKET-1?
 The ticket workflow fits into the speclet ecosystem:
 
 ```
-Large draft.md
+Large draft.md (initial planning)
      │
      ▼
 speclet-ticket (this skill)
      │
      ▼
 .speclet/tickets/
+├── index.json
 ├── TICKET-1.json
 ├── TICKET-2.json
-├── TICKET-3.json
-└── index.json
+└── TICKET-3.json
      │
      ▼ (for each ticket, new session)
-speclet-draft (refine one ticket)
+speclet-draft for TICKET-N
      │
      ▼
-speclet-spec (convert to spec.json)
+.speclet/tickets/TICKET-N/
+├── draft.md              ← Preserved per-ticket
+└── spec.json             ← Generated from draft
      │
      ▼
 speclet-loop (implement)
@@ -184,6 +201,42 @@ speclet-loop (implement)
 Mark ticket done, next session
 ```
 
+### Draft Preservation (CRITICAL)
+
+**Problem:** The default `.speclet/draft.md` gets overwritten when you start a new ticket.
+
+**Solution:** After completing `speclet-draft` for a ticket, the draft is saved to the ticket's own directory:
+
+```
+.speclet/
+├── draft.md                    ← Active draft (work in progress)
+├── tickets/
+│   ├── index.json
+│   ├── TICKET-1.json
+│   ├── TICKET-1/
+│   │   ├── draft.md            ← Preserved after completion
+│   │   └── spec.json
+│   ├── TICKET-2.json
+│   └── TICKET-2/
+│       ├── draft.md
+│       └── spec.json
+```
+
+**Workflow per ticket:**
+
+1. `speclet-draft for TICKET-1` → Creates `.speclet/draft.md`
+2. `speclet-spec` → Creates `.speclet/spec.json`
+3. **Before starting TICKET-2:** Move artifacts to ticket folder:
+   ```bash
+   mkdir -p .speclet/tickets/TICKET-1
+   mv .speclet/draft.md .speclet/tickets/TICKET-1/
+   mv .speclet/spec.json .speclet/tickets/TICKET-1/
+   ```
+4. Update `TICKET-1.json` status to `done`
+5. Start `speclet-draft for TICKET-2`
+
+This ensures full traceability: each ticket has its own draft and spec preserved.
+
 ## Rules
 
 - **One friction = one ticket** — Maximum atomicity
@@ -191,11 +244,14 @@ Mark ticket done, next session
 - **Preliminary criteria only** — Real criteria come from speclet-draft
 - **Status tracking** — Update index.json when ticket status changes
 - **No complexity field** — Estimation happens during draft phase
+- **sourceContext = original source** — Always point to the real origin document, not intermediate artifacts
+- **Preserve drafts per ticket** — Move draft.md/spec.json to ticket folder after completion
 
 ## Output
 
 - Individual tickets: `.speclet/tickets/TICKET-N.json`
 - Central index: `.speclet/tickets/index.json`
+- Per-ticket artifacts (after completion): `.speclet/tickets/TICKET-N/draft.md`, `.speclet/tickets/TICKET-N/spec.json`
 
 When complete:
 

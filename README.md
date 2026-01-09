@@ -45,6 +45,7 @@ your-project/
 ├── .opencode/skill/              # OpenCode skills
 │   ├── speclet-draft/SKILL.md
 │   ├── speclet-spec/SKILL.md
+│   ├── speclet-ticket/SKILL.md
 │   └── speclet-loop/SKILL.md
 ├── .speclet/
 │   ├── GUIDE.md                  # LLM instructions (permanent)
@@ -52,8 +53,14 @@ your-project/
 │   ├── config.json               # Loop configuration
 │   ├── loop.md                   # Manual loop instructions
 │   ├── templates/                # Templates for docs
-│   ├── tickets/                  # Backlog
-│   └── archive/                  # Completed specs
+│   ├── tickets/                  # Ticket backlog
+│   │   ├── index.json            # Ticket index with status
+│   │   ├── TICKET-1.json         # Ticket metadata
+│   │   ├── TICKET-1/             # Per-ticket artifacts
+│   │   │   ├── draft.md          # Preserved draft
+│   │   │   └── spec.json         # Preserved spec
+│   │   └── TICKET-2.json
+│   └── archive/                  # Completed specs (non-ticket workflow)
 ├── speclet.sh                    # Bash runner
 └── speclet.ps1                   # PowerShell runner
 ```
@@ -83,6 +90,30 @@ Use the speclet-spec skill
 ./speclet.ps1      # Windows
 ./speclet.sh       # Linux/Mac/WSL
 ```
+
+### Ticket-Based Workflow (Multiple Issues)
+
+When you have multiple independent issues/features from a single analysis:
+
+```
+# Step 1: Create initial draft from analysis
+Use the speclet-draft skill for @docs/my-analysis.md
+
+# Step 2: Split into tickets
+Use the speclet-ticket skill
+
+# Step 3: Work on tickets one at a time
+Use the speclet-draft skill for TICKET-1
+Use the speclet-spec skill
+./speclet.ps1  # or ./speclet.sh
+
+# Step 4: Archive and continue
+# (Artifacts auto-saved to .speclet/tickets/TICKET-1/)
+Use the speclet-draft skill for TICKET-2
+# ... repeat
+```
+
+**Key benefit:** Each ticket preserves its own `draft.md` and `spec.json` in `.speclet/tickets/TICKET-N/`, preventing overwrites between sessions.
 
 ### Fully Autonomous Mode
 

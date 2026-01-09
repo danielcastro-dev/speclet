@@ -38,6 +38,13 @@ VERIFY_TESTS=false
 STORY_TIMEOUT_MINUTES=30
 CURRENT_MODEL_IDX=0
 
+SESSION_START_TIME=0
+BUILD_FAILURES=0
+TEST_FAILURES=0
+STORIES_COMPLETED=0
+declare -a MODELS_USED
+declare -a STORY_TIMES
+
 load_config() {
     if [[ -f "$CONFIG_FILE" ]]; then
         echo -e "${CYAN}Loading config from $CONFIG_FILE${NC}"
@@ -260,6 +267,7 @@ run_opencode_with_fallback() {
         local model="${MODELS[$CURRENT_MODEL_IDX]}"
         
         log "Using model: $model (timeout: ${STORY_TIMEOUT_MINUTES}m)" "$CYAN"
+        MODELS_USED+=("$model")
         
         timeout "$timeout_seconds" opencode -m "$model" -p "Use the speclet-loop skill" 2>> "$LOG_FILE"
         local exit_code=$?
@@ -304,6 +312,8 @@ declare -A STORY_FAILURES
 
 run_iteration() {
     local iteration=$1
+    local story_start_time=$(date +%s)
+    
     echo ""
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     log "Iteration $iteration/$MAX_ITERATIONS" "$GREEN"
@@ -347,6 +357,7 @@ run_iteration() {
         if ! verify_build; then
             log "Build failed after story implementation, reverting..." "$RED"
             revert_changes
+            ((BUILD_FAILURES++))
             
             STORY_FAILURES[$story_id]=$((current_failures + 1))
             log "Story $story_id failure count: ${STORY_FAILURES[$story_id]}/$MAX_STORY_FAILURES" "$YELLOW"
@@ -358,12 +369,18 @@ run_iteration() {
     if ! verify_tests; then
         log "Tests failed after story implementation, reverting..." "$RED"
         revert_changes
+        ((TEST_FAILURES++))
         
         STORY_FAILURES[$story_id]=$((current_failures + 1))
         log "Story $story_id failure count: ${STORY_FAILURES[$story_id]}/$MAX_STORY_FAILURES" "$YELLOW"
         
         return 1
     fi
+    
+    local story_end_time=$(date +%s)
+    local story_duration=$((story_end_time - story_start_time))
+    STORY_TIMES+=("$story_duration")
+    ((STORIES_COMPLETED++))
     
     STORY_FAILURES[$story_id]=0
     
@@ -445,8 +462,42 @@ show_models() {
     done
 }
 
+show_session_summary() {
+    local end_time=$(date +%s)
+    local duration=$((end_time - SESSION_START_TIME))
+    local minutes=$((duration / 60))
+    local seconds=$((duration % 60))
+    
+    local unique_models=($(printf '%s\n' "${MODELS_USED[@]}" | sort -u))
+    local avg_time=0
+    if [[ ${#STORY_TIMES[@]} -gt 0 ]]; then
+        local total_time=0
+        for t in "${STORY_TIMES[@]}"; do
+            total_time=$((total_time + t))
+        done
+        avg_time=$((total_time / ${#STORY_TIMES[@]}))
+    fi
+    
+    echo ""
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${CYAN}                      SESSION SUMMARY                       ${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}Total time:${NC}         ${minutes}m ${seconds}s"
+    echo -e "${BLUE}Stories completed:${NC}  $STORIES_COMPLETED"
+    echo -e "${BLUE}Stories blocked:${NC}    $BLOCKED"
+    echo -e "${BLUE}Build failures:${NC}     $BUILD_FAILURES"
+    echo -e "${BLUE}Test failures:${NC}      $TEST_FAILURES"
+    echo -e "${BLUE}Avg time/story:${NC}     ${avg_time}s"
+    echo -e "${BLUE}Models used:${NC}"
+    for m in "${unique_models[@]}"; do
+        echo -e "  - $m"
+    done
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+}
+
 main() {
     mkdir -p "$(dirname "$LOG_FILE")"
+    SESSION_START_TIME=$(date +%s)
     
     echo -e "${GREEN}"
     echo "╔═══════════════════════════════════════════════════════════╗"
@@ -488,6 +539,7 @@ main() {
             echo -e "${GREEN}╚═══════════════════════════════════════════════════════════╝${NC}"
             echo ""
             count_stories
+            show_session_summary
             log "All stories complete!" "$GREEN"
             
             echo ""
@@ -507,6 +559,7 @@ main() {
             exit 0
         elif [[ $result -eq 2 ]]; then
             log "Cannot continue - all models failed" "$RED"
+            show_session_summary
             exit 1
         fi
         
@@ -516,6 +569,7 @@ main() {
     echo ""
     log "Max iterations ($MAX_ITERATIONS) reached" "$YELLOW"
     count_stories
+    show_session_summary
     echo -e "${YELLOW}Run again to continue: ./speclet.sh${NC}"
     exit 1
 }

@@ -156,3 +156,21 @@ Ready to create PR.
 - **Keep CI green** - Never commit broken code
 - **Update passes AFTER commit**
 - **No type suppression** - Never use `as any` or `@ts-ignore`
+
+## Global Rules
+
+### Always Show Recommendation + Reason
+
+When asking questions with options, ALWAYS:
+1. Mark the recommended option with ⭐
+2. Add `**Reason for recommendation:**` explaining why
+
+**Example format:**
+```
+1. [Question]?
+   A. Option A
+   B. Option B ⭐ Recommended — [brief reason]
+   C. Option C
+
+   **Reason for recommendation:** [Detailed explanation of why B is best]
+```

@@ -133,6 +133,24 @@ After creating the draft, ask:
 - **Story sizing** - If you can't describe in 2-3 sentences, it's too big
 - **Dependency order** - Schema first, UI last
 
+## Global Rules
+
+### Always Show Recommendation + Reason
+
+When asking questions with options, ALWAYS:
+1. Mark the recommended option with ⭐
+2. Add `**Reason for recommendation:**` explaining why
+
+**Example format:**
+```
+1. [Question]?
+   A. Option A
+   B. Option B ⭐ Recommended — [brief reason]
+   C. Option C
+
+   **Reason for recommendation:** [Detailed explanation of why B is best]
+```
+
 ## Output
 
 Save the draft to `.speclet/draft.md`

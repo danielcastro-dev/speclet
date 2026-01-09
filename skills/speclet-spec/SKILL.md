@@ -126,6 +126,24 @@ For quick fixes (15-60 min), create `.speclet/spec-lite.json`:
 }
 ```
 
+## Global Rules
+
+### Always Show Recommendation + Reason
+
+When asking questions with options, ALWAYS:
+1. Mark the recommended option with ⭐
+2. Add `**Reason for recommendation:**` explaining why
+
+**Example format:**
+```
+1. [Question]?
+   A. Option A
+   B. Option B ⭐ Recommended — [brief reason]
+   C. Option C
+
+   **Reason for recommendation:** [Detailed explanation of why B is best]
+```
+
 ## Output
 
 - Full spec: `.speclet/spec.json`

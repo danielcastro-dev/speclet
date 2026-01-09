@@ -276,14 +276,14 @@ run_opencode_with_fallback() {
             return 0
         fi
         
+        # Handle both timeout (124) and other failures through retry logic
         if [[ $exit_code -eq 124 ]]; then
             log "Story timed out after ${STORY_TIMEOUT_MINUTES} minutes" "$RED"
-            return 1
+        else
+            log "OpenCode failed (exit code: $exit_code)" "$YELLOW"
         fi
         
         ((retries++))
-        
-        log "OpenCode failed (exit code: $exit_code)" "$YELLOW"
         
         if [[ $retries -lt $MAX_RETRIES ]]; then
             log "Retry $retries/$MAX_RETRIES with $model (waiting ${delay}s)..." "$YELLOW"

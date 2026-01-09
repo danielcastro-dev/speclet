@@ -324,6 +324,7 @@ function Invoke-OpenCodeWithFallback {
     $retries = 0
     $delay = 5
     $timeoutSeconds = $script:STORY_TIMEOUT_MINUTES * 60
+    $tempLogFile = [System.IO.Path]::GetTempFileName()
     
     while ($true) {
         $model = $script:MODELS[$script:CurrentModelIdx]
@@ -332,48 +333,51 @@ function Invoke-OpenCodeWithFallback {
         $script:ModelsUsed += $model
         
         try {
-            $process = Start-Process -FilePath "opencode" -ArgumentList "-m", $model, "-p", "Use the speclet-loop skill" -PassThru -NoNewWindow -Wait:$false
+            $process = Start-Process -FilePath "opencode" -ArgumentList "-m", $model, "-p", "Use the speclet-loop skill" -PassThru -NoNewWindow -Wait:$false -RedirectStandardError $tempLogFile
             $completed = $process.WaitForExit($timeoutSeconds * 1000)
             
+            if (Test-Path $tempLogFile) {
+                Get-Content $tempLogFile | Add-Content -Path $LOG_FILE -ErrorAction SilentlyContinue
+            }
+            
             if (-not $completed) {
-                $process.Kill()
+                try { $process.Kill() } catch { }
                 Write-Log "Story timed out after $($script:STORY_TIMEOUT_MINUTES) minutes" "Red"
-                return $false
-            }
-            
-            if ($process.ExitCode -eq 0) {
+            } elseif ($process.ExitCode -eq 0) {
                 return $true
+            } else {
+                throw "OpenCode exited with code $($process.ExitCode)"
             }
-            throw "OpenCode exited with code $($process.ExitCode)"
         } catch {
-            $retries++
             Write-Log "OpenCode failed: $_" "Yellow"
-            
-            if ($retries -lt $script:MAX_RETRIES) {
-                Write-Log "Retry $retries/$script:MAX_RETRIES with $model (waiting ${delay}s)..." "Yellow"
-                Start-Sleep -Seconds $delay
-                $delay = $delay * 3
-                continue
-            }
-            
-            $script:CurrentModelIdx++
-            $retries = 0
-            $delay = 5
-            
-            if ($script:CurrentModelIdx -ge $script:MODELS.Count) {
-                Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Red"
-                Write-Log "All models exhausted" "Red"
-                foreach ($m in $script:MODELS) {
-                    Write-ColorOutput "  - $m" "Red"
-                }
-                Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Red"
-                return $false
-            }
-            
-            Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Yellow"
-            Write-Log "Switching to fallback model: $($script:MODELS[$script:CurrentModelIdx])" "Yellow"
-            Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Yellow"
         }
+        
+        $retries++
+        
+        if ($retries -lt $script:MAX_RETRIES) {
+            Write-Log "Retry $retries/$script:MAX_RETRIES with $model (waiting ${delay}s)..." "Yellow"
+            Start-Sleep -Seconds $delay
+            $delay = $delay * 3
+            continue
+        }
+        
+        $script:CurrentModelIdx++
+        $retries = 0
+        $delay = 5
+        
+        if ($script:CurrentModelIdx -ge $script:MODELS.Count) {
+            Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Red"
+            Write-Log "All models exhausted" "Red"
+            foreach ($m in $script:MODELS) {
+                Write-ColorOutput "  - $m" "Red"
+            }
+            Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Red"
+            return $false
+        }
+        
+        Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Yellow"
+        Write-Log "Switching to fallback model: $($script:MODELS[$script:CurrentModelIdx])" "Yellow"
+        Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Yellow"
     }
 }
 

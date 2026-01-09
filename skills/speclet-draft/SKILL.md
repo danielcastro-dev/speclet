@@ -1,31 +1,38 @@
+---
+name: speclet-draft
+description: Generate a collaborative draft document with clarifying questions for a new feature
+license: MIT
+compatibility: opencode
+metadata:
+  workflow: speclet
+  phase: planning
+---
+
 # Speclet Draft Skill
 
 Generate a collaborative draft document for a new feature.
 
-## Usage
+## What I Do
 
-```
-Load the draft skill and create a draft for [your feature description]
-```
+- Ask 3-5 clarifying questions with lettered options for quick responses
+- Create a structured draft document at `.speclet/draft.md`
+- Identify scope, non-goals, and affected files
+- Break down the feature into right-sized stories
+
+## When to Use Me
+
+Use this when starting a new feature and you need to:
+- Clarify requirements before coding
+- Define scope and non-goals
+- Break work into atomic stories
 
 ## Your Task
 
-You are helping a developer define requirements for a new feature. Your goal is to:
+You are helping a developer define requirements for a new feature.
 
-1. Understand the feature through clarifying questions
-2. Create a structured draft document
-3. Identify scope, non-goals, and affected files
+### Step 1: Ask Clarifying Questions
 
-## Step 1: Ask Clarifying Questions
-
-Ask 3-5 critical questions with **lettered options** for quick responses. Focus on:
-
-- **Goal:** What problem does this solve?
-- **Scope:** Minimal vs full-featured?
-- **Boundaries:** What should it NOT do?
-- **Success:** How do we know it's done?
-
-Format questions like this:
+Ask 3-5 critical questions with **lettered options** for quick responses:
 
 ```
 1. What is the primary goal?
@@ -44,7 +51,13 @@ Format questions like this:
 
 User responds quickly: **"1C, 2A"**
 
-## Step 2: Create Draft Document
+Focus on:
+- **Goal:** What problem does this solve?
+- **Scope:** Minimal vs full-featured?
+- **Boundaries:** What should it NOT do?
+- **Success:** How do we know it's done?
+
+### Step 2: Create Draft Document
 
 After getting answers, create `.speclet/draft.md`:
 
@@ -71,9 +84,6 @@ After getting answers, create `.speclet/draft.md`:
    
    **Answer:** [User's choice with explanation]
 
-2. [Next question]
-   ...
-
 ---
 
 ## Proposed Scope
@@ -81,13 +91,11 @@ After getting answers, create `.speclet/draft.md`:
 ### Included
 
 - [What this feature WILL do]
-- [Be specific]
 
 ### Non-Goals (Out of Scope)
 
 - [What this feature will NOT do]
 - [Critical for preventing scope creep]
-- [Be explicit about boundaries]
 
 ---
 
@@ -101,14 +109,8 @@ After getting answers, create `.speclet/draft.md`:
 
 ## Stories (Draft)
 
-<!--
-Each story: 2-3 sentences max. If more, split it.
-Order: schema → backend → UI → dashboard
--->
-
 1. **STORY-1:** [2-3 sentence description]
 2. **STORY-2:** [2-3 sentence description]
-3. **STORY-3:** [2-3 sentence description]
 
 ---
 
@@ -117,7 +119,7 @@ Order: schema → backend → UI → dashboard
 1. [Any remaining uncertainties]
 ```
 
-## Step 3: Confirm with User
+### Step 3: Confirm with User
 
 After creating the draft, ask:
 
@@ -135,6 +137,6 @@ After creating the draft, ask:
 
 Save the draft to `.speclet/draft.md`
 
-When complete, tell user:
+When complete:
 
-> "Draft saved to `.speclet/draft.md`. Ready to convert to spec? Load the spec skill."
+> "Draft saved to `.speclet/draft.md`. Ready to convert to spec? Use the speclet-spec skill."

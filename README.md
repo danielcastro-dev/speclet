@@ -21,13 +21,16 @@ Speclet is a structured workflow for developing features with AI assistants (Cla
 git clone https://github.com/danielcastro-dev/speclet.git /tmp/speclet
 
 # Copy to your project
-mkdir -p .speclet/templates .speclet/tickets .speclet/archive .speclet/skills
+mkdir -p .speclet/templates .speclet/tickets .speclet/archive
 cp /tmp/speclet/GUIDE.md .speclet/
 cp /tmp/speclet/loop.md .speclet/
 cp /tmp/speclet/templates/* .speclet/templates/
-cp -r /tmp/speclet/skills/* .speclet/skills/
 
-# Add to .gitignore (optional - keeps planning files out of repo)
+# Install skills (OpenCode format)
+mkdir -p .opencode/skill
+cp -r /tmp/speclet/skills/* .opencode/skill/
+
+# Add to .gitignore (optional)
 echo ".speclet/" >> .gitignore
 # OR keep only DECISIONS.md tracked
 echo ".speclet/*" >> .gitignore
@@ -45,22 +48,22 @@ echo "!.speclet/DECISIONS.md" >> .gitignore
 
 ```
 your-project/
+├── .opencode/skill/          # OpenCode skills location
+│   ├── speclet-draft/SKILL.md
+│   ├── speclet-spec/SKILL.md
+│   └── speclet-loop/SKILL.md
 ├── .speclet/
 │   ├── GUIDE.md              # LLM instructions (permanent)
 │   ├── DECISIONS.md          # Architecture decisions (permanent)
-│   ├── loop.md               # Autonomous loop instructions
-│   ├── skills/               # Skill prompts
-│   │   ├── draft/prompt.md   # Draft generation skill
-│   │   ├── spec/prompt.md    # Spec conversion skill
-│   │   └── loop/prompt.md    # Loop execution skill
+│   ├── loop.md               # Manual loop instructions
 │   ├── templates/            # Templates for docs
-│   │   ├── draft.md          # Collaborative planning (markdown)
-│   │   ├── spec.json         # Execution plan (JSON)
-│   │   ├── spec-lite.json    # Quick fixes (JSON)
-│   │   ├── progress.md       # Session learnings
-│   │   └── ticket.md         # Backlog items
-│   ├── tickets/              # Backlog (create as needed)
-│   └── archive/              # Completed specs (create as needed)
+│   │   ├── draft.md
+│   │   ├── spec.json
+│   │   ├── spec-lite.json
+│   │   ├── progress.md
+│   │   └── ticket.md
+│   ├── tickets/              # Backlog
+│   └── archive/              # Completed specs
 └── ... your code
 ```
 
@@ -68,37 +71,42 @@ your-project/
 
 ### Using Skills (Recommended)
 
-Speclet provides three skills that work with any LLM:
+Speclet provides three skills compatible with OpenCode and Claude:
 
 | Skill | Command | Purpose |
 |-------|---------|---------|
-| **draft** | `Load the draft skill for [feature]` | Generate draft.md with clarifying questions |
-| **spec** | `Load the spec skill, convert draft.md` | Convert draft to spec.json |
-| **loop** | `Load the loop skill, execute iteration` | Implement one story autonomously |
+| **speclet-draft** | `Use the speclet-draft skill for [feature]` | Generate draft.md with clarifying questions |
+| **speclet-spec** | `Use the speclet-spec skill` | Convert draft to spec.json |
+| **speclet-loop** | `Use the speclet-loop skill` | Implement one story autonomously |
 
 #### Complete Workflow with Skills
 
 ```
 # Step 1: Create draft with clarifying questions
-Load the draft skill for "add user authentication"
+Use the speclet-draft skill for "add user authentication"
 
 # Step 2: Convert to executable spec
-Load the spec skill and convert draft.md to spec.json
+Use the speclet-spec skill
 
 # Step 3: Implement (repeat until COMPLETE)
-Load the loop skill and execute one iteration
+Use the speclet-loop skill
 ```
 
 #### Installing Skills
 
-Copy skills to your project or LLM config:
+Skills use OpenCode/Claude compatible format (`SKILL.md` with frontmatter).
 
 ```bash
-# Option 1: Copy to project
-cp -r /tmp/speclet/skills .speclet/
+# Option 1: Copy to project (OpenCode)
+mkdir -p .opencode/skill
+cp -r /tmp/speclet/skills/* .opencode/skill/
 
-# Option 2: Copy to Amp config (if using Amp)
-cp -r /tmp/speclet/skills/* ~/.config/amp/skills/
+# Option 2: Copy to global config (OpenCode)
+cp -r /tmp/speclet/skills/* ~/.config/opencode/skill/
+
+# Option 3: Claude compatible
+mkdir -p .claude/skills
+cp -r /tmp/speclet/skills/* .claude/skills/
 ```
 
 ### Manual Mode (without skills)

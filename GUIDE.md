@@ -1,16 +1,16 @@
 # Speclet: LLM Session Instructions
 
-**How to use:** Copy this file to `.speclet/` and tell your LLM:
+**How to use:** Tell your LLM:
 
 > "Read `.speclet/GUIDE.md` and let's start with Phase 0"
 
-**Using Skills (recommended):**
+**Using Skills (recommended for OpenCode):**
 
 | Skill | Command | Purpose |
 |-------|---------|---------|
-| `draft` | "Load the draft skill for [feature]" | Generate draft.md with clarifying questions |
-| `spec` | "Load the spec skill, convert draft.md" | Convert draft to spec.json |
-| `loop` | "Load the loop skill, execute iteration" | Implement one story autonomously |
+| `speclet-draft` | "Use the speclet-draft skill for [feature]" | Generate draft.md with clarifying questions |
+| `speclet-spec` | "Use the speclet-spec skill" | Convert draft to spec.json |
+| `speclet-loop` | "Use the speclet-loop skill" | Implement one story autonomously |
 
 **Manual loop:** Once you have a `spec.json`:
 

@@ -1,0 +1,14 @@
+{
+  "models": [
+    "github-copilot/claude-opus-4.5",
+    "google/antigravity-claude-opus-4-5-thinking-medium",
+    "openai/gpt-5.2-codex",
+    "opencode/glm-4.7-free",
+    "opencode/minimax-m2.1-free"
+  ],
+  "maxRetries": 3,
+  "maxStoryFailures": 3,
+  "buildCommand": "npm run build",
+  "verifyBuild": true,
+  "logFile": ".speclet/loop.log"
+}

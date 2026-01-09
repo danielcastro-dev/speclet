@@ -10,7 +10,7 @@ metadata:
 
 # Speclet Draft Skill
 
-Generate a collaborative draft document for a new feature.
+Generate a collaborative draft document for a new feature or refine an existing ticket.
 
 ## What I Do
 
@@ -18,19 +18,111 @@ Generate a collaborative draft document for a new feature.
 - Create a structured draft document at `.speclet/draft.md`
 - Identify scope, non-goals, and affected files
 - Break down the feature into right-sized stories
+- **For tickets:** Read existing ticket context and refine into actionable draft
 
 ## When to Use Me
 
-Use this when starting a new feature and you need to:
-- Clarify requirements before coding
-- Define scope and non-goals
-- Break work into atomic stories
+Use this when:
+- Starting a new feature and you need to clarify requirements
+- Working on a specific ticket: `speclet-draft for TICKET-N`
+- Defining scope and non-goals before coding
 
 ## Your Task
 
-You are helping a developer define requirements for a new feature.
+### Step 0: Detect Ticket Mode
 
-### Step 1: Ask Clarifying Questions
+**Check if the user prompt contains `TICKET-N` pattern** (e.g., "TICKET-1", "TICKET-3").
+
+If yes → **Ticket Mode** (Step 1A)
+If no → **Normal Mode** (Step 1B)
+
+---
+
+### Step 1A: Ticket Mode
+
+When user says something like "speclet-draft for TICKET-1":
+
+#### 1. Locate and validate the ticket
+
+```
+Read .speclet/tickets/TICKET-N.json
+```
+
+**Validation (CRITICAL):**
+- Check if file exists
+- Check if `"specletVersion"` field exists and equals `"1.0"`
+
+**If validation fails:**
+```
+❌ TICKET-N is not a valid speclet ticket.
+
+Either:
+- The file doesn't exist at .speclet/tickets/TICKET-N.json
+- The ticket is missing "specletVersion": "1.0" (not created by speclet-ticket)
+
+Please verify the ticket exists and was created with speclet-ticket skill.
+```
+
+**If validation passes:** Continue to step 2.
+
+#### 2. Read ticket context
+
+```
+Read .speclet/tickets/TICKET-N/ticket-draft.md
+```
+
+This file contains the general draft context from when tickets were created.
+
+#### 3. Read source document (optional but recommended)
+
+The `sourceContext` field in the ticket JSON points to the original source:
+
+```
+Read [sourceContext path] if it exists
+```
+
+#### 4. Summarize context and ask questions
+
+Present what you found:
+
+```
+📋 **TICKET-N: [title]**
+
+**Description:** [from ticket JSON]
+
+**Source:** [sourceContext]
+
+**Preliminary Criteria:**
+- [criterion 1]
+- [criterion 2]
+
+**Affected Files:** [files array]
+
+---
+
+Based on the ticket context, I have some clarifying questions:
+
+1. [Question with options]
+   A. ...
+   B. ... ⭐ Recommended
+   
+2. [Question with options]
+   ...
+```
+
+#### 5. Create refined draft
+
+After getting answers, create `.speclet/draft.md` with the refined, actionable draft.
+
+The draft should be more specific than `ticket-draft.md` — focused on implementation details.
+
+---
+
+### Step 1B: Normal Mode (No Ticket)
+
+Standard flow for new features.
+
+#### Ask Clarifying Questions
 
 Ask 3-5 critical questions with **lettered options** for quick responses:
 
@@ -57,6 +149,8 @@ Focus on:
 - **Boundaries:** What should it NOT do?
 - **Success:** How do we know it's done?
 
+---
+
 ### Step 2: Create Draft Document
 
 After getting answers, create `.speclet/draft.md`:
@@ -67,6 +161,7 @@ After getting answers, create `.speclet/draft.md`:
 **Status:** In definition  
 **Date:** YYYY-MM-DD  
 **Branch:** feature/[suggested-branch-name]
+**Ticket:** TICKET-N (if applicable)
 
 ---
 
@@ -132,6 +227,7 @@ After creating the draft, ask:
 - **Non-Goals mandatory** - Always include what it WON'T do
 - **Story sizing** - If you can't describe in 2-3 sentences, it's too big
 - **Dependency order** - Schema first, UI last
+- **Validate specletVersion** - Only process tickets with `"specletVersion": "1.0"`
 
 ## Global Rules
 
@@ -149,6 +245,34 @@ When asking questions with options, ALWAYS:
    C. Option C
 
    **Reason for recommendation:** [Detailed explanation of why B is best]
+```
+
+## Ticket Mode Flow Summary
+
+```
+User: "speclet-draft for TICKET-1"
+     │
+     ▼
+Validate .speclet/tickets/TICKET-1.json
+     │
+     ├── Has "specletVersion": "1.0"? 
+     │   ├── NO → Error message, stop
+     │   └── YES → Continue
+     │
+     ▼
+Read .speclet/tickets/TICKET-1/ticket-draft.md
+     │
+     ▼
+Read sourceContext document (if exists)
+     │
+     ▼
+Present context + ask clarifying questions
+     │
+     ▼
+Create .speclet/draft.md (refined)
+     │
+     ▼
+"Ready to convert to spec? Use speclet-spec skill."
 ```
 
 ## Output

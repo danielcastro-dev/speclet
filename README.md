@@ -318,18 +318,6 @@ Every spec must define what it will NOT do. Critical for preventing scope creep.
 | Commits/hour | 3-4 |
 | Questions/story | ≤2 |
 
-## Comparison with Ralph
-
-See [RALPH_COMPARISON.md](./RALPH_COMPARISON.md) for detailed comparison with [snarktank/ralph](https://github.com/snarktank/ralph).
-
-**Speclet advantages:**
-- JSON tracking (programmatic)
-- Non-Goals (scope control)
-- Lettered questions (faster UX)
-- Tiered complexity (efficiency)
-- Model fallback (resilience)
-- Build verification (safety)
-- Cross-platform (Bash + PowerShell)
 
 ## Philosophy
 
@@ -337,7 +325,7 @@ Speclet is inspired by:
 - **Spec-Driven Development**: Specification before code
 - **BDD**: Acceptance criteria, Gherkin-style scenarios
 - **ADR**: Architecture Decision Records
-- **[Ralph pattern](https://ghuntley.com/ralph/)**: Story sizing, JSON tracking
+- **[Ralph](https://ghuntley.com/ralph/)**: Story sizing, JSON tracking
 
 The key insight: **LLMs work better with structured context**. Speclet provides that structure while staying lightweight.
 

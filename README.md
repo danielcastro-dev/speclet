@@ -17,8 +17,19 @@ Speclet is a structured workflow for developing features with AI assistants (Cla
 
 ### Installation (One Command)
 
+**Linux / macOS / WSL:**
 ```bash
 git clone https://github.com/danielcastro-dev/speclet.git /tmp/speclet && /tmp/speclet/install.sh
+```
+
+**Windows (PowerShell):**
+```powershell
+git clone https://github.com/danielcastro-dev/speclet.git $env:TEMP\speclet; & $env:TEMP\speclet\install.ps1
+```
+
+**Windows (CMD):**
+```cmd
+git clone https://github.com/danielcastro-dev/speclet.git %TEMP%\speclet && powershell -ExecutionPolicy Bypass -File %TEMP%\speclet\install.ps1
 ```
 
 This installs:

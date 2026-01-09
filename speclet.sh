@@ -182,7 +182,6 @@ run_iteration() {
     fi
 }
 
-# Archive completed spec
 archive_spec() {
     DATE=$(date +%Y-%m-%d)
     FEATURE_SLUG=$(echo "$FEATURE_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g')
@@ -196,6 +195,47 @@ archive_spec() {
     [[ -f "$PROGRESS_FILE" ]] && mv "$PROGRESS_FILE" "$ARCHIVE_PATH/"
     
     echo -e "${GREEN}Archived!${NC}"
+}
+
+ensure_gh_auth() {
+    if ! gh auth status &>/dev/null; then
+        echo -e "${YELLOW}GitHub CLI not authenticated.${NC}"
+        echo ""
+        echo -e "${CYAN}Options:${NC}"
+        echo "  1. Enter token manually"
+        echo "  2. Skip PR creation"
+        echo ""
+        read -p "Choice (1/2): " -n 1 -r
+        echo
+        
+        if [[ $REPLY == "1" ]]; then
+            echo -e "${CYAN}Enter your GitHub token (ghp_...):${NC}"
+            read -r GH_TOKEN
+            if [[ -n "$GH_TOKEN" ]]; then
+                echo "$GH_TOKEN" | gh auth login --with-token
+                if gh auth status &>/dev/null; then
+                    echo -e "${GREEN}Authenticated!${NC}"
+                    return 0
+                else
+                    echo -e "${RED}Authentication failed${NC}"
+                    return 1
+                fi
+            fi
+        fi
+        return 1
+    fi
+    return 0
+}
+
+create_pr() {
+    if ensure_gh_auth; then
+        echo -e "${BLUE}Creating PR...${NC}"
+        gh pr create --fill
+    else
+        echo -e "${YELLOW}Skipping PR. Create manually:${NC}"
+        echo "  gh auth login"
+        echo "  gh pr create --fill"
+    fi
 }
 
 # Show available models
@@ -261,8 +301,7 @@ main() {
             read -p "Create PR? (y/n) " -n 1 -r
             echo
             if [[ $REPLY =~ ^[Yy]$ ]]; then
-                echo -e "${BLUE}Creating PR...${NC}"
-                gh pr create --fill
+                create_pr
             fi
             
             exit 0

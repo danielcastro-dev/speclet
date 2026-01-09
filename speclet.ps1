@@ -212,6 +212,52 @@ function Save-Archive {
     Write-ColorOutput "Archived!" "Green"
 }
 
+function Test-GhAuth {
+    $null = gh auth status 2>&1
+    return $LASTEXITCODE -eq 0
+}
+
+function Invoke-GhAuth {
+    if (Test-GhAuth) {
+        return $true
+    }
+    
+    Write-ColorOutput "GitHub CLI not authenticated." "Yellow"
+    Write-Host ""
+    Write-ColorOutput "Options:" "Cyan"
+    Write-Host "  1. Enter token manually"
+    Write-Host "  2. Skip PR creation"
+    Write-Host ""
+    $choice = Read-Host "Choice (1/2)"
+    
+    if ($choice -eq "1") {
+        Write-ColorOutput "Enter your GitHub token (ghp_...):" "Cyan"
+        $token = Read-Host
+        if ($token) {
+            $token | gh auth login --with-token 2>&1 | Out-Null
+            if (Test-GhAuth) {
+                Write-ColorOutput "Authenticated!" "Green"
+                return $true
+            } else {
+                Write-ColorOutput "Authentication failed" "Red"
+                return $false
+            }
+        }
+    }
+    return $false
+}
+
+function New-PullRequest {
+    if (Invoke-GhAuth) {
+        Write-ColorOutput "Creating PR..." "Cyan"
+        gh pr create --fill
+    } else {
+        Write-ColorOutput "Skipping PR. Create manually:" "Yellow"
+        Write-Host "  gh auth login"
+        Write-Host "  gh pr create --fill"
+    }
+}
+
 function Main {
     Write-ColorOutput @"
 
@@ -254,8 +300,7 @@ function Main {
             Write-Host ""
             $createPR = Read-Host "Create PR? (y/n)"
             if ($createPR -eq 'y') {
-                Write-ColorOutput "Creating PR..." "Cyan"
-                gh pr create --fill
+                New-PullRequest
             }
             
             exit 0

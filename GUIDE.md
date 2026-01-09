@@ -4,6 +4,10 @@
 
 > "Read `.speclet/GUIDE.md` and let's start with Phase 0"
 
+**For autonomous loop:** Once you have a `spec.json`, use:
+
+> "Read `.speclet/loop.md` and execute one iteration."
+
 ---
 
 ## For the LLM: Workflow

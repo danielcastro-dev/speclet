@@ -1,0 +1,19 @@
+{
+  "feature": "Fix duplicate project names",
+  "branch": "fix/duplicate-project-names",
+  "date": "2024-01-15",
+  "actualTime": "~25 min",
+  "problem": "Users can create projects with duplicate names, causing confusion when selecting from dropdowns",
+  "solution": "Add validation to check for existing project names before creating. Show error toast if name already exists.",
+  "files": [
+    "src/actions/projects.ts",
+    "src/components/ProjectForm.tsx"
+  ],
+  "acceptanceCriteria": [
+    "Cannot create project with name that already exists (case-insensitive)",
+    "Error toast shown with clear message",
+    "Build passes"
+  ],
+  "passes": false,
+  "notes": ""
+}

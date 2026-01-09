@@ -1,0 +1,94 @@
+{
+  "feature": "Task Priority System",
+  "branch": "feature/task-priority",
+  "date": "2024-01-15",
+  "summary": "Add priority levels (high/medium/low) to tasks with visual indicators and filtering",
+  "nonGoals": [
+    "No priority-based notifications or reminders",
+    "No automatic priority assignment",
+    "No priority inheritance for subtasks"
+  ],
+  "functionalRequirements": [
+    "FR-1: The system must store task priority as an enum (high, medium, low) with default 'medium'",
+    "FR-2: Each task card must display a colored priority badge visible without interaction",
+    "FR-3: Users must be able to change priority from the task edit modal",
+    "FR-4: Users must be able to filter the task list by priority level"
+  ],
+  "stories": [
+    {
+      "id": "STORY-1",
+      "title": "Add priority field to database",
+      "description": "Add priority column to tasks table. Column should be an enum with values 'high', 'medium', 'low' and default to 'medium'. Generate and run migration.",
+      "files": [
+        "migrations/001_add_priority.sql",
+        "src/db/schema.ts"
+      ],
+      "acceptanceCriteria": [
+        "Column created with enum: high | medium | low",
+        "Default value is 'medium'",
+        "Migration runs successfully",
+        "Build/typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "STORY-2",
+      "title": "Display priority badge on task cards",
+      "description": "Add a colored priority badge to each task card. Red for high, yellow for medium, gray for low. Badge must be visible at a glance without hover or click.",
+      "files": [
+        "src/components/TaskCard.tsx",
+        "src/components/PriorityBadge.tsx"
+      ],
+      "acceptanceCriteria": [
+        "Priority badge shows on every task card",
+        "Colors: red=high, yellow=medium, gray=low",
+        "Visible without hovering or clicking",
+        "Build/typecheck passes",
+        "Verify in browser"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "STORY-3",
+      "title": "Add priority selector to task edit",
+      "description": "Add a priority dropdown to the task edit modal. Should show current priority as selected and save immediately on change.",
+      "files": [
+        "src/components/TaskEditModal.tsx",
+        "src/actions/tasks.ts"
+      ],
+      "acceptanceCriteria": [
+        "Priority dropdown in task edit modal",
+        "Shows current priority as selected",
+        "Saves immediately on selection change",
+        "Build/typecheck passes",
+        "Verify in browser"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "STORY-4",
+      "title": "Filter tasks by priority",
+      "description": "Add a filter dropdown to the task list with options All, High, Medium, Low. Filter should persist in URL params. Show empty state when no tasks match.",
+      "files": [
+        "src/components/TaskList.tsx",
+        "src/components/PriorityFilter.tsx"
+      ],
+      "acceptanceCriteria": [
+        "Filter dropdown with options: All | High | Medium | Low",
+        "Filter persists in URL params",
+        "Empty state message when no tasks match",
+        "Build/typecheck passes",
+        "Verify in browser"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

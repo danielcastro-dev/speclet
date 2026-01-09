@@ -6,9 +6,9 @@ Based on [AIhero's 11 Tips for AI Coding with Ralph Wiggum](https://www.aihero.d
 
 | Category | Ralph Tips | Speclet Status |
 |----------|------------|----------------|
-| Verified ✅ | 9/11 | Compliant |
-| Partial ⚠️ | 1/11 | Needs enhancement |
-| Missing ❌ | 1/11 | Not implemented |
+| Verified ✅ | 11/11 | Fully Compliant |
+| Partial ⚠️ | 0/11 | - |
+| Missing ❌ | 0/11 | - |
 
 ---
 
@@ -186,7 +186,7 @@ Based on [AIhero's 11 Tips for AI Coding with Ralph Wiggum](https://www.aihero.d
 
 ---
 
-## Tip 11: Autonomous Loop Mode ⚠️
+## Tip 11: Autonomous Loop Mode ✅
 
 > "Agent picks next story and implements autonomously until complete"
 
@@ -194,24 +194,31 @@ Based on [AIhero's 11 Tips for AI Coding with Ralph Wiggum](https://www.aihero.d
 
 **Speclet:**
 - `speclet.sh` (Bash) and `speclet.ps1` (PowerShell)
-- Model fallback with retry
+- Model fallback with retry and exponential backoff
+- Build verification with automatic revert on failure
+- Test verification (optional, configurable)
+- Story timeout to prevent stuck iterations
+- Skip blocked stories after N failures
+- Checkpoint/resume capability
+- Session summary with metrics
 - Archive + PR creation at end
 
-**Status:** ⚠️ **PARTIAL** - Missing features:
+**Status:** ✅ **COMPLIANT** - Exceeds Ralph
 
 | Feature | Ralph | Speclet |
 |---------|-------|---------|
 | Basic loop | ✅ | ✅ |
 | Model fallback | ❌ | ✅ |
 | Cross-platform | ❌ | ✅ (Bash + PowerShell) |
-| Build verification in script | ✅ | ❌ (trusts agent) |
-| Skip stuck story | ✅ | ❌ |
-| Resume after crash | ✅ | ❌ |
+| Build verification | ✅ | ✅ |
+| Test verification | ❌ | ✅ (optional) |
+| Skip stuck story | ✅ | ✅ |
+| Resume after crash | ✅ | ✅ |
+| Story timeout | ❌ | ✅ |
+| Session summary | ❌ | ✅ |
+| Story completion check | ❌ | ✅ |
 
-**Recommendations:**
-1. Add build verification in script (not just in agent)
-2. Add skip story after N failures
-3. Add checkpoint/resume capability
+**Location:** `speclet.sh`, `speclet.ps1`, `.speclet/config.json`
 
 ---
 
@@ -254,55 +261,40 @@ Based on [AIhero's 11 Tips for AI Coding with Ralph Wiggum](https://www.aihero.d
 
 ---
 
-## Recommendations
+## Implementation Status
 
-### High Priority
+All recommended features have been implemented:
 
-1. **Build verification in loop script**
-   ```bash
-   # After opencode completes, verify build
-   npm run build || { echo "Build failed"; git checkout .; continue; }
-   ```
+### ✅ Completed
 
-2. **Skip story after failures**
-   ```bash
-   # If story fails 3 times, mark as blocked and continue
-   if [[ $story_failures -ge 3 ]]; then
-       mark_story_blocked "$story_id"
-       continue
-   fi
-   ```
+1. **Build verification in loop script** - Runs after each story, reverts on failure
+2. **Test verification (optional)** - `testCommand` and `verifyTests` config options
+3. **Skip story after failures** - Marks as `blocked` after `maxStoryFailures` attempts
+4. **Checkpoint/Resume** - State saved to `.speclet/checkpoint.json`
+5. **Config file** - `.speclet/config.json` for models, retries, build command
+6. **Log file** - `.speclet/loop.log` for debugging
+7. **Story timeout** - `storyTimeoutMinutes` kills stuck stories
+8. **Session summary** - Metrics at end (time, completions, failures, models used)
+9. **Story completion check** - Verifies `passes: true` after each iteration
 
-3. **Checkpoint/Resume**
-   ```bash
-   # Save state to .speclet/checkpoint.json
-   # On restart, read checkpoint and continue
-   ```
+### ⏳ Not Planned
 
-### Medium Priority
-
-4. **Config file** - `.speclet/config.json` for models, retries, build command
-
-5. **Log file** - `.speclet/loop.log` for debugging
-
-6. **Notification** - Beep/toast when complete
-
-### Low Priority
-
-7. **Dry-run mode** - Show what would happen without executing
-
-8. **Time estimation** - ETA based on stories remaining
+- **Notification (beep/toast)** - Out of scope
+- **Dry-run mode** - Out of scope  
+- **Time estimation** - Out of scope
 
 ---
 
 ## Conclusion
 
-Speclet is **90% compliant** with Ralph Wiggum principles and adds several improvements:
+Speclet is **100% compliant** with Ralph Wiggum principles and adds several improvements:
 - JSON tracking (programmatic)
 - Non-Goals (scope control)
 - Lettered questions (faster UX)
 - Tiered complexity (efficiency)
-- Model fallback (resilience)
+- Model fallback with retry (resilience)
 - Cross-platform (Bash + PowerShell)
-
-Main gap: Loop script should verify build independently, not trust the agent.
+- Build + test verification (safety)
+- Story timeout (prevents stuck loops)
+- Session summary (observability)
+- Story completion verification (correctness)

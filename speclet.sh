@@ -210,6 +210,19 @@ revert_changes() {
     git clean -fd 2>/dev/null
 }
 
+verify_story_completion() {
+    local story_id=$1
+    local passes=$(jq -r --arg id "$story_id" '.stories[] | select(.id == $id) | .passes' "$SPEC_FILE")
+    
+    if [[ "$passes" == "true" ]]; then
+        log "Story $story_id marked complete ✓" "$GREEN"
+        return 0
+    else
+        log "Story $story_id not marked complete, counting as failure" "$YELLOW"
+        return 1
+    fi
+}
+
 run_opencode_with_fallback() {
     local retries=0
     local delay=5
@@ -286,6 +299,12 @@ run_iteration() {
     if ! run_opencode_with_fallback; then
         log "Failed to run opencode with any model" "$RED"
         return 2
+    fi
+    
+    if ! verify_story_completion "$story_id"; then
+        STORY_FAILURES[$story_id]=$((current_failures + 1))
+        log "Story $story_id failure count: ${STORY_FAILURES[$story_id]}/$MAX_STORY_FAILURES" "$YELLOW"
+        return 1
     fi
     
     if [[ "$VERIFY_BUILD" == "true" ]]; then

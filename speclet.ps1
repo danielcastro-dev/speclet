@@ -235,6 +235,21 @@ function Undo-Changes {
     git clean -fd 2>$null
 }
 
+function Test-StoryCompletion {
+    param([string]$StoryId)
+    
+    $spec = Get-SpecData
+    $story = $spec.stories | Where-Object { $_.id -eq $StoryId } | Select-Object -First 1
+    
+    if ($story -and $story.passes -eq $true) {
+        Write-Log "Story $StoryId marked complete ✓" "Green"
+        return $true
+    } else {
+        Write-Log "Story $StoryId not marked complete, counting as failure" "Yellow"
+        return $false
+    }
+}
+
 function Invoke-OpenCodeWithFallback {
     $retries = 0
     $delay = 5
@@ -318,6 +333,12 @@ function Invoke-Iteration {
     if (-not $success) {
         Write-Log "Failed to run opencode with any model" "Red"
         return 2
+    }
+    
+    if (-not (Test-StoryCompletion -StoryId $storyId)) {
+        $script:StoryFailures[$storyId] = $currentFailures + 1
+        Write-Log "Story $storyId failure count: $($script:StoryFailures[$storyId])/$script:MAX_STORY_FAILURES" "Yellow"
+        return 1
     }
     
     if ($script:VERIFY_BUILD) {

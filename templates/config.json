@@ -10,5 +10,7 @@
   "maxStoryFailures": 3,
   "buildCommand": "npm run build",
   "verifyBuild": true,
+  "testCommand": "",
+  "verifyTests": false,
   "logFile": ".speclet/loop.log"
 }

@@ -35,6 +35,8 @@ $script:MAX_RETRIES = 3
 $script:MAX_STORY_FAILURES = 3
 $script:BUILD_COMMAND = "npm run build"
 $script:VERIFY_BUILD = $true
+$script:TEST_COMMAND = ""
+$script:VERIFY_TESTS = $false
 $script:CurrentModelIdx = 0
 $script:StoryFailures = @{}
 
@@ -63,6 +65,8 @@ function Import-Config {
             if ($config.buildCommand) { $script:BUILD_COMMAND = $config.buildCommand }
             if ($null -ne $config.verifyBuild) { $script:VERIFY_BUILD = $config.verifyBuild }
             if ($config.logFile) { $script:LOG_FILE = $config.logFile }
+            if ($config.testCommand) { $script:TEST_COMMAND = $config.testCommand }
+            if ($null -ne $config.verifyTests) { $script:VERIFY_TESTS = $config.verifyTests }
         } catch {
             Write-ColorOutput "Warning: Could not parse config file" "Yellow"
         }
@@ -229,6 +233,30 @@ function Test-Build {
     }
 }
 
+function Test-Tests {
+    if (-not $script:VERIFY_TESTS -or [string]::IsNullOrEmpty($script:TEST_COMMAND)) { 
+        return $true 
+    }
+    
+    Write-Log "Running tests: $script:TEST_COMMAND" "Cyan"
+    
+    try {
+        $output = Invoke-Expression $script:TEST_COMMAND 2>&1
+        $output | Add-Content -Path $LOG_FILE -ErrorAction SilentlyContinue
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "Tests passed ✓" "Green"
+            return $true
+        } else {
+            Write-Log "Tests FAILED ✗" "Red"
+            return $false
+        }
+    } catch {
+        Write-Log "Tests FAILED: $_" "Red"
+        return $false
+    }
+}
+
 function Undo-Changes {
     Write-Log "Reverting uncommitted changes..." "Yellow"
     git checkout . 2>$null
@@ -351,6 +379,16 @@ function Invoke-Iteration {
             
             return 1
         }
+    }
+    
+    if (-not (Test-Tests)) {
+        Write-Log "Tests failed after story implementation, reverting..." "Red"
+        Undo-Changes
+        
+        $script:StoryFailures[$storyId] = $currentFailures + 1
+        Write-Log "Story $storyId failure count: $($script:StoryFailures[$storyId])/$script:MAX_STORY_FAILURES" "Yellow"
+        
+        return 1
     }
     
     $script:StoryFailures[$storyId] = 0

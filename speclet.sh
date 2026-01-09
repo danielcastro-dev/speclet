@@ -33,6 +33,8 @@ MAX_RETRIES=3
 MAX_STORY_FAILURES=3
 BUILD_COMMAND="npm run build"
 VERIFY_BUILD=true
+TEST_COMMAND=""
+VERIFY_TESTS=false
 CURRENT_MODEL_IDX=0
 
 load_config() {
@@ -59,6 +61,12 @@ load_config() {
         
         val=$(jq -r '.logFile // empty' "$CONFIG_FILE" 2>/dev/null)
         [[ -n "$val" && "$val" != "null" ]] && LOG_FILE=$val
+        
+        val=$(jq -r '.testCommand // empty' "$CONFIG_FILE" 2>/dev/null)
+        [[ -n "$val" && "$val" != "null" ]] && TEST_COMMAND=$val
+        
+        val=$(jq -r '.verifyTests // empty' "$CONFIG_FILE" 2>/dev/null)
+        [[ "$val" == "true" ]] && VERIFY_TESTS=true
     fi
 }
 
@@ -204,6 +212,22 @@ verify_build() {
     fi
 }
 
+verify_tests() {
+    if [[ "$VERIFY_TESTS" != "true" ]] || [[ -z "$TEST_COMMAND" ]]; then
+        return 0
+    fi
+    
+    log "Running tests: $TEST_COMMAND" "$CYAN"
+    
+    if eval "$TEST_COMMAND" >> "$LOG_FILE" 2>&1; then
+        log "Tests passed ✓" "$GREEN"
+        return 0
+    else
+        log "Tests FAILED ✗" "$RED"
+        return 1
+    fi
+}
+
 revert_changes() {
     log "Reverting uncommitted changes..." "$YELLOW"
     git checkout . 2>/dev/null
@@ -317,6 +341,16 @@ run_iteration() {
             
             return 1
         fi
+    fi
+    
+    if ! verify_tests; then
+        log "Tests failed after story implementation, reverting..." "$RED"
+        revert_changes
+        
+        STORY_FAILURES[$story_id]=$((current_failures + 1))
+        log "Story $story_id failure count: ${STORY_FAILURES[$story_id]}/$MAX_STORY_FAILURES" "$YELLOW"
+        
+        return 1
     fi
     
     STORY_FAILURES[$story_id]=0

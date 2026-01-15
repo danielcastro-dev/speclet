@@ -137,40 +137,44 @@ If **zero** reviewers succeed, fail with:
 Check API keys, network, or agent configuration. Try again or reduce the reviewer set.
 ```
 
-### Step 6: Synthesize Council Review
+### Step 6: Verdict Parsing and Dashboard Synthesis
 
-Use a specialized synthesis prompt to consolidate all issues using **Thematic Clustering**:
-1. **Thematic Grouping**: Identify shared problems across reviewers and group them under a single descriptive heading.
-2. **Nuance Preservation**: Do NOT delete unique details. If Reviewer A found a race condition and Reviewer B found a general concurrency limit in the same area, list them both as distinct perspectives under the same theme.
-3. **UX Formatting**: Use HTML `<details>` and `<summary>` tags. The summary MUST contain the severity (🔴 HIGH, 🟡 MEDIUM, 🟢 LOW) and the theme title.
-4. **Reviewer Attribution**: Clearly state which models identified each issue.
-5. **Language Parity**: Detect the language of the draft and ensure the synthesis matches it exactly.
-6. **HTML Integrity**: Ensure all `<details>` blocks are correctly opened and closed.
+After collection, parse the outputs to build the **Approval Board**.
 
-To prevent concurrency issues and ensure safety, **always append** the Council Review section using a **single** operation after all reviewers finish.
+**Parsing Logic:**
+- Iterate through `completedTasks`.
+- For each output, search for `Verdict: [STATUS]`.
+- Regex: `/Verdict:\s*\[(APPROVED|APPROVED_WITH_SUGGESTIONS|NEEDS_REVISION)\]/i`
+- If not found, mark as `UNKNOWN`.
+- If task failed (not in completedTasks), mark as `FAILED`.
 
-```bash
-# Example Synthesized Output structure
+**Dashboard Generation:**
+Construct a markdown table:
+
+```markdown
 ## Council Review
 
-### Status
-- ✅ plan-reviewer-opus
-- ✅ plan-reviewer-sonnet
-- ⚠️ plan-reviewer-gemini (Timeout)
-- ✅ plan-reviewer-gpt
+### Approval Board
+
+| Reviewer | Specialty | Status | Verdict |
+| :--- | :--- | :--- | :--- |
+| **Opus** | Strategy | ✅ | `[APPROVED]` |
+| **GLM** | Clean Design | ✅ | `[APPROVED_WITH_SUGGESTIONS]` |
+| **Gemini** | Resilience | ❌ | `[FAILED]` |
+...
 
 <details>
-<summary>🔴 HIGH: [Theme Title]</summary>
+<summary>See Full Critiques</summary>
 
-- **Reviewers:** Opus, GPT
-- **Problem:** [Consolidated description of the theme]
-- **Specific Notes:**
-  - **Opus:** [Unique architectural nuance]
-  - **GPT:** [Unique implementation detail]
-- **Consolidated Suggestion:** [Actionable fix merging both suggestions]
+[... Thematic Clustering Content ...]
+
 </details>
-...
 ```
+
+**Synthesize Feedback:**
+Use the existing thematic clustering logic to generate the detailed body, but wrap it in a `<details>` block to keep the draft clean, with the Dashboard visible at the top.
+
+Always append the Dashboard + Details to `.speclet/draft.md`.
 
 ### Step 7: Write Council Artifacts
 

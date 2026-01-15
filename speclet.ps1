@@ -300,10 +300,91 @@ function Test-Tests {
 }
 
 function Undo-Changes {
-    Write-Log "Reverting uncommitted changes..." "Yellow"
-    git checkout . 2>$null
-    git clean -fd 2>$null
+    param([string]$PreHash)
+    Write-Log "Reverting changes..." "Yellow"
+    
+    $currentHash = git rev-parse HEAD
+    if ($PreHash -and $currentHash -ne $PreHash) {
+        Write-Log "New commit(s) detected. Performing hard reset to $PreHash..." "Red"
+        git reset --hard $PreHash 2>&1 | Add-Content -Path $LOG_FILE -ErrorAction SilentlyContinue
+    } else {
+        Write-Log "No new commits. Cleaning working tree..." "Yellow"
+        git checkout . 2>$null
+        git clean -fd 2>$null
+    }
 }
+
+function Invoke-Iteration {
+    param([int]$Iteration)
+    
+    $storyStartTime = Get-Date
+    $preIterationHash = git rev-parse HEAD
+    
+    Write-Host ""
+    Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Green"
+    Write-Log "Iteration $Iteration/$MaxIterations" "Green"
+    Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Green"
+    
+    Show-ModelInfo
+    
+    $storyId = Get-NextStoryId
+    $storyDisplay = Get-NextStoryDisplay
+    
+    if (-not $storyId) {
+        Write-Log "No more stories to process" "Green"
+        return 0
+    }
+    
+    Write-Log "Next story: $storyDisplay" "Cyan"
+    
+    $currentFailures = if ($script:StoryFailures.ContainsKey($storyId)) { $script:StoryFailures[$storyId] } else { 0 }
+    
+    if ($currentFailures -ge $script:MAX_STORY_FAILURES) {
+        Write-Log "Story $storyId has failed $currentFailures times, marking as blocked" "Red"
+        Set-StoryBlocked -StoryId $storyId
+        return 1
+    }
+    
+    Save-Checkpoint -StoryId $storyId -Iteration $Iteration -Failures $currentFailures
+    
+    Write-Host ""
+    
+    $success = Invoke-OpenCodeWithFallback
+    if (-not $success) {
+        Write-Log "Failed to run opencode with any model" "Red"
+        return 2
+    }
+    
+    if (-not (Test-StoryCompletion -StoryId $storyId)) {
+        $script:StoryFailures[$storyId] = $currentFailures + 1
+        Write-Log "Story $storyId failure count: $($script:StoryFailures[$storyId])/$script:MAX_STORY_FAILURES" "Yellow"
+        Undo-Changes -PreHash $preIterationHash
+        return 1
+    }
+    
+    if ($script:VERIFY_BUILD) {
+        if (-not (Test-Build)) {
+            Write-Log "Build failed after story implementation, reverting..." "Red"
+            Undo-Changes -PreHash $preIterationHash
+            $script:BuildFailures++
+            
+            $script:StoryFailures[$storyId] = $currentFailures + 1
+            Write-Log "Story $storyId failure count: $($script:StoryFailures[$storyId])/$script:MAX_STORY_FAILURES" "Yellow"
+            
+            return 1
+        fi
+    }
+    
+    if (-not (Test-Tests)) {
+        Write-Log "Tests failed after story implementation, reverting..." "Red"
+        Undo-Changes -PreHash $preIterationHash
+        $script:TestFailures++
+        
+        $script:StoryFailures[$storyId] = $currentFailures + 1
+        Write-Log "Story $storyId failure count: $($script:StoryFailures[$storyId])/$script:MAX_STORY_FAILURES" "Yellow"
+        
+        return 1
+    }
 
 function Test-StoryCompletion {
     param([string]$StoryId)

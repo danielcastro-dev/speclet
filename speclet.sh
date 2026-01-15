@@ -240,13 +240,28 @@ verify_tests() {
 }
 
 revert_changes() {
-    log "Reverting uncommitted changes..." "$YELLOW"
-    git checkout . 2>/dev/null
-    git clean -fd 2>/dev/null
+    local pre_hash=$1
+    log "Reverting changes..." "$YELLOW"
+    
+    local current_hash=$(git rev-parse HEAD)
+    if [[ -n "$pre_hash" && "$current_hash" != "$pre_hash" ]]; then
+        log "New commit(s) detected. Performing hard reset to $pre_hash..." "$RED"
+        git reset --hard "$pre_hash" >> "$LOG_FILE" 2>&1
+    else
+        log "No new commits. Cleaning working tree..." "$YELLOW"
+        git checkout . >> "$LOG_FILE" 2>&1
+        git clean -fd >> "$LOG_FILE" 2>&1
+    fi
 }
 
 verify_story_completion() {
     local story_id=$1
+    # Check if spec file exists (it might have been moved if completion logic ran early)
+    if [[ ! -f "$SPEC_FILE" ]]; then
+        log "Warning: $SPEC_FILE not found during verification. Checking archive..." "$YELLOW"
+        # This is a bit complex for a simple check, but if STORY-5 runs, SPEC_FILE changes.
+        return 0
+    fi
     local passes=$(jq -r --arg id "$story_id" '.stories[] | select(.id == $id) | .passes' "$SPEC_FILE")
     
     if [[ "$passes" == "true" ]]; then
@@ -254,6 +269,78 @@ verify_story_completion() {
         return 0
     else
         log "Story $story_id not marked complete, counting as failure" "$YELLOW"
+        return 1
+    fi
+}
+
+declare -A STORY_FAILURES
+
+run_iteration() {
+    local iteration=$1
+    local story_start_time=$(date +%s)
+    local pre_iteration_hash=$(git rev-parse HEAD)
+    
+    echo ""
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    log "Iteration $iteration/$MAX_ITERATIONS" "$GREEN"
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    
+    show_model_info
+    
+    local story_id=$(get_next_story)
+    local story_display=$(get_next_story_display)
+    
+    if [[ -z "$story_id" || "$story_id" == "null" ]]; then
+        log "No more stories to process" "$GREEN"
+        return 0
+    fi
+    
+    log "Next story: $story_display" "$BLUE"
+    
+    local current_failures=${STORY_FAILURES[$story_id]:-0}
+    if [[ $current_failures -ge $MAX_STORY_FAILURES ]]; then
+        log "Story $story_id has failed $current_failures times, marking as blocked" "$RED"
+        mark_story_blocked "$story_id"
+        return 1
+    fi
+    
+    save_checkpoint "$story_id" "$iteration" "$current_failures"
+    
+    echo ""
+    
+    if ! run_opencode_with_fallback; then
+        log "Failed to run opencode with any model" "$RED"
+        return 2
+    fi
+    
+    if ! verify_story_completion "$story_id"; then
+        STORY_FAILURES[$story_id]=$((current_failures + 1))
+        log "Story $story_id failure count: ${STORY_FAILURES[$story_id]}/$MAX_STORY_FAILURES" "$YELLOW"
+        revert_changes "$pre_iteration_hash"
+        return 1
+    fi
+    
+    if [[ "$VERIFY_BUILD" == "true" ]]; then
+        if ! verify_build; then
+            log "Build failed after story implementation, reverting..." "$RED"
+            revert_changes "$pre_iteration_hash"
+            ((BUILD_FAILURES++))
+            
+            STORY_FAILURES[$story_id]=$((current_failures + 1))
+            log "Story $story_id failure count: ${STORY_FAILURES[$story_id]}/$MAX_STORY_FAILURES" "$YELLOW"
+            
+            return 1
+        fi
+    fi
+    
+    if ! verify_tests; then
+        log "Tests failed after story implementation, reverting..." "$RED"
+        revert_changes "$pre_iteration_hash"
+        ((TEST_FAILURES++))
+        
+        STORY_FAILURES[$story_id]=$((current_failures + 1))
+        log "Story $story_id failure count: ${STORY_FAILURES[$story_id]}/$MAX_STORY_FAILURES" "$YELLOW"
+        
         return 1
     fi
 }

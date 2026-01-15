@@ -38,6 +38,20 @@ If no → **Normal Mode** (Step 1B)
 
 ---
 
+### Step 0.1: Context Switching and Collision Prevention
+
+Before any mode, check for an existing `activeTicket` in `.speclet/config.json`:
+
+1. **Read config:** `Read .speclet/config.json`
+2. **If `activeTicket` exists:**
+    - If it's different from the new target (or if target is Normal Mode):
+        - **Stash current draft:** `mv .speclet/draft.md .speclet/tickets/[activeTicket]/draft.md` (if draft exists)
+        - **Clear activeTicket:** Update `config.json` to reflect the new state.
+3. **If starting a new ticket:**
+    - Update `config.json` setting `activeTicket` to the new ID.
+
+---
+
 ### Step 1A: Ticket Mode
 
 When user says something like "speclet-draft for TICKET-1":
@@ -52,18 +66,9 @@ Read .speclet/tickets/TICKET-N/ticket.json
 - Check if file exists at `.speclet/tickets/TICKET-N/ticket.json`
 - Check if `"specletVersion"` field exists and equals `"1.0"`
 
-**If validation fails (file missing OR no specletVersion):**
-
-Fallback to Normal Mode gracefully:
-```
-⚠️ TICKET-N not found or not a speclet ticket.
-
-Proceeding with Normal Mode — treating "TICKET-N" as feature description.
-```
-
-Then continue with **Step 1B: Normal Mode**.
-
-**If validation passes:** Continue to step 2.
+**If validation passes:**
+- Update `activeTicket` in `.speclet/config.json` to `TICKET-N`.
+- Continue to step 2.
 
 #### 2. Read ticket context
 
@@ -72,6 +77,7 @@ Read .speclet/tickets/TICKET-N/ticket-draft.md
 ```
 
 This file contains the general draft context from when tickets were created.
+If a `draft.md` already exists in the ticket folder (from a previous stashed session), use that instead.
 
 #### 3. Read source document (optional but recommended)
 

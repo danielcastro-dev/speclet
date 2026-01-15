@@ -75,28 +75,26 @@ Run speclet-draft first to create a draft before using speclet-council.
 
 Use these prompt templates:
 
-- `.opencode/skill/speclet-council/prompts/reviewer-opus.md`
-- `.opencode/skill/speclet-council/prompts/reviewer-sonnet.md`
-- `.opencode/skill/speclet-council/prompts/reviewer-gemini.md`
-- `.opencode/skill/speclet-council/prompts/reviewer-gpt.md`
+- `.opencode/skill/speclet-council/prompts/reviewer-opus.md` (Strategy)
+- `.opencode/skill/speclet-council/prompts/reviewer-glm.md` (Clean Design)
+- `.opencode/skill/speclet-council/prompts/reviewer-kimi.md` (Logic)
+- `.opencode/skill/speclet-council/prompts/reviewer-gemini.md` (Resilience)
+- `.opencode/skill/speclet-council/prompts/reviewer-gpt.md` (Implementation)
 
 Each prompt defines a strict output contract. Pass the draft content inline after the prompt.
 
 ### Step 3: Parallel Review Invocation
 
-Launch all reviewers in parallel using `call_omo_agent` with `run_in_background=true`.
+Launch all reviewers in parallel using `background_task`.
 
 Pseudo-flow:
 
 ```typescript
-for (const reviewer of ["opus", "sonnet", "gemini", "gpt"]) {
-  const prompt = `[PROMPT TEMPLATE CONTENT]\n\nDraft Content:\n${draftContent}`;
-  call_omo_agent(
-    subagent_type="explore", // Using explore as proxy if specialized types not available
+for (const reviewer of ["opus", "sonnet", "gemini", "gpt", "glm"]) {
+  background_task(
+    agent=`plan-reviewer-${reviewer}`,
     description=`Council Review: ${reviewer}`,
-    prompt=prompt,
-    run_in_background=true,
-    session_id=reviewer // Using session_id to map back easily
+    prompt=`[PROMPT TEMPLATE CONTENT]\n\nDraft Content:\n${draftContent}`
   );
 }
 ```
@@ -108,7 +106,7 @@ for (const reviewer of ["opus", "sonnet", "gemini", "gpt"]) {
 
 ### Step 4: Classify Errors and Retry
 
-Retry only for transient errors. If using `call_omo_agent`, monitor the task status via `background_output`.
+Retry only for transient errors. If using `background_task`, monitor the task status via `background_output`.
 
 Transient errors:
 - Timeouts
@@ -127,6 +125,11 @@ If a reviewer fails after max retries, record the failure and continue.
 Retrieve each task with `background_output(task_id="...", block=true)` and map it back to its reviewer.
 Note: Ensure you wait for all tasks to complete or timeout before proceeding to synthesis.
 
+**Review Status Header:**
+Generate a summary table or list showing the status of each reviewer.
+- ✅ [Model Name] (Success)
+- ⚠️ [Model Name] (Failed/Timeout)
+
 If **zero** reviewers succeed, fail with:
 
 ```
@@ -134,23 +137,44 @@ If **zero** reviewers succeed, fail with:
 Check API keys, network, or agent configuration. Try again or reduce the reviewer set.
 ```
 
-### Step 6: Synthesize Council Review
+### Step 6: Verdict Parsing and Dashboard Synthesis
 
-Consolidate all issues:
-- De-duplicate similar items
-- Group by severity (high → medium → low)
-- Preserve reviewer attribution
+After collection, parse the outputs to build the **Approval Board**.
 
-To prevent concurrency issues and ensure safety, **always append** the Council Review section using a **single** operation after all reviewers finish:
+**Parsing Logic:**
+- Iterate through `completedTasks`.
+- For each output, search for `Verdict: [STATUS]`.
+- Regex: `/Verdict:\s*\[(APPROVED|APPROVED_WITH_SUGGESTIONS|NEEDS_REVISION)\]/i`
+- If not found, mark as `UNKNOWN`.
+- If task failed (not in completedTasks), mark as `FAILED`.
 
-```bash
-# Use bash to append safely to the end of the file
-cat <<'EOF' >> .speclet/draft.md
+**Dashboard Generation:**
+Construct a markdown table:
 
+```markdown
 ## Council Review
+
+### Approval Board
+
+| Reviewer | Specialty | Status | Verdict |
+| :--- | :--- | :--- | :--- |
+| **Opus** | Strategy | ✅ | `[APPROVED]` |
+| **GLM** | Clean Design | ✅ | `[APPROVED_WITH_SUGGESTIONS]` |
+| **Gemini** | Resilience | ❌ | `[FAILED]` |
 ...
-EOF
+
+<details>
+<summary>See Full Critiques</summary>
+
+[... Thematic Clustering Content ...]
+
+</details>
 ```
+
+**Synthesize Feedback:**
+Use the existing thematic clustering logic to generate the detailed body, but wrap it in a `<details>` block to keep the draft clean, with the Dashboard visible at the top.
+
+Always append the Dashboard + Details to `.speclet/draft.md`.
 
 ### Step 7: Write Council Artifacts
 
@@ -223,4 +247,5 @@ Use this to validate the workflow without API costs.
 ## Notes
 
 - This skill never rewrites existing draft content; it only appends a Council Review section.
+- **English-First Protocol:** Internal orchestration prompts and background task instructions are in English for reliability, but final user-facing output matches the draft's language.
 - Webfetch policies can only be enforced via reviewer prompts or disabled in agent config.

@@ -22,6 +22,13 @@ If no issues found, use:
 ### Issues Detected
 - No issues found.
 
+### Executive Verdict
+- [ ] APPROVED
+- [ ] APPROVED_WITH_SUGGESTIONS
+- [ ] NEEDS_REVISION
+
+**Verdict:** [APPROVED|APPROVED_WITH_SUGGESTIONS|NEEDS_REVISION]
+
 ### Aspects Reviewed
 - [✓] Clarity
 - [✓] Completeness

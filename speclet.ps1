@@ -67,6 +67,16 @@ function Import-Config {
         try {
             $config = Get-Content $CONFIG_FILE -Raw | ConvertFrom-Json
             
+            # Load activeTicket and resolve paths
+            if ($config.activeTicket) {
+                $script:ACTIVE_TICKET = $config.activeTicket
+                Write-Log "Active Ticket: $script:ACTIVE_TICKET" "Cyan"
+                $TICKET_DIR = ".speclet/tickets/$($script:ACTIVE_TICKET)"
+                $script:SPEC_FILE = "$TICKET_DIR/spec.json"
+                $script:PROGRESS_FILE = "$TICKET_DIR/progress.md"
+                $script:DRAFT_FILE = "$TICKET_DIR/draft.md"
+            }
+
             if ($config.models) { $script:MODELS = $config.models }
             if ($config.maxRetries) { $script:MAX_RETRIES = $config.maxRetries }
             if ($config.maxStoryFailures) { $script:MAX_STORY_FAILURES = $config.maxStoryFailures }
@@ -300,10 +310,91 @@ function Test-Tests {
 }
 
 function Undo-Changes {
-    Write-Log "Reverting uncommitted changes..." "Yellow"
-    git checkout . 2>$null
-    git clean -fd 2>$null
+    param([string]$PreHash)
+    Write-Log "Reverting changes..." "Yellow"
+    
+    $currentHash = git rev-parse HEAD
+    if ($PreHash -and $currentHash -ne $PreHash) {
+        Write-Log "New commit(s) detected. Performing hard reset to $PreHash..." "Red"
+        git reset --hard $PreHash 2>&1 | Add-Content -Path $LOG_FILE -ErrorAction SilentlyContinue
+    } else {
+        Write-Log "No new commits. Cleaning working tree..." "Yellow"
+        git checkout . 2>$null
+        git clean -fd 2>$null
+    }
 }
+
+function Invoke-Iteration {
+    param([int]$Iteration)
+    
+    $storyStartTime = Get-Date
+    $preIterationHash = git rev-parse HEAD
+    
+    Write-Host ""
+    Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Green"
+    Write-Log "Iteration $Iteration/$MaxIterations" "Green"
+    Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Green"
+    
+    Show-ModelInfo
+    
+    $storyId = Get-NextStoryId
+    $storyDisplay = Get-NextStoryDisplay
+    
+    if (-not $storyId) {
+        Write-Log "No more stories to process" "Green"
+        return 0
+    }
+    
+    Write-Log "Next story: $storyDisplay" "Cyan"
+    
+    $currentFailures = if ($script:StoryFailures.ContainsKey($storyId)) { $script:StoryFailures[$storyId] } else { 0 }
+    
+    if ($currentFailures -ge $script:MAX_STORY_FAILURES) {
+        Write-Log "Story $storyId has failed $currentFailures times, marking as blocked" "Red"
+        Set-StoryBlocked -StoryId $storyId
+        return 1
+    }
+    
+    Save-Checkpoint -StoryId $storyId -Iteration $Iteration -Failures $currentFailures
+    
+    Write-Host ""
+    
+    $success = Invoke-OpenCodeWithFallback
+    if (-not $success) {
+        Write-Log "Failed to run opencode with any model" "Red"
+        return 2
+    }
+    
+    if (-not (Test-StoryCompletion -StoryId $storyId)) {
+        $script:StoryFailures[$storyId] = $currentFailures + 1
+        Write-Log "Story $storyId failure count: $($script:StoryFailures[$storyId])/$script:MAX_STORY_FAILURES" "Yellow"
+        Undo-Changes -PreHash $preIterationHash
+        return 1
+    }
+    
+    if ($script:VERIFY_BUILD) {
+        if (-not (Test-Build)) {
+            Write-Log "Build failed after story implementation, reverting..." "Red"
+            Undo-Changes -PreHash $preIterationHash
+            $script:BuildFailures++
+            
+            $script:StoryFailures[$storyId] = $currentFailures + 1
+            Write-Log "Story $storyId failure count: $($script:StoryFailures[$storyId])/$script:MAX_STORY_FAILURES" "Yellow"
+            
+            return 1
+        fi
+    }
+    
+    if (-not (Test-Tests)) {
+        Write-Log "Tests failed after story implementation, reverting..." "Red"
+        Undo-Changes -PreHash $preIterationHash
+        $script:TestFailures++
+        
+        $script:StoryFailures[$storyId] = $currentFailures + 1
+        Write-Log "Story $storyId failure count: $($script:StoryFailures[$storyId])/$script:MAX_STORY_FAILURES" "Yellow"
+        
+        return 1
+    }
 
 function Test-StoryCompletion {
     param([string]$StoryId)
@@ -471,14 +562,31 @@ function Save-Archive {
     
     $date = Get-Date -Format "yyyy-MM-dd"
     $featureSlug = $FeatureName.ToLower() -replace '[^a-z0-9]', '-' -replace '--+', '-'
+    
+    if ($script:ACTIVE_TICKET) {
+        Write-Log "Updating ticket $($script:ACTIVE_TICKET) status to done..." "Blue"
+        $indexFile = ".speclet/tickets/index.json"
+        if (Test-Path $indexFile) {
+            $index = Get-Content $indexFile -Raw | ConvertFrom-Json
+            foreach ($ticket in $index.tickets) {
+                if ($ticket.id -eq $script:ACTIVE_TICKET) {
+                    $ticket.status = "done"
+                }
+            }
+            $index | ConvertTo-Json -Depth 10 | Set-Content $indexFile
+        }
+        Write-Log "Ticket completed!" "Green"
+        return
+    }
+
     $archivePath = "$ARCHIVE_DIR/$date-$featureSlug"
     
     Write-Log "Archiving to: $archivePath" "Cyan"
     New-Item -ItemType Directory -Path $archivePath -Force | Out-Null
     
     if (Test-Path ".speclet/draft.md") { Move-Item ".speclet/draft.md" $archivePath -Force }
-    if (Test-Path $SPEC_FILE) { Move-Item $SPEC_FILE $archivePath -Force }
-    if (Test-Path $PROGRESS_FILE) { Move-Item $PROGRESS_FILE $archivePath -Force }
+    if (Test-Path $script:SPEC_FILE) { Move-Item $script:SPEC_FILE $archivePath -Force }
+    if (Test-Path $script:PROGRESS_FILE) { Move-Item $script:PROGRESS_FILE $archivePath -Force }
     if (Test-Path $LOG_FILE) { Copy-Item $LOG_FILE $archivePath -Force }
     
     Write-Log "Archived!" "Green"

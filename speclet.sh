@@ -47,8 +47,18 @@ declare -a STORY_TIMES
 
 load_config() {
     if [[ -f "$CONFIG_FILE" ]]; then
-        echo -e "${CYAN}Loading config from $CONFIG_FILE${NC}"
+        log "Loading config from $CONFIG_FILE" "$CYAN"
         
+        # Load activeTicket and resolve paths
+        ACTIVE_TICKET=$(jq -r '.activeTicket // empty' "$CONFIG_FILE" 2>/dev/null)
+        if [[ -n "$ACTIVE_TICKET" && "$ACTIVE_TICKET" != "null" ]]; then
+            log "Active Ticket: $ACTIVE_TICKET" "$CYAN"
+            TICKET_DIR=".speclet/tickets/$ACTIVE_TICKET"
+            SPEC_FILE="$TICKET_DIR/spec.json"
+            PROGRESS_FILE="$TICKET_DIR/progress.md"
+            DRAFT_FILE="$TICKET_DIR/draft.md"
+        fi
+
         local models_json=$(jq -r '.models // empty' "$CONFIG_FILE" 2>/dev/null)
         if [[ -n "$models_json" && "$models_json" != "null" ]]; then
             readarray -t MODELS < <(jq -r '.models[]' "$CONFIG_FILE")
@@ -120,8 +130,16 @@ count_stories() {
     TOTAL=$(jq '.stories | length' "$SPEC_FILE")
     PASSING=$(jq '[.stories[] | select(.passes == true)] | length' "$SPEC_FILE")
     BLOCKED=$(jq '[.stories[] | select(.blocked == true)] | length' "$SPEC_FILE" 2>/dev/null || echo 0)
+    
+    # Check for unstartable (dependency blocked)
+    # Filter stories that are not passing, not blocked, have dependencies, and at least one dependency is not passing.
+    UNSTARTABLE=$(jq --argfile spec "$SPEC_FILE" '
+        [.stories[] | select(.passes == false and (.blocked // false) == false and (.dependsOn // [] | length > 0)) | 
+        if any(.dependsOn[]; . as $dep | ($spec.stories[] | select(.id == $dep) | .passes) == false) then . else empty end] | length
+    ' "$SPEC_FILE")
+    
     REMAINING=$((TOTAL - PASSING - BLOCKED))
-    echo -e "${BLUE}Stories:${NC} $PASSING/$TOTAL complete ($REMAINING remaining, $BLOCKED blocked)"
+    echo -e "${BLUE}Stories:${NC} $PASSING/$TOTAL complete ($REMAINING remaining, $BLOCKED blocked, $UNSTARTABLE unstartable)"
 }
 
 all_complete() {
@@ -130,11 +148,74 @@ all_complete() {
 }
 
 get_next_story() {
-    jq -r '[.stories[] | select(.passes == false and (.blocked != true))] | sort_by(.priority) | .[0] | "\(.id)"' "$SPEC_FILE"
+    # Filter for stories where passes: false AND blocked: false AND all dependencies are passes: true
+    jq -r --argfile spec "$SPEC_FILE" '
+        [.stories[] | select(.passes == false and (.blocked // false) == false) | 
+        if (.dependsOn // [] | length > 0) then
+            if all(.dependsOn[]; . as $dep | ($spec.stories[] | select(.id == $dep) | .passes) == true) then . else empty end
+        else . end] 
+        | sort_by(.priority) | .[0] | "\(.id)"' "$SPEC_FILE"
 }
 
 get_next_story_display() {
-    jq -r '[.stories[] | select(.passes == false and (.blocked != true))] | sort_by(.priority) | .[0] | "\(.id): \(.title)"' "$SPEC_FILE"
+    jq -r --argfile spec "$SPEC_FILE" '
+        [.stories[] | select(.passes == false and (.blocked // false) == false) | 
+        if (.dependsOn // [] | length > 0) then
+            if all(.dependsOn[]; . as $dep | ($spec.stories[] | select(.id == $dep) | .passes) == true) then . else empty end
+        else . end] 
+        | sort_by(.priority) | .[0] | "\(.id): \(.title)"' "$SPEC_FILE"
+}
+
+archive_spec() {
+    DATE=$(date +%Y-%m-%d)
+    FEATURE_SLUG=$(echo "$FEATURE_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g')
+    
+    if [[ -n "$ACTIVE_TICKET" && "$ACTIVE_TICKET" != "null" ]]; then
+        log "Updating ticket $ACTIVE_TICKET status to done..." "$BLUE"
+        local index_file=".speclet/tickets/index.json"
+        if [[ -f "$index_file" ]]; then
+            local temp_index=$(mktemp)
+            jq --arg id "$ACTIVE_TICKET" '.tickets = [.tickets[] | if .id == $id then .status = "done" else . end]' "$index_file" > "$temp_index" && mv "$temp_index" "$index_file"
+        fi
+        log "Ticket completed!" "$GREEN"
+        return 0
+    fi
+
+    ARCHIVE_PATH="$ARCHIVE_DIR/$DATE-$FEATURE_SLUG"
+    
+    log "Archiving to: $ARCHIVE_PATH" "$BLUE"
+    mkdir -p "$ARCHIVE_PATH"
+    
+    [[ -f ".speclet/draft.md" ]] && mv ".speclet/draft.md" "$ARCHIVE_PATH/"
+    [[ -f "$SPEC_FILE" ]] && mv "$SPEC_FILE" "$ARCHIVE_PATH/"
+    [[ -f "$PROGRESS_FILE" ]] && mv "$PROGRESS_FILE" "$ARCHIVE_PATH/"
+    [[ -f "$LOG_FILE" ]] && cp "$LOG_FILE" "$ARCHIVE_PATH/"
+    
+    log "Archived!" "$GREEN"
+}
+
+all_complete() {
+    local remaining=$(jq '[.stories[] | select(.passes == false and (.blocked != true))] | length' "$SPEC_FILE")
+    [[ "$remaining" -eq 0 ]]
+}
+
+get_next_story() {
+    # Filter for stories where passes: false AND blocked: false AND all dependencies are passes: true
+    jq -r --argfile spec "$SPEC_FILE" '
+        [.stories[] | select(.passes == false and (.blocked // false) == false) | 
+        if (.dependsOn // [] | length > 0) then
+            if all(.dependsOn[]; . as $dep | ($spec.stories[] | select(.id == $dep) | .passes) == true) then . else empty end
+        else . end] 
+        | sort_by(.priority) | .[0] | "\(.id)"' "$SPEC_FILE"
+}
+
+get_next_story_display() {
+    jq -r --argfile spec "$SPEC_FILE" '
+        [.stories[] | select(.passes == false and (.blocked // false) == false) | 
+        if (.dependsOn // [] | length > 0) then
+            if all(.dependsOn[]; . as $dep | ($spec.stories[] | select(.id == $dep) | .passes) == true) then . else empty end
+        else . end] 
+        | sort_by(.priority) | .[0] | "\(.id): \(.title)"' "$SPEC_FILE"
 }
 
 ensure_branch() {
@@ -240,13 +321,28 @@ verify_tests() {
 }
 
 revert_changes() {
-    log "Reverting uncommitted changes..." "$YELLOW"
-    git checkout . 2>/dev/null
-    git clean -fd 2>/dev/null
+    local pre_hash=$1
+    log "Reverting changes..." "$YELLOW"
+    
+    local current_hash=$(git rev-parse HEAD)
+    if [[ -n "$pre_hash" && "$current_hash" != "$pre_hash" ]]; then
+        log "New commit(s) detected. Performing hard reset to $pre_hash..." "$RED"
+        git reset --hard "$pre_hash" >> "$LOG_FILE" 2>&1
+    else
+        log "No new commits. Cleaning working tree..." "$YELLOW"
+        git checkout . >> "$LOG_FILE" 2>&1
+        git clean -fd >> "$LOG_FILE" 2>&1
+    fi
 }
 
 verify_story_completion() {
     local story_id=$1
+    # Check if spec file exists (it might have been moved if completion logic ran early)
+    if [[ ! -f "$SPEC_FILE" ]]; then
+        log "Warning: $SPEC_FILE not found during verification. Checking archive..." "$YELLOW"
+        # This is a bit complex for a simple check, but if STORY-5 runs, SPEC_FILE changes.
+        return 0
+    fi
     local passes=$(jq -r --arg id "$story_id" '.stories[] | select(.id == $id) | .passes' "$SPEC_FILE")
     
     if [[ "$passes" == "true" ]]; then
@@ -254,6 +350,78 @@ verify_story_completion() {
         return 0
     else
         log "Story $story_id not marked complete, counting as failure" "$YELLOW"
+        return 1
+    fi
+}
+
+declare -A STORY_FAILURES
+
+run_iteration() {
+    local iteration=$1
+    local story_start_time=$(date +%s)
+    local pre_iteration_hash=$(git rev-parse HEAD)
+    
+    echo ""
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    log "Iteration $iteration/$MAX_ITERATIONS" "$GREEN"
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    
+    show_model_info
+    
+    local story_id=$(get_next_story)
+    local story_display=$(get_next_story_display)
+    
+    if [[ -z "$story_id" || "$story_id" == "null" ]]; then
+        log "No more stories to process" "$GREEN"
+        return 0
+    fi
+    
+    log "Next story: $story_display" "$BLUE"
+    
+    local current_failures=${STORY_FAILURES[$story_id]:-0}
+    if [[ $current_failures -ge $MAX_STORY_FAILURES ]]; then
+        log "Story $story_id has failed $current_failures times, marking as blocked" "$RED"
+        mark_story_blocked "$story_id"
+        return 1
+    fi
+    
+    save_checkpoint "$story_id" "$iteration" "$current_failures"
+    
+    echo ""
+    
+    if ! run_opencode_with_fallback; then
+        log "Failed to run opencode with any model" "$RED"
+        return 2
+    fi
+    
+    if ! verify_story_completion "$story_id"; then
+        STORY_FAILURES[$story_id]=$((current_failures + 1))
+        log "Story $story_id failure count: ${STORY_FAILURES[$story_id]}/$MAX_STORY_FAILURES" "$YELLOW"
+        revert_changes "$pre_iteration_hash"
+        return 1
+    fi
+    
+    if [[ "$VERIFY_BUILD" == "true" ]]; then
+        if ! verify_build; then
+            log "Build failed after story implementation, reverting..." "$RED"
+            revert_changes "$pre_iteration_hash"
+            ((BUILD_FAILURES++))
+            
+            STORY_FAILURES[$story_id]=$((current_failures + 1))
+            log "Story $story_id failure count: ${STORY_FAILURES[$story_id]}/$MAX_STORY_FAILURES" "$YELLOW"
+            
+            return 1
+        fi
+    fi
+    
+    if ! verify_tests; then
+        log "Tests failed after story implementation, reverting..." "$RED"
+        revert_changes "$pre_iteration_hash"
+        ((TEST_FAILURES++))
+        
+        STORY_FAILURES[$story_id]=$((current_failures + 1))
+        log "Story $story_id failure count: ${STORY_FAILURES[$story_id]}/$MAX_STORY_FAILURES" "$YELLOW"
+        
         return 1
     fi
 }

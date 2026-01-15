@@ -25,6 +25,8 @@
       ],
       "priority": 1,
       "passes": false,
+      "blocked": false,
+      "dependsOn": [],
       "notes": ""
     },
     {
@@ -39,6 +41,8 @@
       ],
       "priority": 2,
       "passes": false,
+      "blocked": false,
+      "dependsOn": ["STORY-1"],
       "notes": ""
     }
   ]

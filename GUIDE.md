@@ -9,6 +9,7 @@
 | Skill | Command | Purpose |
 |-------|---------|---------|
 | `speclet-draft` | "Use the speclet-draft skill for [feature]" | Generate draft.md with clarifying questions |
+| `speclet-council` | "Use the speclet-council skill" | Parallel adversarial review of the draft |
 | `speclet-spec` | "Use the speclet-spec skill" | Convert draft to spec.json |
 | `speclet-ticket` | "Use the speclet-ticket skill" | Split draft into individual tickets |
 | `speclet-loop` | "Use the speclet-loop skill" | Implement one story autonomously |

@@ -32,8 +32,19 @@ Copy-Item "$ScriptDir/GUIDE.md" ".speclet/" -Force
 Copy-Item "$ScriptDir/loop.md" ".speclet/" -Force
 Copy-Item "$ScriptDir/templates/*" ".speclet/templates/" -Force
 Copy-Item "$ScriptDir/skills/*" ".opencode/skill/" -Recurse -Force
-Copy-Item "$ScriptDir/speclet.sh" "./" -Force
-Copy-Item "$ScriptDir/speclet.ps1" "./" -Force
+
+$CurrentDir = (Get-Location).Path
+$SourceSh = (Resolve-Path "$ScriptDir/speclet.sh").Path
+$DestSh = Join-Path $CurrentDir "speclet.sh"
+$SourcePs1 = (Resolve-Path "$ScriptDir/speclet.ps1").Path
+$DestPs1 = Join-Path $CurrentDir "speclet.ps1"
+
+if ($SourceSh -ne $DestSh) {
+    Copy-Item "$ScriptDir/speclet.sh" "./" -Force
+}
+if ($SourcePs1 -ne $DestPs1) {
+    Copy-Item "$ScriptDir/speclet.ps1" "./" -Force
+}
 
 if (-not (Test-Path ".speclet/DECISIONS.md")) {
     @"

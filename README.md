@@ -19,18 +19,13 @@ Speclet is a structured workflow for developing features with AI assistants (Cla
 
 To install the Speclet Council agents (Opus, GLM, Sonnet, Gemini, GPT) into your environment, run the included installer:
 
-**Linux / WSL / macOS:**
-```bash
-./scripts/install-agents.sh
-```
-
 **Windows (PowerShell):**
 ```powershell
 .\scripts\install-agents.ps1
 ```
 
 The installer will:
-1. Detect your OS.
+1. Detect your config directory.
 2. Ask where to install the agents (Global or Project-local).
 3. Back up any existing agents.
 4. Verify the installation using `opencode agent list`.
@@ -38,7 +33,7 @@ The installer will:
 ### Setup Manual
 
 If you prefer manual setup:
-1. Copy the files from `.opencode/agent/*.md` to your `~/.config/opencode/agent/` directory.
+1. Copy the files from `.opencode\agent\*.md` to your `%USERPROFILE%\.config\opencode\agent\` directory.
 2. Ensure you have the necessary model access in your OpenCode account.
 
 ### Project Structure
@@ -67,8 +62,7 @@ your-project/
 │   │   └── TICKET-2/
 │   │       └── ...
 │   └── archive/                  # Completed specs (non-ticket workflow)
-├── speclet.sh                    # Bash runner
-└── speclet.ps1                   # PowerShell runner
+└── speclet.ps1                   # PowerShell runner (Windows-only)
 ```
 
 ## Usage
@@ -96,9 +90,8 @@ Use the speclet-council skill
 # Step 3: Convert to executable spec
 Use the speclet-spec skill
 
-# Step 3: Run autonomous loop
-./speclet.ps1      # Windows
-./speclet.sh       # Linux/Mac/WSL
+# Step 4: Run autonomous loop
+.\speclet.ps1
 ```
 
 ### Ticket-Based Workflow (Multiple Issues)
@@ -115,7 +108,7 @@ Use the speclet-ticket skill
 # Step 3: Work on tickets one at a time
 Use the speclet-draft skill for TICKET-1
 Use the speclet-spec skill
-./speclet.ps1  # or ./speclet.sh
+.\speclet.ps1
 
 # Step 4: Archive and continue
 # (Artifacts auto-saved to .speclet/tickets/TICKET-1/)
@@ -129,15 +122,11 @@ Use the speclet-draft skill for TICKET-2
 
 Run the entire workflow unattended:
 
-```bash
-# Bash (Linux/Mac/WSL)
-./speclet.sh
-
+```powershell
 # PowerShell (Windows)
 .\speclet.ps1
 
 # With max iterations
-./speclet.sh 20
 .\speclet.ps1 -MaxIterations 20
 ```
 

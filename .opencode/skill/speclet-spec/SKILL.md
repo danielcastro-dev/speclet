@@ -37,16 +37,9 @@ Read `.speclet/draft.md` and extract:
 - Proposed stories
 - Files to modify
 
-If the draft contains a `## Council Review` section, ask the user:
+Ignore any `## Council Review` or `draft.review.md` content by default. The base draft should already include accepted council decisions via `speclet-consolidate`.
 
-```
-A Council Review section was found in .speclet/draft.md.
-Do you want to use the council-enhanced draft to generate spec.json? (yes/no)
-```
-
-- If yes: proceed using the full draft including the Council Review.
-- If no: proceed using the draft content without the Council Review section.
-
+If a `## Council Review` section exists in `draft.md`, proceed without prompting and treat it as non-executable context.
 
 ### Step 2: Create spec.json
 
@@ -162,4 +155,4 @@ When asking questions with options, ALWAYS:
 
 When complete:
 
-> "Spec saved. Ready to implement? Use the speclet-loop skill."
+> "Spec saved. Ready to implement? Use /ralph-loop."

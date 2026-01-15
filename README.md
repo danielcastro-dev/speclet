@@ -21,7 +21,7 @@ To install the Speclet Council agents (Opus, GLM, Sonnet, Gemini, GPT) into your
 
 **Windows (PowerShell):**
 ```powershell
-.\scripts\install-agents.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\install-agents.ps1
 ```
 
 The installer will:

@@ -1,6 +1,6 @@
 ---
 name: speclet-council
-description: Run parallel multi-model reviews on .speclet/draft.md and append a Council Review
+description: Run parallel multi-model reviews on .speclet/draft.md and emit Council artifacts
 license: MIT
 compatibility: opencode
 metadata:
@@ -10,7 +10,7 @@ metadata:
 
 # Speclet Council Skill
 
-Run a multi-model council review over an existing `.speclet/draft.md`, then append a structured Council Review section and emit audit artifacts.
+Run a multi-model council review over an existing `.speclet/draft.md`, then emit audit artifacts.
 
 ## What I Do
 
@@ -19,7 +19,7 @@ Run a multi-model council review over an existing `.speclet/draft.md`, then appe
 - Collect critiques and generate a **Review Status Header** (succeeded vs. failed models)
 - Synthesize feedback using **Thematic Clustering** and collapsible HTML tags
 - Write `.speclet/council-session.md` and `.speclet/council-summary.md`
-- Create a git commit for speclet artifacts only (if repo clean)
+- Write optional `.speclet/draft.review.md` (full Council Review)
 - Support `--dry-run` mode with mocked reviewer outputs
 
 ## When to Use Me
@@ -54,9 +54,9 @@ Do not edit `oh-my-opencode.json` from this repo; document this setup for the us
 
 ## Outputs
 
-- `.speclet/draft.md` (Council Review appended)
 - `.speclet/council-session.md` (full audit log)
 - `.speclet/council-summary.md` (executive summary)
+- `.speclet/draft.review.md` (optional full review)
 
 ## Your Task
 
@@ -92,11 +92,11 @@ Pseudo-flow:
 for (const reviewer of ["opus", "sonnet", "gemini", "gpt"]) {
   const prompt = `[PROMPT TEMPLATE CONTENT]\n\nDraft Content:\n${draftContent}`;
   call_omo_agent(
-    subagent_type="explore", // Using explore as proxy if specialized types not available
+    subagent_type="explore",
     description=`Council Review: ${reviewer}`,
     prompt=prompt,
     run_in_background=true,
-    session_id=reviewer // Using session_id to map back easily
+    session_id=reviewer
   );
 }
 ```
@@ -149,11 +149,10 @@ Use a specialized synthesis prompt to consolidate all issues using **Thematic Cl
 5. **Language Parity**: Detect the language of the draft and ensure the synthesis matches it exactly.
 6. **HTML Integrity**: Ensure all `<details>` blocks are correctly opened and closed.
 
-To prevent concurrency issues and ensure safety, **always append** the Council Review section using a **single** operation after all reviewers finish.
+Write the full Council Review into `.speclet/draft.review.md` (not into `draft.md`).
 
-```bash
-# Example Synthesized Output structure
-## Council Review
+```markdown
+# Council Review
 
 ### Status
 - ✅ plan-reviewer-opus
@@ -171,13 +170,11 @@ To prevent concurrency issues and ensure safety, **always append** the Council R
   - **GPT:** [Unique implementation detail]
 - **Consolidated Suggestion:** [Actionable fix merging both suggestions]
 </details>
-...
 ```
 
 ### Step 7: Write Council Artifacts
 
 Write `.speclet/council-session.md` with a deterministic audit log:
-
 
 ```markdown
 # Council Session
@@ -220,7 +217,7 @@ Write `.speclet/council-summary.md` as an executive summary:
 - Deferred: [list]
 
 ## Draft Changes
-- Council Review appended to .speclet/draft.md
+- Council Review saved to .speclet/draft.review.md
 ```
 
 ### Step 8: Git Commit Rule
@@ -228,8 +225,8 @@ Write `.speclet/council-summary.md` as an executive summary:
 If the repo is clean and draft changes were written, create a commit for the specific artifacts:
 
 ```bash
-git add .speclet/draft.md .speclet/council-session.md .speclet/council-summary.md
-git commit -m "feat(speclet-council): append council review"
+git add .speclet/council-session.md .speclet/council-summary.md .speclet/draft.review.md
+git commit -m "feat(speclet-council): save council review"
 ```
 
 If repo is dirty or git is unavailable, skip the commit and warn the user.
@@ -239,12 +236,12 @@ If repo is dirty or git is unavailable, skip the commit and warn the user.
 When invoked with `--dry-run`:
 - Do not call external models
 - Use mocked reviewer outputs embedded in the skill
-- Still write council-session.md, council-summary.md, and append Council Review
+- Still write council-session.md, council-summary.md, and draft.review.md
 
 Use this to validate the workflow without API costs.
 
 ## Notes
 
-- This skill never rewrites existing draft content; it only appends a Council Review section.
+- This skill never modifies `draft.md`; use speclet-consolidate to merge accepted feedback.
 - **English-First Protocol:** Internal orchestration prompts and background task instructions are in English for reliability, but final user-facing output matches the draft's language.
 - Webfetch policies can only be enforced via reviewer prompts or disabled in agent config.

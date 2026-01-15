@@ -16,10 +16,10 @@ Run a multi-model council review over an existing `.speclet/draft.md`, then appe
 
 - Validate `.speclet/draft.md` exists before any work
 - Invoke four reviewers in parallel with per-reviewer timeouts and retries
-- Collect critiques, classify failures, and fail if zero reviewers succeed
-- Synthesize feedback into a Council Review section appended to the draft
+- Collect critiques and generate a **Review Status Header** (succeeded vs. failed models)
+- Synthesize feedback using **Thematic Clustering** and collapsible HTML tags
 - Write `.speclet/council-session.md` and `.speclet/council-summary.md`
-- Create a git commit when the draft is updated (if repo clean)
+- Create a git commit for speclet artifacts only (if repo clean)
 - Support `--dry-run` mode with mocked reviewer outputs
 
 ## When to Use Me
@@ -127,6 +127,11 @@ If a reviewer fails after max retries, record the failure and continue.
 Retrieve each task with `background_output(task_id="...", block=true)` and map it back to its reviewer.
 Note: Ensure you wait for all tasks to complete or timeout before proceeding to synthesis.
 
+**Review Status Header:**
+Generate a summary table or list showing the status of each reviewer.
+- ✅ [Model Name] (Success)
+- ⚠️ [Model Name] (Failed/Timeout)
+
 If **zero** reviewers succeed, fail with:
 
 ```
@@ -136,20 +141,37 @@ Check API keys, network, or agent configuration. Try again or reduce the reviewe
 
 ### Step 6: Synthesize Council Review
 
-Consolidate all issues:
-- De-duplicate similar items
-- Group by severity (high → medium → low)
-- Preserve reviewer attribution
+Use a specialized synthesis prompt to consolidate all issues using **Thematic Clustering**:
+1. **Thematic Grouping**: Identify shared problems across reviewers and group them under a single descriptive heading.
+2. **Nuance Preservation**: Do NOT delete unique details. If Reviewer A found a race condition and Reviewer B found a general concurrency limit in the same area, list them both as distinct perspectives under the same theme.
+3. **UX Formatting**: Use HTML `<details>` and `<summary>` tags. The summary MUST contain the severity (🔴 HIGH, 🟡 MEDIUM, 🟢 LOW) and the theme title.
+4. **Reviewer Attribution**: Clearly state which models identified each issue.
+5. **Language Parity**: Detect the language of the draft and ensure the synthesis matches it exactly.
+6. **HTML Integrity**: Ensure all `<details>` blocks are correctly opened and closed.
 
-To prevent concurrency issues and ensure safety, **always append** the Council Review section using a **single** operation after all reviewers finish:
+To prevent concurrency issues and ensure safety, **always append** the Council Review section using a **single** operation after all reviewers finish.
 
 ```bash
-# Use bash to append safely to the end of the file
-cat <<'EOF' >> .speclet/draft.md
-
+# Example Synthesized Output structure
 ## Council Review
+
+### Status
+- ✅ plan-reviewer-opus
+- ✅ plan-reviewer-sonnet
+- ⚠️ plan-reviewer-gemini (Timeout)
+- ✅ plan-reviewer-gpt
+
+<details>
+<summary>🔴 HIGH: [Theme Title]</summary>
+
+- **Reviewers:** Opus, GPT
+- **Problem:** [Consolidated description of the theme]
+- **Specific Notes:**
+  - **Opus:** [Unique architectural nuance]
+  - **GPT:** [Unique implementation detail]
+- **Consolidated Suggestion:** [Actionable fix merging both suggestions]
+</details>
 ...
-EOF
 ```
 
 ### Step 7: Write Council Artifacts
@@ -203,10 +225,11 @@ Write `.speclet/council-summary.md` as an executive summary:
 
 ### Step 8: Git Commit Rule
 
-If the repo is clean and draft changes were written, create a commit:
+If the repo is clean and draft changes were written, create a commit for the specific artifacts:
 
-```
-feat(speclet-council): append council review
+```bash
+git add .speclet/draft.md .speclet/council-session.md .speclet/council-summary.md
+git commit -m "feat(speclet-council): append council review"
 ```
 
 If repo is dirty or git is unavailable, skip the commit and warn the user.
@@ -223,4 +246,5 @@ Use this to validate the workflow without API costs.
 ## Notes
 
 - This skill never rewrites existing draft content; it only appends a Council Review section.
+- **English-First Protocol:** Internal orchestration prompts and background task instructions are in English for reliability, but final user-facing output matches the draft's language.
 - Webfetch policies can only be enforced via reviewer prompts or disabled in agent config.

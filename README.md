@@ -15,28 +15,31 @@ Speclet is a structured workflow for developing features with AI assistants (Cla
 
 ## Quick Start
 
-### Installation (One Command)
+### Installation (Bootstrap)
 
-**Linux / macOS / WSL:**
+To install the Speclet Council agents (Opus, GLM, Sonnet, Gemini, GPT) into your environment, run the included installer:
+
+**Linux / WSL / macOS:**
 ```bash
-git clone https://github.com/danielcastro-dev/speclet.git /tmp/speclet && /tmp/speclet/install.sh
+./scripts/install-agents.sh
 ```
 
 **Windows (PowerShell):**
 ```powershell
-git clone https://github.com/danielcastro-dev/speclet.git $env:TEMP\speclet; & $env:TEMP\speclet\install.ps1
+.\scripts\install-agents.ps1
 ```
 
-**Windows (CMD):**
-```cmd
-git clone https://github.com/danielcastro-dev/speclet.git %TEMP%\speclet && powershell -ExecutionPolicy Bypass -File %TEMP%\speclet\install.ps1
-```
+The installer will:
+1. Detect your OS.
+2. Ask where to install the agents (Global or Project-local).
+3. Back up any existing agents.
+4. Verify the installation using `opencode agent list`.
 
-This installs:
-- `.speclet/` - Templates, GUIDE, DECISIONS.md, config.json
-- `.opencode/skill/` - Skills ready for OpenCode
-- `./speclet.sh` - Autonomous loop runner (Bash)
-- `./speclet.ps1` - Autonomous loop runner (PowerShell)
+### Setup Manual
+
+If you prefer manual setup:
+1. Copy the files from `.opencode/agent/*.md` to your `~/.config/opencode/agent/` directory.
+2. Ensure you have the necessary model access in your OpenCode account.
 
 ### Project Structure
 

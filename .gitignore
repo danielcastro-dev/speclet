@@ -1,3 +1,16 @@
 # Speclet
-.speclet/*
+.speclet/
 !.speclet/DECISIONS.md
+!.speclet/config.json
+!.speclet/GUIDE.md
+
+# OpenCode local
+.opencode/
+
+# System/Session files
+session-*.md
+agent-memory-analysis.md
+*.log
+node_modules/
+dist/
+.DS_Store

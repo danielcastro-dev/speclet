@@ -67,6 +67,16 @@ function Import-Config {
         try {
             $config = Get-Content $CONFIG_FILE -Raw | ConvertFrom-Json
             
+            # Load activeTicket and resolve paths
+            if ($config.activeTicket) {
+                $script:ACTIVE_TICKET = $config.activeTicket
+                Write-Log "Active Ticket: $script:ACTIVE_TICKET" "Cyan"
+                $TICKET_DIR = ".speclet/tickets/$($script:ACTIVE_TICKET)"
+                $script:SPEC_FILE = "$TICKET_DIR/spec.json"
+                $script:PROGRESS_FILE = "$TICKET_DIR/progress.md"
+                $script:DRAFT_FILE = "$TICKET_DIR/draft.md"
+            }
+
             if ($config.models) { $script:MODELS = $config.models }
             if ($config.maxRetries) { $script:MAX_RETRIES = $config.maxRetries }
             if ($config.maxStoryFailures) { $script:MAX_STORY_FAILURES = $config.maxStoryFailures }

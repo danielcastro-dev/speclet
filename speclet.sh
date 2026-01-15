@@ -47,8 +47,18 @@ declare -a STORY_TIMES
 
 load_config() {
     if [[ -f "$CONFIG_FILE" ]]; then
-        echo -e "${CYAN}Loading config from $CONFIG_FILE${NC}"
+        log "Loading config from $CONFIG_FILE" "$CYAN"
         
+        # Load activeTicket and resolve paths
+        ACTIVE_TICKET=$(jq -r '.activeTicket // empty' "$CONFIG_FILE" 2>/dev/null)
+        if [[ -n "$ACTIVE_TICKET" && "$ACTIVE_TICKET" != "null" ]]; then
+            log "Active Ticket: $ACTIVE_TICKET" "$CYAN"
+            TICKET_DIR=".speclet/tickets/$ACTIVE_TICKET"
+            SPEC_FILE="$TICKET_DIR/spec.json"
+            PROGRESS_FILE="$TICKET_DIR/progress.md"
+            DRAFT_FILE="$TICKET_DIR/draft.md"
+        fi
+
         local models_json=$(jq -r '.models // empty' "$CONFIG_FILE" 2>/dev/null)
         if [[ -n "$models_json" && "$models_json" != "null" ]]; then
             readarray -t MODELS < <(jq -r '.models[]' "$CONFIG_FILE")

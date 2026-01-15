@@ -562,14 +562,31 @@ function Save-Archive {
     
     $date = Get-Date -Format "yyyy-MM-dd"
     $featureSlug = $FeatureName.ToLower() -replace '[^a-z0-9]', '-' -replace '--+', '-'
+    
+    if ($script:ACTIVE_TICKET) {
+        Write-Log "Updating ticket $($script:ACTIVE_TICKET) status to done..." "Blue"
+        $indexFile = ".speclet/tickets/index.json"
+        if (Test-Path $indexFile) {
+            $index = Get-Content $indexFile -Raw | ConvertFrom-Json
+            foreach ($ticket in $index.tickets) {
+                if ($ticket.id -eq $script:ACTIVE_TICKET) {
+                    $ticket.status = "done"
+                }
+            }
+            $index | ConvertTo-Json -Depth 10 | Set-Content $indexFile
+        }
+        Write-Log "Ticket completed!" "Green"
+        return
+    }
+
     $archivePath = "$ARCHIVE_DIR/$date-$featureSlug"
     
     Write-Log "Archiving to: $archivePath" "Cyan"
     New-Item -ItemType Directory -Path $archivePath -Force | Out-Null
     
     if (Test-Path ".speclet/draft.md") { Move-Item ".speclet/draft.md" $archivePath -Force }
-    if (Test-Path $SPEC_FILE) { Move-Item $SPEC_FILE $archivePath -Force }
-    if (Test-Path $PROGRESS_FILE) { Move-Item $PROGRESS_FILE $archivePath -Force }
+    if (Test-Path $script:SPEC_FILE) { Move-Item $script:SPEC_FILE $archivePath -Force }
+    if (Test-Path $script:PROGRESS_FILE) { Move-Item $script:PROGRESS_FILE $archivePath -Force }
     if (Test-Path $LOG_FILE) { Copy-Item $LOG_FILE $archivePath -Force }
     
     Write-Log "Archived!" "Green"

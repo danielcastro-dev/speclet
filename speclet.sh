@@ -166,6 +166,58 @@ get_next_story_display() {
         | sort_by(.priority) | .[0] | "\(.id): \(.title)"' "$SPEC_FILE"
 }
 
+archive_spec() {
+    DATE=$(date +%Y-%m-%d)
+    FEATURE_SLUG=$(echo "$FEATURE_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g')
+    
+    if [[ -n "$ACTIVE_TICKET" && "$ACTIVE_TICKET" != "null" ]]; then
+        log "Updating ticket $ACTIVE_TICKET status to done..." "$BLUE"
+        local index_file=".speclet/tickets/index.json"
+        if [[ -f "$index_file" ]]; then
+            local temp_index=$(mktemp)
+            jq --arg id "$ACTIVE_TICKET" '.tickets = [.tickets[] | if .id == $id then .status = "done" else . end]' "$index_file" > "$temp_index" && mv "$temp_index" "$index_file"
+        fi
+        log "Ticket completed!" "$GREEN"
+        return 0
+    fi
+
+    ARCHIVE_PATH="$ARCHIVE_DIR/$DATE-$FEATURE_SLUG"
+    
+    log "Archiving to: $ARCHIVE_PATH" "$BLUE"
+    mkdir -p "$ARCHIVE_PATH"
+    
+    [[ -f ".speclet/draft.md" ]] && mv ".speclet/draft.md" "$ARCHIVE_PATH/"
+    [[ -f "$SPEC_FILE" ]] && mv "$SPEC_FILE" "$ARCHIVE_PATH/"
+    [[ -f "$PROGRESS_FILE" ]] && mv "$PROGRESS_FILE" "$ARCHIVE_PATH/"
+    [[ -f "$LOG_FILE" ]] && cp "$LOG_FILE" "$ARCHIVE_PATH/"
+    
+    log "Archived!" "$GREEN"
+}
+
+all_complete() {
+    local remaining=$(jq '[.stories[] | select(.passes == false and (.blocked != true))] | length' "$SPEC_FILE")
+    [[ "$remaining" -eq 0 ]]
+}
+
+get_next_story() {
+    # Filter for stories where passes: false AND blocked: false AND all dependencies are passes: true
+    jq -r --argfile spec "$SPEC_FILE" '
+        [.stories[] | select(.passes == false and (.blocked // false) == false) | 
+        if (.dependsOn // [] | length > 0) then
+            if all(.dependsOn[]; . as $dep | ($spec.stories[] | select(.id == $dep) | .passes) == true) then . else empty end
+        else . end] 
+        | sort_by(.priority) | .[0] | "\(.id)"' "$SPEC_FILE"
+}
+
+get_next_story_display() {
+    jq -r --argfile spec "$SPEC_FILE" '
+        [.stories[] | select(.passes == false and (.blocked // false) == false) | 
+        if (.dependsOn // [] | length > 0) then
+            if all(.dependsOn[]; . as $dep | ($spec.stories[] | select(.id == $dep) | .passes) == true) then . else empty end
+        else . end] 
+        | sort_by(.priority) | .[0] | "\(.id): \(.title)"' "$SPEC_FILE"
+}
+
 ensure_branch() {
     CURRENT_BRANCH=$(git branch --show-current)
     if [[ "$CURRENT_BRANCH" != "$BRANCH_NAME" ]]; then

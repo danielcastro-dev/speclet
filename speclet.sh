@@ -130,8 +130,16 @@ count_stories() {
     TOTAL=$(jq '.stories | length' "$SPEC_FILE")
     PASSING=$(jq '[.stories[] | select(.passes == true)] | length' "$SPEC_FILE")
     BLOCKED=$(jq '[.stories[] | select(.blocked == true)] | length' "$SPEC_FILE" 2>/dev/null || echo 0)
+    
+    # Check for unstartable (dependency blocked)
+    # Filter stories that are not passing, not blocked, have dependencies, and at least one dependency is not passing.
+    UNSTARTABLE=$(jq --argfile spec "$SPEC_FILE" '
+        [.stories[] | select(.passes == false and (.blocked // false) == false and (.dependsOn // [] | length > 0)) | 
+        if any(.dependsOn[]; . as $dep | ($spec.stories[] | select(.id == $dep) | .passes) == false) then . else empty end] | length
+    ' "$SPEC_FILE")
+    
     REMAINING=$((TOTAL - PASSING - BLOCKED))
-    echo -e "${BLUE}Stories:${NC} $PASSING/$TOTAL complete ($REMAINING remaining, $BLOCKED blocked)"
+    echo -e "${BLUE}Stories:${NC} $PASSING/$TOTAL complete ($REMAINING remaining, $BLOCKED blocked, $UNSTARTABLE unstartable)"
 }
 
 all_complete() {
@@ -140,11 +148,22 @@ all_complete() {
 }
 
 get_next_story() {
-    jq -r '[.stories[] | select(.passes == false and (.blocked != true))] | sort_by(.priority) | .[0] | "\(.id)"' "$SPEC_FILE"
+    # Filter for stories where passes: false AND blocked: false AND all dependencies are passes: true
+    jq -r --argfile spec "$SPEC_FILE" '
+        [.stories[] | select(.passes == false and (.blocked // false) == false) | 
+        if (.dependsOn // [] | length > 0) then
+            if all(.dependsOn[]; . as $dep | ($spec.stories[] | select(.id == $dep) | .passes) == true) then . else empty end
+        else . end] 
+        | sort_by(.priority) | .[0] | "\(.id)"' "$SPEC_FILE"
 }
 
 get_next_story_display() {
-    jq -r '[.stories[] | select(.passes == false and (.blocked != true))] | sort_by(.priority) | .[0] | "\(.id): \(.title)"' "$SPEC_FILE"
+    jq -r --argfile spec "$SPEC_FILE" '
+        [.stories[] | select(.passes == false and (.blocked // false) == false) | 
+        if (.dependsOn // [] | length > 0) then
+            if all(.dependsOn[]; . as $dep | ($spec.stories[] | select(.id == $dep) | .passes) == true) then . else empty end
+        else . end] 
+        | sort_by(.priority) | .[0] | "\(.id): \(.title)"' "$SPEC_FILE"
 }
 
 ensure_branch() {

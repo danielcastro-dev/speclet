@@ -1,0 +1,19 @@
+{
+  "specletVersion": "1.0",
+  "source": ".speclet/draft.md",
+  "createdAt": "2026-01-17T16:12:08Z",
+  "tickets": [
+    {
+      "id": "TICKET-1",
+      "title": "Refine loop naming and add consolidate skill",
+      "status": "pending",
+      "priority": 1
+    },
+    {
+      "id": "TICKET-2",
+      "title": "Handle ticket paths in speclet-consolidate",
+      "status": "done",
+      "priority": 2
+    }
+  ]
+}

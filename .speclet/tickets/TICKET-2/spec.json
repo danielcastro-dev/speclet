@@ -1,0 +1,33 @@
+{
+  "feature": "Ticket-aware consolidate paths",
+  "branch": "fix/consolidate-ticket-paths",
+  "date": "2026-01-17",
+  "summary": "Document how speclet-consolidate resolves draft paths in ticket workflows.",
+  "nonGoals": [
+    "Changing council output formats",
+    "Adding new config fields"
+  ],
+  "functionalRequirements": [
+    "FR-1: Consolidate instructions must describe ticket-aware draft path resolution",
+    "FR-2: Ticket workflow guidance must clarify expected behavior when activeTicket is set"
+  ],
+  "stories": [
+    {
+      "id": "STORY-1",
+      "title": "Ticket pathing",
+      "description": "Document how speclet-consolidate resolves draft paths with ticket workflows, including activeTicket auto-detection and --target-draft behavior. Ensure the guidance is explicit and avoids ambiguity.",
+      "files": [
+        ".opencode/skill/speclet-consolidate/SKILL.md",
+        ".speclet/GUIDE.md"
+      ],
+      "acceptanceCriteria": [
+        "speclet-consolidate instructions mention ticket paths and --target-draft",
+        "Ticket workflow section references consolidate pathing behavior",
+        "Build/typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Assume auto-detect activeTicket when available"
+    }
+  ]
+}

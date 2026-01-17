@@ -45,7 +45,7 @@ your-project/
 │   ├── speclet-council/SKILL.md
 │   ├── speclet-spec/SKILL.md
 │   ├── speclet-ticket/SKILL.md
-│   └── speclet-loop/SKILL.md
+│   └── ralph-loop (built-in command)
 ├── .speclet/
 │   ├── GUIDE.md                  # LLM instructions (permanent)
 │   ├── DECISIONS.md              # Architecture decisions (permanent)
@@ -72,10 +72,10 @@ your-project/
 | Skill | Command | Purpose |
 |-------|---------|---------|
 | **speclet-draft** | `Use the speclet-draft skill for [feature]` | Generate draft.md with clarifying questions |
-| **speclet-council** | `Use the speclet-council skill` | Parallel adversarial review of the draft |
+| **speclet-council** | `Use the speclet-council skill` | Adversarial review of draft/spec/ticket via plan-reviewer agents |
 | **speclet-spec** | `Use the speclet-spec skill` | Convert draft to spec.json |
 | **speclet-ticket** | `Use the speclet-ticket skill` | Split draft into individual tickets |
-| **speclet-loop** | `Use the speclet-loop skill` | Implement one story autonomously |
+| **/ralph-loop** | `/ralph-loop` | Run continuous implementation loop |
 | **speclet-learn** | `Use the speclet-learn skill` | Generate lessons from completed stories |
 
 ### Complete Workflow
@@ -87,11 +87,19 @@ Use the speclet-draft skill for "add user authentication"
 # Step 2: Run adversarial council review (Optional but recommended)
 Use the speclet-council skill
 
+# Optional: review a spec or ticket directly
+Use the speclet-council skill for .speclet/spec.json
+Use the speclet-council skill for .speclet/tickets/TICKET-1/draft.md
+
+# Note: speclet-council uses plan-reviewer agents configured in OpenCode.
+# If all reviewers map to the same model, the council runs but is not multi-model.
+# It can review draft/spec/ticket targets by passing a path.
+
 # Step 3: Convert to executable spec
 Use the speclet-spec skill
 
 # Step 4: Run autonomous loop
-.\speclet.ps1
+/ralph-loop (continuous) or .\speclet.ps1
 ```
 
 ### Ticket-Based Workflow (Multiple Issues)
@@ -133,7 +141,7 @@ Run the entire workflow unattended:
 The script will:
 1. Load config from `.speclet/config.json`
 2. Read `spec.json` and switch to the correct branch
-3. Run OpenCode with `speclet-loop` skill repeatedly
+3. Run OpenCode with `/ralph-loop` repeatedly
 4. **Verify build** after each story (reverts if failed)
 5. **Skip blocked stories** after 3 failures
 6. **Resume from checkpoint** if interrupted

@@ -26,7 +26,7 @@ Execute one autonomous iteration of the Speclet workflow.
 Use this repeatedly until all stories are complete:
 
 ```
-Use the speclet-loop skill
+/ralph-loop
 ```
 
 Keep using until you see `✅ COMPLETE`.

@@ -640,7 +640,7 @@ function Main {
     Write-ColorOutput @"
 
 ╔═══════════════════════════════════════════════════════════╗
-║             SPECLET LOOP (LEGACY) - /ralph-loop           ║
+║                 SPECLET LOOP - /ralph-loop                ║
 ╚═══════════════════════════════════════════════════════════╝
 "@ "Green"
     

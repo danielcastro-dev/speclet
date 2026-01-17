@@ -6,47 +6,48 @@
 
 **Using Skills (recommended for OpenCode):**
 
-| Skill | Command | Purpose |
-|-------|---------|---------|
+| Skill/Command | Invocation | Purpose |
+|--------------|------------|---------|
 | `speclet-draft` | "Use the speclet-draft skill for [feature]" | Generate draft.md with clarifying questions |
-| `speclet-council` | "Use the speclet-council skill" | Adversarial review of draft/spec/ticket inputs (pass a path to review spec/ticket) |
+| `speclet-council` | "Use the speclet-council skill" | Adversarial review of draft/spec/ticket inputs |
 | `speclet-spec` | "Use the speclet-spec skill" | Convert draft to spec.json |
 | `speclet-ticket` | "Use the speclet-ticket skill" | Split draft into individual tickets |
 | `/ralph-loop` | "/ralph-loop" | Run continuous implementation loop |
 | `speclet-learn` | "Use the speclet-learn skill" | Generate lessons from completed stories |
 
+> **Note:** Use `/ralph-loop` for continuous execution.
+
 **Ticket-Based Workflow (for multiple issues):**
 
-When working with tickets from `speclet-ticket`:
+You can review a ticket draft or spec directly:
 
-```bash
-# Work on a specific ticket
-Use the speclet-draft skill for TICKET-1
-
-# After completing ticket, artifacts are preserved in:
-# .speclet/tickets/TICKET-1/draft.md
-# .speclet/tickets/TICKET-1/spec.json
+```powershell
+Use the speclet-council skill for .speclet/tickets/TICKET-1/draft.md
+Use the speclet-council skill for .speclet/tickets/TICKET-1/spec.json
 ```
+
+When working with tickets from `speclet-ticket`:
+ 
+ ```powershell
+ # Work on a specific ticket
+ Use the speclet-draft skill for TICKET-1
+ 
+ # After completing ticket, artifacts are preserved in:
+ # .speclet/tickets/TICKET-1/draft.md
+ # .speclet/tickets/TICKET-1/spec.json
+ 
+ # If running speclet-consolidate in ticket mode:
+ # - Uses .speclet/tickets/TICKET-1/draft.md by default when activeTicket is set
+ # - Use --target-draft to override the path
+ ```
 
 **Autonomous loop (unattended):**
 
-```bash
-./speclet.ps1      # Windows PowerShell
-./speclet.sh       # Linux/Mac/WSL
-```
-
-Features:
-- **Model fallback**: 5 models with retry (primary → free tiers)
-- **Build verification**: Reverts changes if build fails
-- **Blocked stories**: Skip after 3 failures, continue with next
-- **Checkpoint/resume**: Resume from last story if interrupted
-- **Logging**: All activity to `.speclet/loop.log`
-
-See [Configuration](#configuration) section below for customization.
+Use `/ralph-loop` for continuous execution.
 
 **Manual loop:** Once you have a `spec.json`:
 
-> "Read `.speclet/loop.md` and execute one iteration."
+> "Run /ralph-loop for continuous execution or execute one iteration manually."
 
 ---
 
@@ -56,9 +57,9 @@ See [Configuration](#configuration) section below for customization.
 
 1. **Pre-flight checklist:**
 
-   ```bash
+   ```powershell
    git status             # Check current state
-   git stash              # If there are uncommitted changes
+   git stash push -m "speclet-preflight"  # Only if working tree is dirty
    git branch             # Confirm current branch
    ```
 
@@ -73,7 +74,7 @@ See [Configuration](#configuration) section below for customization.
 
 3. **Verify clean build (first iteration of the day only):**
 
-   ```bash
+   ```powershell
    npm run build  # or your project's build command
    ```
 
@@ -84,8 +85,11 @@ See [Configuration](#configuration) section below for customization.
    ├── GUIDE.md         ← This file (already exists)
    ├── DECISIONS.md     ← Permanent (create if doesn't exist)
    ├── draft.md         ← Create in Phase 1 (moves to archive or ticket folder)
+   ├── draft.review.md  ← Council review output (optional)
    ├── spec.json        ← Create in Phase 2 (moves to archive or ticket folder)
-   ├── progress.md      ← Create in Phase 3 (moves to archive)
+   ├── progress.md      ← Create in Phase 2.5 (moves to archive)
+   ├── council-session.md
+   ├── council-summary.md
 └── tickets/         ← Ticket backlog (if using ticket workflow)
         ├── index.json
         └── TICKET-1/    ← Per-ticket folder
@@ -109,7 +113,7 @@ See [Configuration](#configuration) section below for customization.
    > Ask: "Does this look like Tier 1, 2, or 3?" and adjust flow.
    > - **Tier 1:** Skip to direct implementation
    > - **Tier 2:** Create spec-lite.json, then implement
-   > - **Tier 3:** Follow complete flow (Phase 1 → 2 → 3)
+   > - **Tier 3:** Follow complete flow (Phase 1 → 2 → 2.5 → 3)
 
 ---
 
@@ -161,7 +165,8 @@ Ask only critical questions where the initial prompt is ambiguous. Use lettered 
 1. Convert draft into `.speclet/spec.json`
 2. Divide into atomic stories (1 story = 1 commit)
 3. Define acceptance criteria per story
-4. Verify with user: "Shall we start?"
+4. Run **Spec Readiness Check** (story size, acceptance criteria, file list)
+5. Verify with user: "Shall we start?"
 
 #### spec.json Structure
 
@@ -241,6 +246,25 @@ Each criterion must be something that can be CHECKED, not something vague.
 - `Build/typecheck passes` (always)
 - `Verify in browser` (if UI changes)
 
+**When approved:** Move to Phase 2.5.
+
+---
+
+### Phase 2.5: Readiness Gate
+
+**Goal:** Verify environment/tooling before implementation.
+
+Checks:
+- Build/test commands exist in config
+- `progress.md` exists (create from template if missing)
+- Current branch matches spec branch
+- Required CLI tools available (e.g., `opencode`)
+
+Behavior by tier:
+- Tier 3: blocking
+- Tier 2: warning + user confirmation
+- Tier 1: skip
+
 **When approved:** Move to Phase 3.
 
 ---
@@ -307,6 +331,8 @@ Each criterion must be something that can be CHECKED, not something vague.
 
 **Stop Condition:**
 > If ALL stories have `"passes": true`: "✅ All stories completed. Shall we create PR?"
+
+> **Pre-archive check:** Confirm `DECISIONS.md` updated if needed, then archive draft/spec/progress plus council artifacts.
 
 ---
 

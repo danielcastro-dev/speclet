@@ -160,7 +160,7 @@ try {
     Write-Host ""
     
 } catch {
-    Write-ColorOutput "Error: $_" "Red"
+    Write-ColorOutput "Error: $($_)" "Red"
     exit 1
 } finally {
     # Cleanup

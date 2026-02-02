@@ -2,6 +2,19 @@
 
 Lightweight spec-driven development workflow for LLM-assisted coding sessions.
 
+**⚡ Quick Install:**
+```powershell
+# Windows
+powershell -ExecutionPolicy Bypass -Command "IEX (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/danielcastro-dev/speclet/main/install-universal.ps1').Content"
+```
+
+```bash
+# Linux/macOS
+bash <(curl -s https://raw.githubusercontent.com/danielcastro-dev/speclet/main/install-universal.sh)
+```
+
+See [INSTALLATION.md](INSTALLATION.md) for more options and details.
+
 ## What is Speclet?
 
 Speclet is a structured workflow for developing features with AI assistants (Claude, GPT, etc.). It provides:
@@ -15,26 +28,87 @@ Speclet is a structured workflow for developing features with AI assistants (Cla
 
 ## Quick Start
 
-### Installation (Bootstrap)
+### Installation in Your Project
 
-To install the Speclet Council agents (Opus, GLM, Sonnet, Gemini, GPT) into your environment, run the included installer:
+#### Option 1: One-Line Installation (Recommended)
 
 **Windows (PowerShell):**
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install-agents.ps1
+powershell -ExecutionPolicy Bypass -Command "IEX (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/danielcastro-dev/speclet/main/install-universal.ps1').Content"
 ```
 
-The installer will:
-1. Detect your config directory.
-2. Ask where to install the agents (Global or Project-local).
-3. Back up any existing agents.
-4. Verify the installation using `opencode agent list`.
+**Linux/macOS (bash):**
+```bash
+bash <(curl -s https://raw.githubusercontent.com/danielcastro-dev/speclet/main/install-universal.sh)
+```
 
-### Setup Manual
+#### Option 2: Clone and Install
 
-If you prefer manual setup:
-1. Copy the files from `.opencode\agent\*.md` to your `%USERPROFILE%\.config\opencode\agent\` directory.
-2. Ensure you have the necessary model access in your OpenCode account.
+**Windows (PowerShell):**
+```powershell
+git clone https://github.com/danielcastro-dev/speclet.git _speclet-installer
+cd _speclet-installer
+powershell -ExecutionPolicy Bypass -File .\install-universal.ps1
+cd ..
+Remove-Item -Recurse -Force _speclet-installer
+```
+
+**Linux/macOS (bash):**
+```bash
+git clone https://github.com/danielcastro-dev/speclet.git _speclet-installer
+cd _speclet-installer
+bash install-universal.sh
+cd ..
+rm -rf _speclet-installer
+```
+
+#### Option 3: Manual Installation
+
+1. Copy the `skills/` folder to `.opencode/skill/`
+2. Copy `GUIDE.md` and `loop.md` to `.speclet/`
+3. Copy template files to `.speclet/templates/`
+4. Copy `speclet.sh` and `speclet.ps1` to your project root
+
+### What Gets Installed
+
+The installer creates the following structure:
+```
+your-project/
+├── .speclet/
+│   ├── GUIDE.md                  # LLM instructions (permanent)
+│   ├── loop.md                   # Loop runner documentation
+│   ├── DECISIONS.md              # Architecture decisions (tracked)
+│   ├── templates/                # Template files
+│   ├── tickets/                  # Individual task tickets
+│   └── archive/                  # Completed work
+├── .opencode/skill/
+│   ├── speclet-draft/            # Feature draft skill
+│   ├── speclet-spec/             # Spec generation skill
+│   ├── speclet-council/          # Review/validation skill
+│   ├── speclet-ticket/           # Ticket generation skill
+│   └── speclet-learn/            # Learning extraction skill
+├── .codex/skills/
+│   ├── speclet-draft/            # OpenAI Codex: Feature draft skill
+│   ├── speclet-spec/             # OpenAI Codex: Spec generation skill
+│   ├── speclet-council/          # OpenAI Codex: Review/validation skill
+│   ├── speclet-ticket/           # OpenAI Codex: Ticket generation skill
+│   └── speclet-learn/            # OpenAI Codex: Learning extraction skill
+├── speclet.sh                    # Loop runner (Linux/macOS)
+├── speclet.ps1                   # Loop runner (Windows)
+└── .gitignore                    # Updated with .speclet/ rules
+```
+
+### Supported Platforms
+
+- **OpenCode Skills** (.opencode/skill/)
+- **OpenAI Codex Skills** (.codex/skills/)
+- **OpenCode Autonomous Loop** (speclet.sh / speclet.ps1)
+
+### Prerequisites
+
+- **OpenCode** or **OpenAI Codex** installed on your system
+- **Git** (optional; installer falls back to ZIP download if not available)
+- **PowerShell 5.0+** (Windows) or **bash 4.0+** (Linux/macOS)
 
 ### Project Structure
 

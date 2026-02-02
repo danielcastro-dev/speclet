@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# Speclet Installer for Linux/macOS
+# This is the local installer for when you have the repository cloned.
+# For remote installation, use install-universal.sh
+
 set -e
 
 GREEN='\033[0;32m'
@@ -15,11 +20,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 mkdir -p .speclet/templates .speclet/tickets .speclet/archive
 mkdir -p .opencode/skill
+mkdir -p .codex/skills
 
 cp "$SCRIPT_DIR/GUIDE.md" .speclet/
 cp "$SCRIPT_DIR/loop.md" .speclet/
 cp "$SCRIPT_DIR/templates/"* .speclet/templates/
 cp -r "$SCRIPT_DIR/skills/"* .opencode/skill/
+cp -r "$SCRIPT_DIR/skills/"* .codex/skills/
 cp "$SCRIPT_DIR/speclet.sh" ./
 cp "$SCRIPT_DIR/speclet.ps1" ./
 
@@ -50,6 +57,9 @@ echo "  .speclet/templates/*"
 echo "  .opencode/skill/speclet-draft/"
 echo "  .opencode/skill/speclet-spec/"
 echo "  .opencode/skill/speclet-loop/"
+echo "  .codex/skills/speclet-draft/"
+echo "  .codex/skills/speclet-spec/"
+echo "  .codex/skills/speclet-loop/"
 echo "  ./speclet.sh"
 echo "  ./speclet.ps1"
 echo ""

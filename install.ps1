@@ -3,6 +3,8 @@
     Speclet Installer for Windows
 .DESCRIPTION
     Installs Speclet files into the current project directory.
+    This is the local installer for when you have the repository cloned.
+    For remote installation, use install-universal.ps1
 .EXAMPLE
     .\install.ps1
 #>
@@ -27,11 +29,13 @@ New-Item -ItemType Directory -Path ".speclet/templates" -Force | Out-Null
 New-Item -ItemType Directory -Path ".speclet/tickets" -Force | Out-Null
 New-Item -ItemType Directory -Path ".speclet/archive" -Force | Out-Null
 New-Item -ItemType Directory -Path ".opencode/skill" -Force | Out-Null
+New-Item -ItemType Directory -Path ".codex/skills" -Force | Out-Null
 
 Copy-Item "$ScriptDir/GUIDE.md" ".speclet/" -Force
 Copy-Item "$ScriptDir/loop.md" ".speclet/" -Force
 Copy-Item "$ScriptDir/templates/*" ".speclet/templates/" -Force
 Copy-Item "$ScriptDir/skills/*" ".opencode/skill/" -Recurse -Force
+Copy-Item "$ScriptDir/skills/*" ".codex/skills/" -Recurse -Force
 
 $CurrentDir = (Get-Location).Path
 $SourceSh = (Resolve-Path "$ScriptDir/speclet.sh").Path
@@ -83,6 +87,9 @@ Write-Host "  .speclet/templates/*"
 Write-Host "  .opencode/skill/speclet-draft/"
 Write-Host "  .opencode/skill/speclet-spec/"
 Write-Host "  .opencode/skill/speclet-loop/"
+Write-Host "  .codex/skills/speclet-draft/"
+Write-Host "  .codex/skills/speclet-spec/"
+Write-Host "  .codex/skills/speclet-loop/"
 Write-Host "  ./speclet.sh"
 Write-Host "  ./speclet.ps1"
 Write-Host ""

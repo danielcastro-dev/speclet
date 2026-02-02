@@ -102,8 +102,11 @@ try {
     Copy-Item "$SourceDir/GUIDE.md" "$TargetDir/.speclet/" -Force -ErrorAction SilentlyContinue
     Copy-Item "$SourceDir/loop.md" "$TargetDir/.speclet/" -Force -ErrorAction SilentlyContinue
     Copy-Item "$SourceDir/templates/*" "$TargetDir/.speclet/templates/" -Force -ErrorAction SilentlyContinue
+    
+    # Copy skills from both locations
     Copy-Item "$SourceDir/skills/*" "$TargetDir/.opencode/skill/" -Recurse -Force -ErrorAction SilentlyContinue
-    Copy-Item "$SourceDir/skills/*" "$TargetDir/.codex/skills/" -Recurse -Force -ErrorAction SilentlyContinue
+    Copy-Item "$SourceDir/.codex/skills/*" "$TargetDir/.codex/skills/" -Recurse -Force -ErrorAction SilentlyContinue
+    
     Copy-Item "$SourceDir/speclet.sh" "$TargetDir/" -Force -ErrorAction SilentlyContinue
     Copy-Item "$SourceDir/speclet.ps1" "$TargetDir/" -Force -ErrorAction SilentlyContinue
     

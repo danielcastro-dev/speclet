@@ -35,7 +35,7 @@ Copy-Item "$ScriptDir/GUIDE.md" ".speclet/" -Force
 Copy-Item "$ScriptDir/loop.md" ".speclet/" -Force
 Copy-Item "$ScriptDir/templates/*" ".speclet/templates/" -Force
 Copy-Item "$ScriptDir/skills/*" ".opencode/skill/" -Recurse -Force
-Copy-Item "$ScriptDir/skills/*" ".codex/skills/" -Recurse -Force
+Copy-Item "$ScriptDir/.codex/skills/*" ".codex/skills/" -Recurse -Force
 
 $CurrentDir = (Get-Location).Path
 $SourceSh = (Resolve-Path "$ScriptDir/speclet.sh").Path

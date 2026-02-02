@@ -77,8 +77,11 @@ mkdir -p "$TARGET_DIR/.codex/skills"
 cp "$SOURCE_DIR/GUIDE.md" "$TARGET_DIR/.speclet/" 2>/dev/null || true
 cp "$SOURCE_DIR/loop.md" "$TARGET_DIR/.speclet/" 2>/dev/null || true
 cp "$SOURCE_DIR/templates/"* "$TARGET_DIR/.speclet/templates/" 2>/dev/null || true
+
+# Copy skills from both locations
 cp -r "$SOURCE_DIR/skills/"* "$TARGET_DIR/.opencode/skill/" 2>/dev/null || true
-cp -r "$SOURCE_DIR/skills/"* "$TARGET_DIR/.codex/skills/" 2>/dev/null || true
+cp -r "$SOURCE_DIR/.codex/skills/"* "$TARGET_DIR/.codex/skills/" 2>/dev/null || true
+
 cp "$SOURCE_DIR/speclet.sh" "$TARGET_DIR/" 2>/dev/null || true
 cp "$SOURCE_DIR/speclet.ps1" "$TARGET_DIR/" 2>/dev/null || true
 

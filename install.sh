@@ -26,7 +26,7 @@ cp "$SCRIPT_DIR/GUIDE.md" .speclet/
 cp "$SCRIPT_DIR/loop.md" .speclet/
 cp "$SCRIPT_DIR/templates/"* .speclet/templates/
 cp -r "$SCRIPT_DIR/skills/"* .opencode/skill/
-cp -r "$SCRIPT_DIR/skills/"* .codex/skills/
+cp -r "$SCRIPT_DIR/.codex/skills/"* .codex/skills/
 cp "$SCRIPT_DIR/speclet.sh" ./
 cp "$SCRIPT_DIR/speclet.ps1" ./
 

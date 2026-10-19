@@ -1,6 +1,6 @@
 ---
 name: speclet-loop
-description: Ejecutar las tareas Markdown de un cambio Speclet aprobado, con worktree consultado, pruebas, revisión independiente y commit local por tarea. Continuar hasta terminar o encontrar un bloqueo real; no usar para planificar ni ejecutar el workflow JSON anterior.
+description: Execute Markdown tasks of an approved Speclet change with consulted worktree, tests, independent review, and local commit per task. Continue until finished or blocked; not for planning or legacy JSON workflow.
 license: MIT
 metadata:
   workflow: speclet
@@ -9,73 +9,86 @@ metadata:
 
 # Speclet Loop
 
-Implementar el cambio aprobado y demostrarlo. `tasks.md` conserva el avance; pruebas y diff demuestran el comportamiento.
+Implement the approved change and prove it works. `tasks.md` preserves progress; tests and diffs demonstrate behavior.
 
-## Entrada y autorización
+## Language and Communication Rules
 
-1. Resolver `.speclet/changes/<nombre>/` desde la ruta indicada. Sin ruta, elegir el único cambio no terminado con spec, plan y tareas; si hay varios, pedir elegir. No importar estado anterior. Si sólo existe ese estado, indicar que se requiere un cambio nuevo.
-2. Leer los tres Markdown e instrucciones aplicables. Requerir spec aprobado, decisiones materiales resueltas y autorización para ejecutar el plan. La petición explícita de ejecutar este loop sobre ese plan cuenta como autorización; no pedir otra confirmación equivalente.
-3. Cargar `ponytail` y `caveman` leyendo sus entrypoints instalados. Ponytail orienta código y revisión; Caveman abrevia sólo el chat en español. La activación prestada termina al salir de Speclet, sin apagar modos previos activados expresamente por el usuario. Documentos, commits, preguntas y errores mantienen lenguaje normal y datos exactos.
+- **Always speak, ask questions, and interact with the user in Spanish.**
+- **Write commit messages in Spanish** using repository style (e.g., `feat(scope): descripción concisa`).
+- **Update `tasks.md` and document notes/evidence in Spanish.**
+- Preserve standard technical terms in English ("log", "health", "endpoint", "middleware", "worktree", "payload", "token", "diff", "gate", "runtime", etc.). Do not translate technical jargon awkwardly.
 
-## Worktree primero, consultado siempre
+## Input and Authorization
 
-Antes de crear un worktree o cambiar de checkout, proponer ruta y rama concretas y preguntar. **No hacerlo mientras la respuesta esté pendiente.** Aprobar el plan no sustituye esta elección. Si el usuario ya autorizó ese worktree para este trabajo, comprobarlo y reutilizarlo sin volver a preguntar. Si lo rechaza, no escribir código hasta acordar otro checkout.
+1. Resolve `.speclet/changes/<name>/` from the given path. Without a path, select the single unfinished change having spec, plan, and tasks; if multiple exist, ask the user to pick. Do not import legacy status. If only legacy status exists, state that a new change is required.
+2. Read the three Markdown files and applicable instructions. Require an approved spec, resolved material decisions, and authorization to execute the plan. An explicit user request to run this loop on that plan counts as authorization; do not ask for redundant confirmation.
+3. Load `ponytail` and `caveman` by reading their installed entrypoints. Ponytail guides code and review; Caveman abbreviates only Spanish chat. Borrowed activation ends upon exiting Speclet, without turning off modes previously activated by the user. Documents, commits, questions, and errors keep normal language and exact data.
 
-Inspeccionar estado Git, rama, raíz y worktrees existentes. Aplicar la guarda de submódulos (`git rev-parse --show-superproject-working-tree` 2>/dev/null): si devuelve una ruta, estamos dentro de un submódulo y no en un checkout aislado ni en la raíz principal; tratarlo en consecuencia para no romper la estructura del superproyecto. No cambiar a la fuerza, limpiar cambios ajenos ni asumir una base main. Usar la base acordada o la rama actual indicada en el plan. Las tareas comparten el worktree autorizado del cambio.
+## Worktree First, Always Consulted
 
-Al crearlo, llevar sólo los tres Markdown locales y aplicar la exclusión local de Speclet. No copiar secretos, dependencias ni builds automáticamente. Contrastar documentos existentes antes de reemplazarlos. Si falta preparación autorizada, declarar el requisito.
+Before creating a worktree or switching checkouts, propose a concrete path and branch, and ask the user. **Do not create or switch while the response is pending.** Approving the plan does not substitute this choice. If the user already authorized that worktree for this work, verify it and reuse it without asking again. If rejected, do not write code until another checkout is agreed.
 
-## Basal y selección
+Inspect Git status, branch, root, and existing worktrees. Apply the submodule guard (`git rev-parse --show-superproject-working-tree` 2>/dev/null): if it returns a path, the workspace is inside a submodule and not an isolated checkout or main root; handle accordingly to avoid breaking the superproject structure. Do not force checkouts, clean untracked foreign changes, or assume a `main` base. Use the agreed base or the current branch indicated in the plan. All tasks share the change's authorized worktree.
 
-- Antes de editar código, ejecutar una vez los comandos pertinentes detectados del proyecto. Registrar comando, señal decisiva y exit code en la verificación de `plan.md`, sin otro reporte.
-- Distinguir fallos heredados, entorno y regresiones propias. Un fallo heredado no es una prueba aprobada ni autoriza arreglar código ajeno. Si bloquea un gate exigido, detenerse salvo excepción explícita y documentada del usuario.
-- Seleccionar la primera tarea pendiente con dependencias completas. Mantener una tarea activa por worktree y señalarla en `tasks.md` para poder retomar.
-- Al reanudar, contrastar avance con archivos y commits reales. No repetir tareas cerradas ni confiar en evidencia de un diff que cambió.
+When creating the worktree, carry over only the three local Markdown files and apply the local Speclet Git exclude (`git rev-parse --git-path info/exclude`). Do not copy secrets, dependencies, or build artifacts automatically. Contrast existing documents before replacing them. If authorized environment setup is missing, declare the requirement.
 
-## Implementar y verificar
+## Baseline and Selection
 
-Hacer el menor cambio completo: reutilizar código y preservar contratos, validación y manejo de errores. Ajustar consumidores, pruebas y fixtures afectados; no aprovechar para refactorizar áreas ajenas.
+- Before editing code, run relevant detected project commands once. Record command, key signal, and exit code in the verification section of `plan.md`, without generating a separate report.
+- Distinguish inherited failures, environment issues, and own regressions. An inherited failure is not a passing test and does not authorize fixing unrelated code. If it blocks a required gate, stop unless an explicit, documented exception is granted by the user.
+- Select the first pending task whose dependencies are satisfied. Keep one active task per worktree and mark it in `tasks.md` to support resumption.
+- When resuming, contrast progress against actual files and commits. Do not re-run closed tasks or trust evidence from an altered diff.
 
-Ejecutar las verificaciones de la tarea y comprobar sus AC. Las regresiones y la lógica no trivial necesitan pruebas discriminantes; una edición trivial no exige una batería artificial. Si una rama crítica lo justifica, alterar temporalmente una condición y comprobar que la prueba falla; restaurar y verificar antes de revisar o hacer commit. No desactivar pruebas ni presentar mocks como evidencia de proveedores reales.
+## Implement and Verify
 
-Comprobaciones sólo cuando correspondan al cambio:
+Make the smallest complete change: reuse existing code and preserve public contracts, validation, and error handling. Adjust affected consumers, tests, and fixtures; do not refactor unrelated areas.
 
-- **Datos/transacciones:** parametrización, conexión/transacción correctas, rollback y concurrencia según el contrato afectado.
-- **Errores:** conservar contrato público, correlación y redacción de secretos; distinguir fallos confirmados de resultados inciertos.
-- **Red/reintentos:** deadlines e intentos acotados; no repetir efectos no idempotentes sin deduplicación probada. No añadir circuit breakers, infraestructura ni manuales innecesarios.
+Execute task verifications and assert AC compliance. Non-trivial logic and regressions require discriminating tests; trivial edits do not warrant artificial suites. If justified by a critical branch, temporarily alter a condition to ensure the test fails; restore and re-verify before review or commit. Do not disable tests or pass mocks off as evidence of real external providers.
 
-Una verificación fallida o no ejecutada no equivale a éxito. Registrar la limitación y mantener pendiente la tarea si falta evidencia requerida.
+Targeted checks applied only when relevant to the change:
 
-## Delegación y revisión independiente
+- **Data/Transactions:** Parameterization, correct connection/transaction boundaries, rollback, and concurrency as dictated by the affected contract.
+- **Errors:** Preserve public contract, correlation IDs, and secret redaction; distinguish confirmed failures from uncertain outcomes.
+- **Network/Retries:** Deadlines and bounded retry attempts; never repeat non-idempotent operations without verified deduplication. Do not add unnecessary circuit breakers, infrastructure, or manuals.
 
-El orquestador conserva decisiones, integración, estado y commits. Delegar implementación/investigación sólo cuando aporte valor. Máximo tres hijos directos, sin subdelegación y heredando la configuración de la sesión, sin fijar modelos o esfuerzos antiguos. Un solo escritor por worktree; revisores sin ediciones ni commits.
+A failed or unexecuted verification does not equal success. Record limitations and keep the task pending if required evidence is missing.
 
-Después de verificar cada tarea, encargar **una revisión independiente** a un subagente con contexto autocontenido:
+## Delegation and Independent Review
 
-- Objetivo, AC, tarea activa, rutas del spec/plan/tareas y restricciones pertinentes.
-- Base y diff exactos, incluidos archivos nuevos, y consumidores que debe leer.
-- Comandos y resultados observados, sin presentarlos como prueba suficiente de corrección.
-- Pedido de revisar aceptación y calidad: hallazgo, archivo/línea, impacto y comprobación. Solicitar un veredicto explícito y breve; no un archivo de reporte.
+The orchestrator retains decisions, integration, state, and commits. Delegate implementation/investigation only when it adds clear value. Maximum three direct children, no sub-delegation, inheriting session configuration without hardcoding deprecated models or effort tiers. Exactly one writer per worktree; reviewers make no edits or commits.
 
-Contrastar hallazgos con el código antes de aceptarlos. La revisión detecta incumplimiento, bugs reales y pruebas insuficientes; no exige refactors ajenos por preferencias del revisor. Aplicar el principio **"Rulings, not stalls"**: ante discrepancias técnicas menores, preferencias estilísticas o ambigüedades sin riesgo destructivo ni fallo de AC/contratos, el orquestador emite un dictamen técnico fundado, lo asienta en las notas de `tasks.md` y continúa la ejecución sin atascar el loop.
+After verifying each task, request **an independent review** from a subagent with self-contained context:
 
-Corregir hallazgos aceptados y bloqueantes; repetir pruebas afectadas y revisión del nuevo diff. Máximo **dos rondas de corrección por tarea**, después de la revisión inicial. Si persiste un bloqueo real no subsanable mediante dictamen, registrarlo y detener el loop con la tarea pendiente. Las notas no bloqueantes pueden quedar justificadas.
+- Objective, AC, active task, paths to spec/plan/tasks, and relevant constraints.
+- Exact base and diff (including new files) and consumers to read.
+- Executed commands and observed outputs, without presenting them as conclusive proof of correctness.
+- Request an acceptance and quality review: finding, file/line, impact, and verification step. Request a concise, explicit verdict; no separate report file.
 
-Si no hay revisión independiente disponible, declarar la limitación y detenerse antes del commit. No sustituirla silenciosamente por auto-revisión ni marcar aprobación ficticia. No generar informes de revisión, inventarios JSON ni diarios obligatorios.
+Contrast findings against code before accepting them. The review identifies non-compliance, real bugs, and insufficient tests; it must not demand unrelated refactoring for stylistic preferences. Apply the **"Rulings, not stalls"** principle: when encountering minor technical discrepancies, stylistic preferences, or harmless ambiguities that do not break AC or public contracts, the orchestrator issues a reasoned technical ruling, documents it in the notes of `tasks.md`, and continues execution without stalling the loop.
 
-## Commit y avance
+Fix accepted blocking findings; re-run affected tests and review the updated diff. Maximum **two correction rounds per task** after the initial review. If a true blocker persists that cannot be resolved via technical ruling, record it and pause the loop with the task pending. Non-blocking observations may remain justified.
 
-Sólo después de verificación y revisión aprobadas:
+If independent review is unavailable, declare the limitation and halt before committing. Do not silently substitute self-review or fake approvals. Do not produce review reports, JSON catalogs, or mandatory diaries.
 
-1. Examinar el diff y stagear únicamente archivos de la tarea, con sus pruebas/fixtures necesarios. No incluir cambios ajenos ni `.speclet/**`.
-2. Hacer un commit local por tarea con el estilo del repositorio y descripción breve en español. Añadir clave Jira sólo si existe; no inventarla. No hacer commits vacíos.
-3. En `tasks.md`, registrar comandos/exit codes, AC comprobados, veredicto, notas relevantes (incluyendo dictámenes técnicos emitidos si los hubo) y SHA. Marcar `[x]` sólo entonces y quitar el marcador de tarea activa.
-4. Continuar sin preguntar "¿continúo?". Una tarea satisfecha por un commit previo puede cerrarse sólo tras verificar evidencia y revisión; citarlo sin fabricar otro.
+## Commit and Progress
 
-Si falla el commit, mantener la tarea pendiente y explicar el fallo; no repetir implementación ya verificada. Cualquier cambio posterior al código revisado invalida esa revisión.
+Only after verification and review pass:
 
-## Cierre
+1. Inspect the diff and stage only task-related files, along with necessary tests and fixtures. Never stage unrelated changes or `.speclet/**`.
+2. Create a local commit per task following repository style with a concise description in Spanish (e.g., `git commit -m "feat(scope): descripción"`). Append Jira issue key only if one exists; do not invent one. Never create empty commits.
+3. In `tasks.md`, record executed commands/exit codes, verified ACs, verdict, relevant notes (including technical rulings if any), and commit SHA. Mark `[x]` only then, and clear the active task marker.
+4. Continue without asking "should I continue?". A task satisfied by an earlier commit may only be closed after verifying evidence and review; cite the existing SHA without creating redundant commits.
 
-Ejecutar la verificación de integración prevista. Si el cambio cruza componentes o contratos, encargar además una revisión independiente del conjunto; no duplicar revisiones completas para un cambio mecánico. Si falla el cierre, registrar el bloqueo en tasks y no declarar terminado ni deshacer commits válidos automáticamente.
+If a commit fails, keep the task pending and explain the error; do not redo already verified implementation. Any change made to code after review invalidates that review.
 
-Actualizar el estado global a Terminado sólo tras cerrar correctamente. Responder con resultado, commits, pruebas y limitaciones reales. Ofrecer los comandos listos de integración/cierre post-merge con verificación (merge, eliminación de worktree/rama y comandos de verificación) listos para copiar o ejecutar a pedido, sin forzar su ejecución interactiva. No crear diario, handoff, mensajes Jira/MR ni auditorías adicionales. Push, PR, merge, despliegues y publicaciones necesitan una petición que los autorice; no ejecutarlos automáticamente ni forzar prompts interactivos para realizarlos.
+## Closing and Final Review
+
+Execute the planned integration verification. Before declaring completion, perform a final closing review using the **3D Review Rubric**:
+
+1. **Completeness:** Verify all ACs from `spec.md` and test coverage from `plan.md` are satisfied by the final combined diff.
+2. **Contract Integration:** Verify public APIs, consumers, migrations, and interfaces align without unintended breaking changes.
+3. **Cruft and Cleanliness:** Ensure no debug logs, temporary test scaffolding, leftover TODOs, commented-out dead code, or unintended tracked files remain.
+
+If the change spans multiple components or contracts, commission an independent review of the combined diff. If closing verification fails, record the blocker in `tasks.md`; do not mark complete or automatically revert valid task commits.
+
+Update overall status to `Terminado` in `tasks.md` only after successful closing. Reply to the user in Spanish with the outcome, commit list, test results, and any genuine limitations. Provide ready-to-run post-merge commands (merge, worktree/branch cleanup, and verification commands) ready to copy or execute on request, without forcing interactive execution. Do not create separate diaries, handoff files, or extra reports. Push, PR, merge, deployments, and publishing require explicit user authorization; do not execute them automatically or force interactive prompts to do so.

@@ -1,6 +1,6 @@
 ---
 name: speclet-draft
-description: Leer el proyecto y acordar requisitos mediante preguntas de selección múltiple antes de crear un spec.md breve. Usar al definir un cambio no trivial o iniciar Speclet; no para consultas, revisiones ni arreglos directos de un archivo.
+description: Read the project and agree on requirements through multiple-choice questions before creating a concise spec.md. Use when defining a non-trivial change or starting Speclet; not for simple questions, reviews, or single-file fixes.
 license: MIT
 metadata:
   workflow: speclet
@@ -9,36 +9,42 @@ metadata:
 
 # Speclet Draft
 
-Definir **qué cambia y cómo sabremos que funciona**. No implementar ni elegir una arquitectura antes de entender el problema.
+Define **what changes and how we will know it works**. Do not implement or pick an architecture before understanding the problem.
 
-## Forma de trabajar
+## Language and Communication Rules
 
-- Cargar expresamente las skills instaladas `ponytail` y `caveman` leyendo sus `SKILL.md`. Ponytail orienta simplicidad y reutilización; Caveman abrevia sólo el chat en español. Esta activación prestada termina al salir de Speclet; respetar un modo previo activado expresamente por el usuario. Documentos, preguntas, comandos y errores mantienen lenguaje normal y datos exactos. No activar plugins, hooks o proxies.
-- Reutilizar código y dependencias existentes. Descartar extras especulativos, conservando el comportamiento y las verificaciones solicitadas.
-- Leer políticas existentes sólo cuando sean pertinentes. No exigir ni generar manuales, catálogos centrales, baseline.md o project-context.md.
+- **Always speak, ask questions, and interact with the user in Spanish.**
+- **Write `spec.md` in Spanish.**
+- Preserve standard technical terms in English ("log", "health", "endpoint", "middleware", "worktree", "payload", "token", etc.). Do not translate technical jargon awkwardly.
 
-## Primero: entender el proyecto
+## Operating Principles
 
-Antes de formular preguntas de requisitos, hacer una pasada de lectura dirigida: instrucciones aplicables, manifiestos, estructura del área afectada, puntos de entrada, consumidores, pruebas y convenciones existentes. Seguir el comportamiento relevante, sin recorrer todo el repositorio por rutina ni ejecutar servicios para preparar la entrevista.
+- Load installed skills `ponytail` and `caveman` by reading their `SKILL.md`. Ponytail guides simplicity and reuse; Caveman keeps Spanish chat concise. This borrowed activation ends upon exiting Speclet; respect any mode previously activated by the user. Documents, questions, commands, and errors keep normal grammar and exact data. Do not activate plugins, hooks, or proxies.
+- Reuse existing code and dependencies. Discard speculative extras while preserving requested behavior and verifications.
+- Read existing policies only when relevant. Do not demand or generate manuals, central catalogs, baseline.md, or project-context.md.
 
-Resumir brevemente qué existe, dónde encaja el cambio y qué decisiones siguen abiertas. Sustentar los hechos importantes con rutas del proyecto. No preguntar al usuario por tecnologías, archivos o comportamientos que esta inspección pueda resolver. Si no hay proyecto accesible, explicitar ese límite y preguntar sólo por el contexto necesario.
+## 1. First: Understand the Project
 
-## Después: selección múltiple en rondas cortas
+Before asking requirement questions, perform a targeted inspection: applicable instructions, manifests, affected area structure, entry points, consumers, tests, and conventions. Trace relevant behavior without routinely walking the entire repo or running services just to prepare questions.
 
-- Presentar entre una y tres preguntas por ronda, únicamente si sus respuestas cambian alcance, comportamiento, aceptación o riesgos relevantes.
-- Preferir selección múltiple: entre dos y cuatro opciones reales, con una recomendación y una frase que explique su consecuencia o tradeoff. No inventar opciones de relleno ni forzar una elección cuando hace falta una respuesta abierta.
-- Usar la herramienta de preguntas estructuradas disponible en el entorno. Si no hay una adecuada, numerar las preguntas y marcar opciones A/B/C para permitir respuestas como `1B, 2A`.
-- Preguntar en español y con frases completas, incluso con Caveman activo. Aceptar respuestas libres e híbridas; las opciones orientan, no limitan la decisión del usuario.
-- Incorporar cada respuesta antes de la siguiente ronda. No repetir preguntas contestadas ni convertir recomendaciones en aprobaciones del usuario.
-- Si el cambio ya está definido, resumirlo y confirmar sólo la aprobación que falte; no fabricar una entrevista. La lectura previa sigue siendo necesaria.
+Briefly summarize what exists, where the change fits, and which decisions remain open. Support key facts with project file paths. Do not ask the user about technologies, files, or behaviors that this inspection can answer. If no project is accessible, state this limit and ask only for necessary context.
 
-## Documento
+## 2. Next: Multiple-Choice Questions in Short Rounds
 
-Resolver la raíz Git y un nombre descriptivo estable. Escribir únicamente `.speclet/changes/<nombre>/spec.md` en español. Si se entrega una ruta, usarla. Si el nombre pertenece a otro trabajo, pedir identificar el cambio antes de sobrescribirlo.
+- Present 1 to 3 questions per round, only if answers alter scope, behavior, acceptance, or key risks.
+- Prefer multiple-choice: 2 to 4 concrete options, with a recommendation and one sentence explaining tradeoffs. Do not invent filler options or force a choice when an open question is needed.
+- Use the structured question tool available in the environment (`ask_question`). If unavailable, number questions and label options A/B/C so the user can reply `1B, 2A`.
+- Formulate questions in Spanish with complete, clear sentences, even if Caveman is active. Accept free-form and hybrid answers; options guide but do not restrict the user's choice.
+- Incorporate each answer before the next round. Do not repeat answered questions or treat recommendations as user approvals.
+- If the change is already well-defined, summarize it and confirm only missing approvals; do not fabricate an interview. Prior reading is still required.
 
-Los documentos son locales: excluir el nuevo directorio mediante el exclude local que resuelva `git rev-parse --git-path info/exclude`, sin editar `.gitignore` versionado ni desversionar documentos existentes. Si este cambio ya tiene documentos versionados, señalar el conflicto antes de modificarlos. Sin Git se puede acordar el spec; la ejecución necesitará un repositorio.
+## 3. Specification Document
 
-Usar una estructura breve:
+Resolve the Git root and a stable descriptive change name. Write exclusively to `.speclet/changes/<name>/spec.md` in Spanish. If a path is provided, use it. If the name belongs to another task, ask before overwriting.
+
+Documents are local: exclude the new directory via `git rev-parse --git-path info/exclude`, without editing tracked `.gitignore` or untracking existing files. If this change already has tracked documents, flag the conflict before editing. Without Git, the spec can be agreed; execution will require a repository.
+
+Use a concise Spanish structure:
 
 ```markdown
 # Nombre del cambio
@@ -59,13 +65,13 @@ Decisiones confirmadas, evidencia pertinente y preguntas materiales.
 Pendiente; registrar la aprobación real cuando exista.
 ```
 
-Los AC describen resultados observables, no "funciona", "es seguro" ni pasos de implementación. Separar hechos del código, decisiones y desconocidos; citar rutas que sostengan decisiones materiales.
+Acceptance criteria (AC) describe observable outcomes, not "works", "secure", or implementation steps. Separate code facts, decisions, and unknowns; cite paths supporting material decisions.
 
-Actualizar el mismo documento durante la conversación. No crear brainstorm, draft, research o informes adicionales. Marcar Aprobado sólo con autorización real; una autorización explícita que ya cubre ese diseño no necesita otra confirmación equivalente.
+Update the same document during the conversation. Do not create brainstorm, draft, research, or extra reports. Mark `Estado: Aprobado` only with real authorization; explicit user authorization covering this design requires no duplicate confirmation.
 
-## Límites y salida
+## Limits and Exit
 
-- No leer, convertir, mover ni borrar JSON, manuales o historial del workflow anterior. Usar exclusivamente el nuevo directorio de cambio.
-- No crear worktrees, cambiar de rama, instalar dependencias ni editar código en esta fase.
-- Si faltan decisiones materiales, mantener Borrador y preguntar. Si está aprobado, proponer `$speclet-plan` con la ruta, sin implementar automáticamente.
-- Los riesgos de datos, errores, concurrencia o reintentos se traducen en AC cuando corresponda; no en auditorías generales.
+- Do not read, migrate, move, or delete legacy workflow JSON, manuals, or history. Exclusively use the change directory.
+- Do not create worktrees, switch branches, install dependencies, or edit code during this phase.
+- If material decisions are missing, keep `Estado: Borrador` and ask. If approved, suggest `$speclet-plan` with the path, without auto-implementing.
+- Translate data, error, concurrency, or retry risks into ACs when applicable; do not run general security/audit checklists.

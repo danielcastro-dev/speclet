@@ -1,6 +1,6 @@
 ---
 name: speclet-plan
-description: Convertir un spec.md aprobado de Speclet en un plan técnico mínimo y tareas Markdown verificables. Usar después de acordar requisitos; no implementa código ni crea JSON o manuales.
+description: Convert an approved Speclet spec.md into a minimal technical plan and verifiable Markdown tasks. Use after agreeing on requirements; does not implement code or create JSON or manuals.
 license: MIT
 metadata:
   workflow: speclet
@@ -9,19 +9,25 @@ metadata:
 
 # Speclet Plan
 
-Decidir **cómo construir el cambio** y dividirlo en tareas ejecutables sin inventar requisitos.
+Decide **how to build the change** and break it into executable tasks without inventing requirements.
 
-## Entrada y enfoque
+## Language and Communication Rules
 
-Resolver `.speclet/changes/<nombre>/spec.md` desde la ruta indicada. Sin ruta, elegir el único spec aprobado cuyo cambio no esté terminado; si hay varios, preguntar. No seleccionar estado del workflow anterior.
+- **Always speak, ask questions, and interact with the user in Spanish.**
+- **Write `plan.md` and `tasks.md` in Spanish.**
+- Preserve standard technical terms in English ("log", "health", "endpoint", "middleware", "worktree", "payload", "token", "gate", "diff", etc.). Do not translate technical jargon awkwardly.
 
-Leer spec, instrucciones aplicables, implementaciones, consumidores, pruebas y comandos reales. Cargar `ponytail` y `caveman` desde sus entrypoints instalados: simplicidad para el enfoque y concisión sólo para el chat en español. La activación prestada termina al salir de Speclet, sin apagar un modo previo activado expresamente por el usuario. No abreviar documentos ni preguntas.
+## Input and Approach
 
-Si falta aprobación del spec, resolverla mediante `$speclet-draft`, sin inventarla. Reutilizar decisiones autorizadas y preguntar sólo por nuevas disyuntivas materiales. Investigar externamente cuando falte información necesaria o se haya solicitado.
+Resolve `.speclet/changes/<name>/spec.md` from the given path. If no path is given, select the single approved spec whose change is not finished; if multiple exist, ask the user. Do not select status from the previous workflow.
 
-## Plan técnico
+Read the spec, applicable instructions, implementations, consumers, tests, and actual commands. Load `ponytail` and `caveman` from their installed entrypoints: simplicity for approach, conciseness only for Spanish chat. Borrowed activation ends upon exiting Speclet, without turning off any mode previously activated by the user. Do not abbreviate documents or questions.
 
-Escribir `plan.md` junto al spec, sin repetir su aceptación:
+If spec approval is missing, resolve it via `$speclet-draft` without assuming it. Reuse authorized decisions and ask only about new material dilemmas. Research externally when necessary information is missing or requested.
+
+## Technical Plan
+
+Write `plan.md` alongside the spec, without repeating its acceptance criteria:
 
 ```markdown
 # Plan técnico
@@ -46,13 +52,13 @@ Puntos críticos de inspección, casos límite (entradas vacías/extremas, fallo
 Autorización real existente o decisiones pendientes antes de ejecutar.
 ```
 
-Precisar firmas, esquemas o secuencias donde la coordinación lo necesite. No crear abstracciones, dependencias u opciones para un futuro hipotético. Fijar los contratos de fallo necesarios dentro del plan y los AC, sin manuales independientes.
+Specify signatures, schemas, or sequences where coordination requires it. Do not create abstractions, dependencies, or options for hypothetical future needs. Define required failure contracts within the plan and AC, without separate manuals.
 
-No instalar paquetes, crear worktrees, editar código ni mutar servicios durante la planificación. Ejecutar pruebas de lectura sólo si aclaran una incertidumbre; registrar únicamente evidencia real.
+Do not install packages, create worktrees, edit code, or mutate services during planning. Run read-only checks only if they resolve an uncertainty; record only real evidence.
 
-## Tareas ejecutables
+## Executable Tasks
 
-Escribir `tasks.md` con estado global Pendiente y una lista ordenada por dependencias. Cada tarea produce un comportamiento o contrato comprobable:
+Write `tasks.md` with overall status `Pendiente` and an ordered dependency list. Each task produces a testable behavior or contract:
 
 ```markdown
 # Tareas
@@ -67,15 +73,15 @@ Tarea activa: ninguna
   - Evidencia, revisión y commit: pendientes
 ```
 
-- Cada AC y cada foco de revisión o caso límite debe estar cubierto obligatoriamente por una tarea y verificación con tests. Registrar límites no verificables antes de ejecutar, sin prometer cobertura ficticia.
-- Incluir pruebas junto al cambio; no tests que sólo reflejen la implementación o prueben que algo se ejecutó.
-- Una tarea consumidora debe conocer los contratos que produce su dependencia cuando admitan varias interpretaciones.
-- Dependencias y orden de la lista bastan: no imponer prioridades, quality budgets, sesiones, catálogos ni estados JSON.
-- Si se actualiza un plan en curso, conservar tareas cerradas y su evidencia. Un cambio material de alcance necesita aprobación antes de ejecutar.
-- Mantener los tres Markdown locales mediante la exclusión establecida por draft. No crear baseline, progress, reviews, diary o handoff separados.
+- Every AC and every focus point/edge case must be covered by a task and verified with tests. Document unverifiable boundaries before execution without promising fictitious coverage.
+- Include tests alongside the change; not tests that merely mirror implementation or prove that code executed.
+- A consumer task must know the contracts produced by its dependency when multiple interpretations are possible.
+- Dependencies and list order suffice: do not impose priorities, quality budgets, sessions, catalogs, or JSON status.
+- If updating an in-progress plan, preserve completed tasks and their evidence. A material change in scope requires approval before execution.
+- Keep the three local Markdown files excluded via the Git exclude established by draft. Do not create separate baseline, progress, reviews, diary, or handoff files.
 
-## Salida
+## Output
 
-Entregar enlaces al plan/tareas y decisiones pendientes. La petición explícita de ejecutar `$speclet-loop` sobre un plan completo lo autoriza, sin otra confirmación equivalente. La creación o cambio de worktree sigue requiriendo la consulta separada del loop.
+Provide clickable links to the plan/tasks and outline any pending decisions. An explicit user request to run `$speclet-loop` on a complete plan authorizes it, without requiring redundant confirmation. Creating or switching worktrees still requires the separate consultation in loop.
 
-No crear un cuarto documento de diseño: requisitos en spec, enfoque en plan y avance/evidencia en tasks. No leer, migrar ni borrar documentos de proyectos del workflow anterior.
+Do not create a fourth design document: requirements in spec, approach in plan, progress/evidence in tasks. Do not read, migrate, or delete project files from the legacy workflow.

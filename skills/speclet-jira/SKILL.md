@@ -1,6 +1,6 @@
 ---
 name: speclet-jira
-description: Preparar historias o mensajes Jira breves desde un pedido o un cambio Speclet Markdown, sólo cuando se soliciten. No implementa código ni publica en Jira automáticamente.
+description: Prepare concise Jira stories or completion messages from a request or Speclet Markdown change, only when requested. Does not implement code or automatically publish to Jira.
 license: MIT
 metadata:
   workflow: speclet
@@ -9,25 +9,31 @@ metadata:
 
 # Speclet Jira
 
-Preparar una historia entendible o comunicar resultados con evidencia real. Es opcional: el loop no genera mensajes Jira por defecto.
+Draft a clear user story or communicate completion results with verifiable evidence. This step is entirely optional: Speclet Loop does not generate Jira handoffs by default.
 
-## Entrada
+## Language and Communication Rules
 
-- Usar el pedido y la ruta del cambio indicada. Leer `spec.md` y sólo lo necesario de `plan.md` y `tasks.md`.
-- Si hay varios cambios candidatos, pedir elegir. Sin contexto Speclet, preparar la historia desde el pedido sin obligar a iniciar el workflow.
-- Cargar expresamente `caveman` para abreviar sólo el chat en español. La activación prestada termina al salir de Speclet; respetar modos previos activados expresamente por el usuario. Redactar tickets y preguntas en lenguaje normal.
-- Preguntar sólo por datos que cambien destinatario, alcance o aceptación. No imponer entrevista, clave Jira ni separación frontend/backend cuando no corresponda.
+- **Always speak, ask questions, and interact with the user in Spanish.**
+- **Write Jira stories, summaries, and completion messages in Spanish.**
+- Preserve standard technical terms in English ("log", "health", "endpoint", "middleware", "token", "payload", "pipeline", etc.). Do not translate technical jargon awkwardly.
 
-## Historia o mensaje
+## Input
 
-Para una historia nueva: título concreto, problema/resultado, alcance y criterios observables. Separar frontend/backend sólo si hay entregables independientes. No copiar detalles internos del plan que no ayuden al lector.
+- Use the user request and specified change path. Read `spec.md` and only the necessary parts of `plan.md` and `tasks.md`.
+- If multiple candidate changes exist, ask the user to pick one. Without Speclet context, draft the story directly from the request without forcing the workflow to initialize.
+- Load `caveman` to keep Spanish chat concise. Borrowed activation ends upon exiting Speclet; respect any mode previously activated by the user. Draft tickets and questions in natural language.
+- Ask only for information that changes the recipient, scope, or acceptance criteria. Do not force an interview, Jira key, or frontend/backend split when unnecessary.
 
-Para una entrega: comportamiento implementado, pruebas ejecutadas, commits y pendientes reales. Distinguir terminado, bloqueado y no verificado. Contrastar evidencia; una casilla marcada no demuestra que una prueba pasó.
+## Story or Completion Message
 
-## Salida y límites
+For a new story: concrete title, problem/desired outcome, scope, and observable criteria. Split frontend/backend only when independent deliverables exist. Do not copy internal planning details that do not benefit the reader.
 
-Por defecto, entregar el texto en el chat. Escribir archivo sólo cuando se solicite una ruta. No generar directorios de handoff, mensajes MR ni otros informes automáticamente.
+For a completion handoff: implemented behavior, executed tests, commit list, and genuine pending items. Distinguish completed, blocked, and unverified work. Verify evidence; a checked box does not prove that a test passed.
 
-Redactar no autoriza publicar. Usar herramientas para crear o modificar tickets sólo cuando el usuario solicite esa acción y el destino sea claro. No enviar secretos ni información operativa sensible.
+## Output and Boundaries
 
-No leer, convertir, mover ni borrar documentos del workflow anterior.
+Deliver text in chat by default. Write to a file only when an explicit path is requested. Do not create handoff directories, MR messages, or extra reports automatically.
+
+Drafting does not authorize publishing. Use tools to create or update tickets only when the user explicitly requests it and the destination is clear. Never post secrets or sensitive operational data.
+
+Do not read, convert, move, or delete documents from legacy workflows.

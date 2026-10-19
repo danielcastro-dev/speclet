@@ -48,11 +48,11 @@ Instala y configura las skills de Speclet en este entorno:
    (o a nivel de proyecto: npx -y skills add danielcastro-dev/speclet -y)
 
 2. Confirma las skills disponibles:
-   - Speclet Core: speclet-draft, speclet-plan, speclet-loop, speclet-archive, speclet-jira
+   - Speclet Core: speclet-rules, speclet-draft, speclet-plan, speclet-loop, speclet-archive, speclet-jira
    - Ingenieria independiente: systematic-debugging, test-driven-development, verification-before-completion, production-monitoring
    - Modos auxiliares: ponytail, caveman
 
-3. Avisame cuando este listo para comenzar con $speclet-draft.
+3. Avisame cuando este listo para comenzar con $speclet-draft (o $speclet-rules si el proyecto es nuevo).
 ```
 
 ---
@@ -60,30 +60,31 @@ Instala y configura las skills de Speclet en este entorno:
 ## Flujo de trabajo
 
 ```text
-  speclet-draft         speclet-plan          speclet-loop          speclet-archive (o jira)
-  (Definicion)    ──>  (Plan tecnico)   ──>   (Ejecucion)     ──>    (Archivado y orden)
-       │                     │                     │                     │
-       ▼                     ▼                     ▼                     ▼
-    spec.md               plan.md               tasks.md              Historico en
-  (Criterios AC)      (Focos/Limites)       (Commits locales)       archive/ e index
+  speclet-rules         speclet-draft         speclet-plan          speclet-loop          speclet-archive (o jira)
+  (Config inicial) ──>  (Definicion)    ──>  (Plan tecnico)   ──>   (Ejecucion)     ──>    (Archivado y orden)
+       │                     │                     │                     │                     │
+       ▼                     ▼                     ▼                     ▼                     ▼
+    rules.md              spec.md               plan.md               tasks.md              Historico en
+ (Invariantes/DB)      (Criterios AC)      (Focos/Limites)       (Commits locales)       archive/ e index
 ```
 
-1. **`$speclet-draft`**: Analiza el proyecto (incluyendo la constitución del repo si existe) y aclara requisitos mediante preguntas breves de seleccion multiple antes de redactar `spec.md`.
-2. **`$speclet-plan`**: Convierte el spec aprobado en un plan tecnico minimo (`plan.md`) y lista de tareas ejecutables (`tasks.md`). Respeta las invariantes del repo (reutilización de helpers según Ponytail, claves PK/FK, índices de BD) y fija focos de revisión con tests obligatorios.
-3. **`$speclet-loop`**: Ejecuta las tareas con worktree consultado, ciclo TDD, revision independiente por subagente, resolucion agil de dudas tecnicas menores ("Rulings, not stalls"), rúbrica 3D de cierre y commits locales.
-4. **`$speclet-archive`**: Archiva el cambio terminado en `.speclet/archive/YYYY-MM-<nombre>/` y actualiza el índice cronológico para mantener `.speclet/changes/` despejado.
-5. **`$speclet-jira`** *(Opcional)*: Prepara la historia o reporte de entrega basado en la evidencia y commits reales cuando se requiere traspaso.
+1. **`$speclet-rules`** *(Opcional / Por repositorio)*: Inspecciona el stack y genera/actualiza `.speclet/rules.md` con las reglas de oro del repo (no duplicar lógica según Ponytail, claves PK/FK, índices obligatorios de BD y seguridad).
+2. **`$speclet-draft`**: Analiza el proyecto respetando `rules.md` y aclara requisitos mediante preguntas breves de seleccion multiple antes de redactar `spec.md`.
+3. **`$speclet-plan`**: Convierte el spec aprobado en un plan tecnico minimo (`plan.md`) y lista de tareas ejecutables (`tasks.md`). Respeta las invariantes del repo (reutilización de helpers, índices de BD) y fija focos de revisión con tests obligatorios.
+4. **`$speclet-loop`**: Ejecuta las tareas con worktree consultado, ciclo TDD, revision independiente por subagente, resolucion agil de dudas tecnicas menores ("Rulings, not stalls"), rúbrica 3D de cierre y commits locales.
+5. **`$speclet-archive`**: Archiva el cambio terminado en `.speclet/archive/YYYY-MM-<nombre>/` y actualiza el índice cronológico para mantener `.speclet/changes/` despejado.
+6. **`$speclet-jira`** *(Opcional)*: Prepara la historia o reporte de entrega basado en la evidencia y commits reales cuando se requiere traspaso.
 
 ---
 
-## Invariantes del Proyecto (`constitution.md`)
+## Reglas del Proyecto (`rules.md`)
 
-Puedes crear un archivo `.speclet/constitution.md` (o `constitution.md` en la raíz) con las reglas de oro de tu repositorio:
-- **Filosofía Ponytail:** No duplicar lógica; si una función se repite, extraer un helper reutilizable.
-- **Base de datos:** Reglas de Primary Keys, Foreign Keys explícitas con restricciones, e índices obligatorios en columnas de búsqueda o filtros WHERE frecuentes.
+Ejecuta `$speclet-rules` para generar o personalizar `.speclet/rules.md` (o `rules.md` en la raíz) con las directrices de tu repositorio:
+- **Filosofía Ponytail:** No duplicar lógica; si una función o patrón se repite, extraer un helper reutilizable.
+- **Base de datos:** Reglas de Primary Keys, Foreign Keys explícitas con restricciones de integridad, e índices obligatorios en columnas de búsqueda o filtros WHERE frecuentes.
 - **Arquitectura:** Esquema de respuestas de endpoints, redacción de tokens en logs y políticas de testing.
 
-*Consulta la plantilla lista para usar en [`templates/constitution.example.md`](./templates/constitution.example.md).*
+*Consulta la plantilla en [`templates/rules.example.md`](./templates/rules.example.md).*
 
 ---
 
@@ -93,6 +94,7 @@ Puedes crear un archivo `.speclet/constitution.md` (o `constitution.md` en la ra
 
 | Skill | Invocacion | Proposito |
 | :--- | :--- | :--- |
+| **`speclet-rules`** | `$speclet-rules` | Inicializa o actualiza `rules.md` con las reglas de oro del repo y de base de datos. |
 | **`speclet-draft`** | `$speclet-draft` | Aclara requisitos mediante opciones multiples y genera `spec.md`. |
 | **`speclet-plan`** | `$speclet-plan` | Define arquitectura minima, casos limite, reglas de DB/Ponytail y tareas en `tasks.md`. |
 | **`speclet-loop`** | `$speclet-loop` | Ejecuta de forma autonoma con TDD, revision independiente, rúbrica 3D y commits atomicos. |
@@ -130,6 +132,7 @@ speclet/
 ├── bin/
 │   └── cli.js                     # CLI ligero para listar o instalar skills
 ├── skills/
+│   ├── speclet-rules/             # Inicializacion de reglas de repo y DB
 │   ├── speclet-draft/             # Definicion guiada de requerimientos
 │   ├── speclet-plan/              # Planificacion tecnica con casos limite
 │   ├── speclet-loop/              # Ejecucion autonoma, TDD y revision
@@ -142,7 +145,7 @@ speclet/
 │   ├── ponytail/                  # Pragmatismo senior (Dietrich Gebert)
 │   └── caveman/                   # Chat conciso (Julius Brussee)
 ├── templates/
-│   └── constitution.example.md    # Plantilla de invariantes de repo y DB
+│   └── rules.example.md           # Plantilla de invariantes de repo y DB
 ├── package.json
 ├── LICENSE
 └── README.md

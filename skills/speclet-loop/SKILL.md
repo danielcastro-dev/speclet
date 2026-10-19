@@ -41,7 +41,7 @@ When creating the worktree, carry over only the three local Markdown files and a
 
 ## Implement and Verify
 
-Make the smallest complete change: reuse existing code and preserve public contracts, validation, and error handling. Check compliance with the project constitution (`.speclet/constitution.md` or `constitution.md`) when present: favor helper extraction and logic reuse over duplication (Ponytail), ensure queries leverage defined database indexes/keys, and enforce security/sanitization invariants. Adjust affected consumers, tests, and fixtures; do not refactor unrelated areas.
+Make the smallest complete change: reuse existing code and preserve public contracts, validation, and error handling. Check compliance with the project rules (`.speclet/rules.md`, `rules.md`, or `.speclet/constitution.md`) when present: favor helper extraction and logic reuse over duplication (Ponytail), ensure queries leverage defined database indexes/keys, and enforce security/sanitization invariants. Adjust affected consumers, tests, and fixtures; do not refactor unrelated areas.
 
 Execute task verifications and assert AC compliance. Non-trivial logic and regressions require discriminating tests; trivial edits do not warrant artificial suites. If justified by a critical branch, temporarily alter a condition to ensure the test fails; restore and re-verify before review or commit. Do not disable tests or pass mocks off as evidence of real external providers.
 

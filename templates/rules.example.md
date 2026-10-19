@@ -1,7 +1,7 @@
-# Constitución del Proyecto (Invariantes y Reglas de Oro)
+# Reglas del Proyecto (rules.md)
 
 Este archivo define las reglas arquitectónicas, de modelado de datos y convenciones de código **no negociables** para este repositorio.
-Los agentes y desarrolladores deben consultar y respetar estas directrices en `speclet-draft`, `speclet-plan` y `speclet-loop`.
+Los agentes y desarrolladores deben consultar y respetar estas directrices en `speclet-draft`, `speclet-plan` y `speclet-loop`. Puede generarse o actualizarse mediante `$speclet-rules`.
 
 ---
 

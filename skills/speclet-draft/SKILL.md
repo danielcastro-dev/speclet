@@ -21,11 +21,11 @@ Define **what changes and how we will know it works**. Do not implement or pick 
 
 - Load installed skills `ponytail` and `caveman` by reading their `SKILL.md`. Ponytail guides simplicity and reuse; Caveman keeps Spanish chat concise. This borrowed activation ends upon exiting Speclet; respect any mode previously activated by the user. Documents, questions, commands, and errors keep normal grammar and exact data. Do not activate plugins, hooks, or proxies.
 - Reuse existing code and dependencies. Discard speculative extras while preserving requested behavior and verifications.
-- Read existing policies only when relevant. Do not demand or generate manuals, central catalogs, baseline.md, or project-context.md.
+- Read existing policies and the project constitution (`.speclet/constitution.md` or `constitution.md`) when present. Treat its guidelines (Ponytail logic reuse, DB schema invariants, naming conventions) as non-negotiable rules. Do not demand or generate manuals, central catalogs, baseline.md, or project-context.md.
 
 ## 1. First: Understand the Project
 
-Before asking requirement questions, perform a targeted inspection: applicable instructions, manifests, affected area structure, entry points, consumers, tests, and conventions. Trace relevant behavior without routinely walking the entire repo or running services just to prepare questions.
+Before asking requirement questions, perform a targeted inspection: project constitution (`.speclet/constitution.md` or `constitution.md`), applicable instructions, manifests, affected area structure, entry points, consumers, tests, and conventions. Trace relevant behavior without routinely walking the entire repo or running services just to prepare questions.
 
 Briefly summarize what exists, where the change fits, and which decisions remain open. Support key facts with project file paths. Do not ask the user about technologies, files, or behaviors that this inspection can answer. If no project is accessible, state this limit and ask only for necessary context.
 

@@ -41,7 +41,7 @@ When creating the worktree, carry over only the three local Markdown files and a
 
 ## Implement and Verify
 
-Make the smallest complete change: reuse existing code and preserve public contracts, validation, and error handling. Adjust affected consumers, tests, and fixtures; do not refactor unrelated areas.
+Make the smallest complete change: reuse existing code and preserve public contracts, validation, and error handling. Check compliance with the project constitution (`.speclet/constitution.md` or `constitution.md`) when present: favor helper extraction and logic reuse over duplication (Ponytail), ensure queries leverage defined database indexes/keys, and enforce security/sanitization invariants. Adjust affected consumers, tests, and fixtures; do not refactor unrelated areas.
 
 Execute task verifications and assert AC compliance. Non-trivial logic and regressions require discriminating tests; trivial edits do not warrant artificial suites. If justified by a critical branch, temporarily alter a condition to ensure the test fails; restore and re-verify before review or commit. Do not disable tests or pass mocks off as evidence of real external providers.
 
@@ -91,4 +91,4 @@ Execute the planned integration verification. Before declaring completion, perfo
 
 If the change spans multiple components or contracts, commission an independent review of the combined diff. If closing verification fails, record the blocker in `tasks.md`; do not mark complete or automatically revert valid task commits.
 
-Update overall status to `Terminado` in `tasks.md` only after successful closing. Reply to the user in Spanish with the outcome, commit list, test results, and any genuine limitations. Provide ready-to-run post-merge commands (merge, worktree/branch cleanup, and verification commands) ready to copy or execute on request, without forcing interactive execution. Do not create separate diaries, handoff files, or extra reports. Push, PR, merge, deployments, and publishing require explicit user authorization; do not execute them automatically or force interactive prompts to do so.
+Update overall status to `Terminado` in `tasks.md` only after successful closing. Reply to the user in Spanish with the outcome, commit list, test results, and any genuine limitations. Offer `$speclet-archive` to cleanly move `.speclet/changes/<name>/` to `.speclet/archive/YYYY-MM-<name>/` without cluttering the repository. Provide ready-to-run post-merge commands (merge, worktree/branch cleanup, and verification commands) ready to copy or execute on request, without forcing interactive execution. Do not create separate diaries, handoff files, or extra reports. Push, PR, merge, deployments, and publishing require explicit user authorization; do not execute them automatically or force interactive prompts to do so.

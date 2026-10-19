@@ -21,7 +21,9 @@ Decide **how to build the change** and break it into executable tasks without in
 
 Resolve `.speclet/changes/<name>/spec.md` from the given path. If no path is given, select the single approved spec whose change is not finished; if multiple exist, ask the user. Do not select status from the previous workflow.
 
-Read the spec, applicable instructions, implementations, consumers, tests, and actual commands. Load `ponytail` and `caveman` from their installed entrypoints: simplicity for approach, conciseness only for Spanish chat. Borrowed activation ends upon exiting Speclet, without turning off any mode previously activated by the user. Do not abbreviate documents or questions.
+Read the spec, applicable instructions, implementations, consumers, tests, and actual commands. Check for the project constitution (`.speclet/constitution.md` or `constitution.md`). Strictly adhere to its rules: verify that the planned approach reuses existing code instead of duplicating logic (extract shared helpers when appropriate), respect database schema invariants (primary keys, foreign keys, required indexes), and maintain architectural contracts.
+
+Load `ponytail` and `caveman` from their installed entrypoints: simplicity for approach, conciseness only for Spanish chat. Borrowed activation ends upon exiting Speclet, without turning off any mode previously activated by the user. Do not abbreviate documents or questions.
 
 If spec approval is missing, resolve it via `$speclet-draft` without assuming it. Reuse authorized decisions and ask only about new material dilemmas. Research externally when necessary information is missing or requested.
 

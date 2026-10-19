@@ -1,0 +1,4 @@
+interface:
+  display_name: "Speclet Draft"
+  short_description: "Leer proyecto y aclarar con selección múltiple"
+  default_prompt: "Usa $speclet-draft: primero lee el proyecto, después aclara decisiones con selección múltiple y guarda el spec.md."

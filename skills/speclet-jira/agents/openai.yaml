@@ -1,0 +1,4 @@
+interface:
+  display_name: "Speclet Jira"
+  short_description: "Preparar historias y mensajes Jira breves"
+  default_prompt: "Usa $speclet-jira para preparar el texto Jira de este cambio."

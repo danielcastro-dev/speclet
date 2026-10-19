@@ -1,0 +1,4 @@
+interface:
+  display_name: "Speclet Plan"
+  short_description: "Plan técnico y tareas Markdown verificables"
+  default_prompt: "Usa $speclet-plan para desglosar el spec aprobado en plan y tareas."

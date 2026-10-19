@@ -1,459 +1,157 @@
 # Speclet
 
-Lightweight spec-driven development workflow for LLM-assisted coding sessions.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+[![skills.sh](https://img.shields.io/badge/skills.sh-danielcastro--dev%2Fspeclet-black)](https://skills.sh)
+[![Compatible with](https://img.shields.io/badge/Agentes-Claude%20Code%20%7C%20Codex%20%7C%20Cursor%20%7C%20Antigravity-purple)]()
 
-**⚡ Quick Install:**
-```powershell
-# Windows
-powershell -ExecutionPolicy Bypass -Command "IEX (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/danielcastro-dev/speclet/main/install-universal.ps1').Content"
-```
+Flujo personal de desarrollo guiado por especificaciones para agentes de IA (Claude Code, OpenAI Codex, Antigravity, Cursor, Windsurf).
+
+Diseñado para ser directo, ligero, centrado en Markdown y sin sobreingeniería.
+
+---
+
+## Filosofia
+
+- **Markdown puro**: Sin esquemas JSON rígidos ni metadatos innecesarios.
+- **Seleccion multiple**: Preguntas cortas con opciones concretas para pair programming agil.
+- **Worktrees consultados**: Desarrollo aislado en ramas limpias sin tocar main sin autorizacion.
+- **Verificacion con evidencia**: Pruebas antes de commits ("evidence before assertions").
+- **Simplicidad**: Menor cambio completo posible, eliminando relleno conversacional.
+
+---
+
+## Como instalar
+
+### Opcion 1: Con npx skills (Recomendado)
+
+Utiliza el gestor universal de skills para agentes ([skills.sh](https://skills.sh)):
 
 ```bash
-# Linux/macOS
-bash <(curl -s https://raw.githubusercontent.com/danielcastro-dev/speclet/main/install-universal.sh)
+# Global para todos tus agentes (Codex, Claude Code, Cursor, etc.):
+npx skills add danielcastro-dev/speclet -g
+
+# O solo para el proyecto actual (.agents/skills/):
+npx skills add danielcastro-dev/speclet
 ```
 
-See [INSTALLATION.md](INSTALLATION.md) for more options and details.
+---
 
-## What is Speclet?
+### Opcion 2: Prompt para que tu LLM lo instale por ti
 
-Speclet is a structured workflow for developing features with AI assistants (Claude, GPT, etc.). It provides:
+Copia y pega este prompt en el chat de tu agente:
 
-- **Phased approach**: Draft (markdown) → Spec (JSON) → Implementation → Archive
-- **Tiered complexity**: Scale documentation based on task size
-- **Context persistence**: Decisions and patterns survive across sessions
-- **Atomic commits**: 1 story = 1 commit
-- **Trackable progress**: JSON specs with `passes: true/false` for each story
-- **Autonomous loop**: Run unattended with model fallback and build verification
+```text
+Instala y configura las skills de Speclet en este entorno:
 
-## Quick Start
+1. Ejecuta en terminal:
+   npx -y skills add danielcastro-dev/speclet -g -y
+   (o a nivel de proyecto: npx -y skills add danielcastro-dev/speclet -y)
 
-### Installation in Your Project
+2. Confirma las skills disponibles:
+   - Speclet Core: speclet-draft, speclet-plan, speclet-loop, speclet-jira
+   - Ingenieria independiente: systematic-debugging, test-driven-development, verification-before-completion, production-monitoring
+   - Modos auxiliares: ponytail, caveman
 
-#### Option 1: One-Line Installation (Recommended)
-
-**Windows (PowerShell):**
-```powershell
-powershell -ExecutionPolicy Bypass -Command "IEX (Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/danielcastro-dev/speclet/main/install-universal.ps1').Content"
+3. Avisame cuando este listo para comenzar con $speclet-draft.
 ```
 
-**Linux/macOS (bash):**
-```bash
-bash <(curl -s https://raw.githubusercontent.com/danielcastro-dev/speclet/main/install-universal.sh)
+---
+
+## Flujo de trabajo
+
+```text
+  speclet-draft         speclet-plan          speclet-loop          speclet-jira
+  (Definicion)    ──>  (Plan tecnico)   ──>   (Ejecucion)     ──>    (Entrega)
+       │                     │                     │                     │
+       ▼                     ▼                     ▼                     ▼
+    spec.md               plan.md               tasks.md              Ticket o
+  (Criterios AC)      (Focos/Limites)       (Commits locales)        mensaje PR
 ```
 
-#### Option 2: Clone and Install
+1. **`$speclet-draft`**: Analiza el proyecto y aclara requisitos mediante preguntas breves de seleccion multiple antes de redactar `spec.md`.
+2. **`$speclet-plan`**: Convierte el spec aprobado en un plan tecnico minimo (`plan.md`) y lista de tareas ejecutables (`tasks.md`), incorporando focos de revision y casos limite con tests obligatorios.
+3. **`$speclet-loop`**: Ejecuta las tareas con worktree consultado, ciclo TDD, revision independiente por subagente, resolucion agil de dudas tecnicas menores ("Rulings, not stalls") y commits locales.
+4. **`$speclet-jira`** *(Opcional)*: Prepara la historia o reporte de entrega basado en la evidencia y commits reales.
 
-**Windows (PowerShell):**
-```powershell
-git clone https://github.com/danielcastro-dev/speclet.git _speclet-installer
-cd _speclet-installer
-powershell -ExecutionPolicy Bypass -File .\install-universal.ps1
-cd ..
-Remove-Item -Recurse -Force _speclet-installer
+---
+
+## Catalogo de Skills
+
+### Speclet Core
+
+| Skill | Invocacion | Proposito |
+| :--- | :--- | :--- |
+| **`speclet-draft`** | `$speclet-draft` | Aclara requisitos mediante opciones multiples y genera `spec.md`. |
+| **`speclet-plan`** | `$speclet-plan` | Define arquitectura minima, casos limite y tareas en `tasks.md`. |
+| **`speclet-loop`** | `$speclet-loop` | Ejecuta de forma autonoma con TDD, revision independiente y commits atomicos. |
+| **`speclet-jira`** | `$speclet-jira` | Genera tickets o reportes de cierre con evidencia real. |
+
+---
+
+### Habilidades de Ingenieria Independientes
+
+Skills autonomas para calidad, depuracion y monitoreo en produccion:
+
+| Skill | Proposito | Regla central |
+| :--- | :--- | :--- |
+| **`systematic-debugging`** | Aislamiento de causa raiz ante bugs o fallos de CI. | Prohibido proponer codigo sin investigacion de causa raiz previa. |
+| **`test-driven-development`** | Desarrollo guiado por pruebas (TDD). | Escribe el test primero, comprueba que falle y luego implementa lo minimo. |
+| **`verification-before-completion`** | Verificacion con evidencia fresca antes de commits. | Prohibido afirmar exito sin ejecucion del comando y salida exit 0 en el turno. |
+| **`production-monitoring`** | Observabilidad en produccion, OpenTelemetry, trazas, logs estructurados, metricas y SLOs. | La observabilidad es fundacional desde el dia uno, no un agregado posterior. |
+
+---
+
+### Modos Auxiliares
+
+| Skill | Proposito |
+| :--- | :--- |
+| **`ponytail`** | Desarrollador senior pragmatico: el menor cambio que resuelve el problema por completo, sin sobreingenieria ni codigo especulativo. |
+| **`caveman`** | Respuestas concisas y directas al grano en espanol, eliminando el relleno conversacional sin perder rigor tecnico. |
+
+---
+
+## Estructura del repositorio
+
+```text
+speclet/
+├── bin/
+│   └── cli.js                     # CLI ligero para listar o instalar skills
+├── skills/
+│   ├── speclet-draft/             # Definicion guiada de requerimientos
+│   ├── speclet-plan/              # Planificacion tecnica con casos limite
+│   ├── speclet-loop/              # Ejecucion autonoma, TDD y revision
+│   ├── speclet-jira/              # Traspaso y tickets con evidencia
+│   ├── systematic-debugging/      # Investigacion de causa raiz (Superpowers)
+│   ├── test-driven-development/   # Ciclo TDD (Superpowers)
+│   ├── verification-before-completion/ # Puerta de evidencia previa al commit (Superpowers)
+│   ├── production-monitoring/     # Observabilidad, OTEL y metricas en produccion
+│   ├── ponytail/                  # Pragmatismo senior (Dietrich Gebert)
+│   └── caveman/                   # Chat conciso (Julius Brussee)
+├── package.json
+├── LICENSE
+└── README.md
 ```
 
-**Linux/macOS (bash):**
-```bash
-git clone https://github.com/danielcastro-dev/speclet.git _speclet-installer
-cd _speclet-installer
-bash install-universal.sh
-cd ..
-rm -rf _speclet-installer
-```
+---
 
-#### Option 3: Manual Installation
+## Creditos y Atribuciones
 
-1. Copy the `skills/` folder to `.opencode/skill/`
-2. Copy `GUIDE.md` and `loop.md` to `.speclet/`
-3. Copy template files to `.speclet/templates/`
-4. Copy `speclet.sh` and `speclet.ps1` to your project root
+Este repositorio representa el flujo de trabajo personal de **[Daniel Castro](https://github.com/danielcastro-dev)**, publicado bajo licencia **MIT**.
 
-### What Gets Installed
+Incluye e integra componentes desarrollados por la comunidad de software libre:
 
-The installer creates the following structure:
-```
-your-project/
-├── .speclet/
-│   ├── GUIDE.md                  # LLM instructions (permanent)
-│   ├── loop.md                   # Loop runner documentation
-│   ├── DECISIONS.md              # Architecture decisions (tracked)
-│   ├── templates/                # Template files
-│   ├── tickets/                  # Individual task tickets
-│   └── archive/                  # Completed work
-├── .opencode/skill/
-│   ├── speclet-draft/            # Feature draft skill
-│   ├── speclet-spec/             # Spec generation skill
-│   ├── speclet-council/          # Review/validation skill
-│   ├── speclet-ticket/           # Ticket generation skill
-│   └── speclet-learn/            # Learning extraction skill
-├── .codex/skills/
-│   ├── speclet-draft/            # OpenAI Codex: Feature draft skill
-│   ├── speclet-spec/             # OpenAI Codex: Spec generation skill
-│   ├── speclet-council/          # OpenAI Codex: Review/validation skill
-│   ├── speclet-ticket/           # OpenAI Codex: Ticket generation skill
-│   └── speclet-learn/            # OpenAI Codex: Learning extraction skill
-├── speclet.sh                    # Loop runner (Linux/macOS)
-├── speclet.ps1                   # Loop runner (Windows)
-└── .gitignore                    # Updated with .speclet/ rules
-```
+- **Superpowers (`systematic-debugging`, `test-driven-development`, `verification-before-completion`)**:  
+  Creados por **Jesse Vincent** ([obra/superpowers](https://github.com/obra/superpowers)) bajo Licencia MIT.  
+  *Nota:* Estas skills son propiedad intelectual de sus autores originales y se incorporan como dependencias independientes recomendadas.
 
-### Supported Platforms
+- **Production Monitoring (`production-monitoring`)**:  
+  Skill de observabilidad y monitoreo en produccion basado en estandares OpenTelemetry, SRE y patrones de observabilidad para servicios distribuidos.
 
-- **OpenCode Skills** (.opencode/skill/)
-- **OpenAI Codex Skills** (.codex/skills/)
-- **OpenCode Autonomous Loop** (speclet.sh / speclet.ps1)
+- **Ponytail (`ponytail`)**:  
+  Creado por **Dietrich Gebert** ([DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)) bajo Licencia MIT.
 
-### Prerequisites
+- **Caveman (`caveman`)**:  
+  Creado por **Julius Brussee** ([JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman)) bajo Licencia MIT / Apache 2.0.
 
-- **OpenCode** or **OpenAI Codex** installed on your system
-- **Git** (optional; installer falls back to ZIP download if not available)
-- **PowerShell 5.0+** (Windows) or **bash 4.0+** (Linux/macOS)
-
-### Project Structure
-
-```
-your-project/
-├── .opencode/skill/              # OpenCode skills
-│   ├── speclet-draft/SKILL.md
-│   ├── speclet-council/SKILL.md
-│   ├── speclet-spec/SKILL.md
-│   ├── speclet-ticket/SKILL.md
-│   └── ralph-loop (built-in command)
-├── .speclet/
-│   ├── GUIDE.md                  # LLM instructions (permanent)
-│   ├── DECISIONS.md              # Architecture decisions (permanent)
-│   ├── config.json               # Loop configuration
-│   ├── loop.md                   # Manual loop instructions
-│   ├── templates/                # Templates for docs
-│   ├── tickets/                  # Ticket backlog
-│   │   ├── index.json            # Ticket index with status
-│   │   ├── TICKET-1/             # Per-ticket folder
-│   │   │   ├── ticket.json       # Ticket metadata
-│   │   │   ├── ticket-draft.md   # Context from general draft
-│   │   │   ├── draft.md          # Refined draft (after speclet-draft)
-│   │   │   └── spec.json         # Spec (after speclet-spec)
-│   │   └── TICKET-2/
-│   │       └── ...
-│   └── archive/                  # Completed specs (non-ticket workflow)
-└── speclet.ps1                   # PowerShell runner (Windows-only)
-```
-
-## Usage
-
-### Using Skills (Recommended)
-
-| Skill | Command | Purpose |
-|-------|---------|---------|
-| **speclet-draft** | `Use the speclet-draft skill for [feature]` | Generate draft.md with clarifying questions |
-| **speclet-council** | `Use the speclet-council skill` | Adversarial review of draft/spec/ticket via plan-reviewer agents |
-| **speclet-spec** | `Use the speclet-spec skill` | Convert draft to spec.json |
-| **speclet-ticket** | `Use the speclet-ticket skill` | Split draft into individual tickets |
-| **/ralph-loop** | `/ralph-loop` | Run continuous implementation loop |
-| **speclet-learn** | `Use the speclet-learn skill` | Generate lessons from completed stories |
-
-### Complete Workflow
-
-```
-# Step 1: Create draft with clarifying questions
-Use the speclet-draft skill for "add user authentication"
-
-# Step 2: Run adversarial council review (Optional but recommended)
-Use the speclet-council skill
-
-# Optional: review a spec or ticket directly
-Use the speclet-council skill for .speclet/spec.json
-Use the speclet-council skill for .speclet/tickets/TICKET-1/draft.md
-
-# Note: speclet-council uses plan-reviewer agents configured in OpenCode.
-# If all reviewers map to the same model, the council runs but is not multi-model.
-# It can review draft/spec/ticket targets by passing a path.
-
-# Step 3: Convert to executable spec
-Use the speclet-spec skill
-
-# Step 4: Run autonomous loop
-/ralph-loop (continuous) or .\speclet.ps1
-```
-
-### Ticket-Based Workflow (Multiple Issues)
-
-When you have multiple independent issues/features from a single analysis:
-
-```
-# Step 1: Create initial draft from analysis
-Use the speclet-draft skill for @docs/my-analysis.md
-
-# Step 2: Split into tickets
-Use the speclet-ticket skill
-
-# Step 3: Work on tickets one at a time
-Use the speclet-draft skill for TICKET-1
-Use the speclet-spec skill
-.\speclet.ps1
-
-# Step 4: Archive and continue
-# (Artifacts auto-saved to .speclet/tickets/TICKET-1/)
-Use the speclet-draft skill for TICKET-2
-# ... repeat
-```
-
-**Key benefit:** Each ticket preserves its own `draft.md` and `spec.json` in `.speclet/tickets/TICKET-N/`, preventing overwrites between sessions.
-
-### Fully Autonomous Mode
-
-Run the entire workflow unattended:
-
-```powershell
-# PowerShell (Windows)
-.\speclet.ps1
-
-# With max iterations
-.\speclet.ps1 -MaxIterations 20
-```
-
-The script will:
-1. Load config from `.speclet/config.json`
-2. Read `spec.json` and switch to the correct branch
-3. Run OpenCode with `/ralph-loop` repeatedly
-4. **Verify build** after each story (reverts if failed)
-5. **Skip blocked stories** after 3 failures
-6. **Resume from checkpoint** if interrupted
-7. Log everything to `.speclet/loop.log`
-8. Offer to archive files and create PR
-
-## Configuration
-
-Create `.speclet/config.json`:
-
-```json
-{
-  "models": [
-    "github-copilot/claude-opus-4.5",
-    "google/antigravity-claude-opus-4-5-thinking-medium",
-    "openai/gpt-5.2-codex",
-    "opencode/glm-4.7-free",
-    "opencode/minimax-m2.1-free"
-  ],
-  "maxRetries": 3,
-  "maxStoryFailures": 3,
-  "buildCommand": "npm run build",
-  "verifyBuild": true,
-  "testCommand": "npm test",
-  "verifyTests": false,
-  "storyTimeoutMinutes": 30,
-  "logFile": ".speclet/loop.log"
-}
-```
-
-| Option | Default | Description |
-|--------|---------|-------------|
-| `models` | 5 models | Fallback chain (primary → free) |
-| `maxRetries` | 3 | Retries per model before fallback |
-| `maxStoryFailures` | 3 | Failures before marking story blocked |
-| `buildCommand` | `npm run build` | Command to verify build |
-| `verifyBuild` | true | Run build after each story |
-| `testCommand` | `""` | Command to run tests (optional) |
-| `verifyTests` | false | Run tests after build (if testCommand set) |
-| `storyTimeoutMinutes` | 30 | Kill story if exceeds this time |
-| `logFile` | `.speclet/loop.log` | Log file path |
-
-## Features
-
-### Model Fallback with Retry
-
-If a model fails (rate limit, timeout, etc.):
-1. Retry 3 times with exponential backoff (5s → 15s → 45s)
-2. Switch to next model in fallback chain
-3. Continue until all models exhausted
-
-### Build Verification
-
-After each story:
-1. Run `buildCommand` (e.g., `npm run build`)
-2. If passes: continue to next story
-3. If fails: revert changes, increment failure count
-
-### Test Verification (Optional)
-
-If `verifyTests: true` and `testCommand` configured:
-1. Run `testCommand` after successful build
-2. If passes: continue to next story
-3. If fails: revert changes, increment failure count
-
-### Story Timeout
-
-Prevents stuck stories:
-1. Each story has `storyTimeoutMinutes` limit (default: 30)
-2. If exceeded: kill the process, count as failure
-3. Bash uses `timeout` command, PowerShell uses `WaitForExit`
-
-### Story Completion Verification
-
-After each iteration:
-1. Read `spec.json` and check if `passes: true` for current story
-2. If not marked complete: count as failure
-3. Ensures agent actually completed the work
-
-### Skip Blocked Stories
-
-If a story fails 3 times:
-1. Mark as `"blocked": true` in spec.json
-2. Skip and continue with next story
-3. Report blocked stories at end
-
-### Checkpoint/Resume
-
-If the script crashes or is interrupted:
-1. State saved to `.speclet/checkpoint.json`
-2. On restart: resume from last story
-3. No lost progress
-
-### Session Summary
-
-At end of session (complete, max iterations, or failure):
-- Total time elapsed
-- Stories completed / blocked
-- Build failures / test failures
-- Average time per story
-- Models used during session
-
-### Logging
-
-All activity logged to `.speclet/loop.log`:
-- Model switches
-- Build results
-- Story completions
-- Errors and retries
-
-### GitHub Integration
-
-At completion:
-1. Prompts to create PR
-2. If not authenticated: prompts for token
-3. Uses `gh pr create --fill`
-
-## Workflow Phases
-
-| Phase | Purpose | Artifact |
-|-------|---------|----------|
-| **0: Bootstrap** | Setup branch, verify build | - |
-| **1: Draft** | Clarify requirements | `draft.md` |
-| **2: Spec** | Detailed plan with stories | `spec.json` |
-| **3: Implementation** | Code + atomic commits | `progress.md` |
-| **4: Close** | Document decisions | `DECISIONS.md` |
-
-## Tiers (Complexity Scaling)
-
-| Tier | Time | Documentation | Example |
-|------|------|---------------|---------|
-| **1** | < 15 min | Commit only | Fix typo, add field |
-| **2** | 15-60 min | spec-lite.json | Bug fix, small feature |
-| **3** | > 1 hour | Full flow | Multi-story feature |
-
-## spec.json Structure
-
-```json
-{
-  "feature": "Task Priority System",
-  "branch": "feature/task-priority",
-  "date": "2024-01-15",
-  "summary": "Add priority levels to tasks",
-  "nonGoals": ["No priority-based notifications"],
-  "functionalRequirements": [
-    "FR-1: Add priority field to tasks table",
-    "FR-2: Display priority badge on task cards"
-  ],
-  "stories": [
-    {
-      "id": "STORY-1",
-      "title": "Add priority field to database",
-      "description": "Add priority column with default 'medium'",
-      "files": ["migrations/001_add_priority.sql"],
-      "acceptanceCriteria": [
-        "Column created with enum: high, medium, low",
-        "Build/typecheck passes"
-      ],
-      "priority": 1,
-      "passes": false,
-      "blocked": false,
-      "notes": ""
-    }
-  ]
-}
-```
-
-## Key Concepts
-
-### Lettered Questions
-
-Fast clarification during draft phase:
-
-```
-1. What is the primary goal?
-   A. Improve user experience
-   B. Fix existing bug
-   C. Add new functionality
-
-2. What is the scope?
-   A. Minimal viable version
-   B. Full-featured implementation
-```
-
-User responds: **"1C, 2A"**
-
-### Story Sizing
-
-**If you cannot describe the change in 2-3 sentences, it's too big. Split it.**
-
-✅ Right-sized:
-- Add a database column and migration
-- Add a UI component to an existing page
-
-❌ Too big:
-- "Build the entire dashboard"
-- "Add authentication"
-
-### Non-Goals
-
-Every spec must define what it will NOT do. Critical for preventing scope creep.
-
-## Golden Rules
-
-### ✅ DO
-- Atomic commits (1 story = 1 commit)
-- Build before push
-- Push immediately
-- Update `passes: true` after each story
-- Document architectural decisions
-
-### ❌ DON'T
-- Commit `.speclet/` files
-- Refactor while fixing bugs
-- Implement without confirming understanding
-- Ignore build errors
-- Use vague acceptance criteria
-
-## Success Metrics
-
-| Metric | Target |
-|--------|--------|
-| Broken builds | 0 |
-| Reverts | 0 |
-| Commits/hour | 3-4 |
-| Questions/story | ≤2 |
-
-
-## Philosophy
-
-Speclet is inspired by:
-- **Spec-Driven Development**: Specification before code
-- **BDD**: Acceptance criteria, Gherkin-style scenarios
-- **ADR**: Architecture Decision Records
-- **[Ralph](https://ghuntley.com/ralph/)**: Story sizing, JSON tracking
-
-The key insight: **LLMs work better with structured context**. Speclet provides that structure while staying lightweight.
-
-## License
-
-MIT
+- **Inspiraciones**:  
+  Inspirado en el catalogo de skills de **Matt Pocock** ([mattpocock/skills](https://github.com/mattpocock/skills)) y el concepto de especificaciones vivas de **OpenSpec** ([Fission-AI/openspec](https://github.com/Fission-AI/openspec)).

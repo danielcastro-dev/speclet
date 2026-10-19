@@ -1,0 +1,43 @@
+{
+  "name": "speclet",
+  "version": "2.0.0",
+  "description": "Skills para desarrollo de software iterativo y guiado por especificaciones con agentes de IA",
+  "main": "bin/cli.js",
+  "bin": {
+    "speclet": "bin/cli.js"
+  },
+  "scripts": {
+    "test": "node bin/cli.js --list",
+    "list": "node bin/cli.js --list",
+    "prompt": "node bin/cli.js --prompt"
+  },
+  "keywords": [
+    "skills",
+    "agent-skills",
+    "speclet",
+    "ai-agents",
+    "claude-code",
+    "codex",
+    "cursor",
+    "antigravity",
+    "windsurf",
+    "tdd",
+    "debugging"
+  ],
+  "author": "Daniel Castro",
+  "license": "MIT",
+  "homepage": "https://github.com/danielcastro-dev/speclet#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danielcastro-dev/speclet.git"
+  },
+  "bugs": {
+    "url": "https://github.com/danielcastro-dev/speclet/issues"
+  },
+  "files": [
+    "bin",
+    "skills",
+    "README.md",
+    "LICENSE"
+  ]
+}

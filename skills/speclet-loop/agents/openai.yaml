@@ -1,0 +1,4 @@
+interface:
+  display_name: "Speclet Loop"
+  short_description: "Ejecutar, revisar y hacer commit por tarea"
+  default_prompt: "Usa $speclet-loop para ejecutar este cambio aprobado con revisión independiente."

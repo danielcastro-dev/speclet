@@ -1,16 +1,16 @@
-# Speclet
-.speclet/
-!.speclet/DECISIONS.md
-!.speclet/config.json
-!.speclet/GUIDE.md
-
-# OpenCode local
-.opencode/
-
-# System/Session files
-session-*.md
-agent-memory-analysis.md
-*.log
+# Node
 node_modules/
 dist/
+package-lock.json
+
+# Skills CLI artifacts
+.agents/
+skills-lock.json
+
+# Speclet local run directory
+.speclet/
+
+# Logs & OS files
+*.log
 .DS_Store
+Thumbs.db

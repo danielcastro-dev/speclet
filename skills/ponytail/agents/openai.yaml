@@ -1,0 +1,7 @@
+interface:
+  display_name: "Ponytail"
+  short_description: "Cambio mínimo completo con reutilización"
+  default_prompt: "Usa $ponytail para resolver este cambio con la menor complejidad necesaria."
+
+policy:
+  allow_implicit_invocation: false

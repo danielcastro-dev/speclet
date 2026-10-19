@@ -1,0 +1,7 @@
+interface:
+  display_name: "Caveman"
+  short_description: "Respuestas breves conservando hechos exactos"
+  default_prompt: "Usa $caveman para responder brevemente en español sin perder precisión."
+
+policy:
+  allow_implicit_invocation: false

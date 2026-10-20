@@ -1,6 +1,6 @@
 ---
 name: speclet-loop
-description: Execute Markdown tasks of an approved Speclet change with consulted worktree, tests, independent review, and local commit per task. Continue until finished or blocked; not for planning or legacy JSON workflow.
+description: Execute approved Speclet Markdown tasks with consulted worktree, TDD, verification and atomic commits; manual review is a separate skill.
 license: MIT
 metadata:
   workflow: speclet
@@ -9,7 +9,7 @@ metadata:
 
 # Speclet Loop
 
-Implement the approved change and prove it works. `tasks.md` preserves progress; tests and diffs demonstrate behavior.
+Implement the approved change and prove it works. `tasks.md` preserves progress; tests and diffs demonstrate behavior. **Never launch a reviewer or `$speclet-review` automatically.**
 
 ## Language and Communication Rules
 
@@ -53,42 +53,36 @@ Targeted checks applied only when relevant to the change:
 
 A failed or unexecuted verification does not equal success. Record limitations and keep the task pending if required evidence is missing.
 
-## Delegation and Independent Review
+## Cost-Aware Execution; Review Is Manual
 
-The orchestrator retains decisions, integration, state, and commits. Delegate implementation/investigation only when it adds clear value. Maximum three direct children, no sub-delegation, inheriting session configuration without hardcoding deprecated models or effort tiers. Exactly one writer per worktree; reviewers make no edits or commits.
+The orchestrator owns decisions, implementation, integration, tests, task state and commits. **Do not spawn subagents automatically** for exploration, implementation, verification or closure. Run project-native tests directly; they do not constitute a reviewer.
 
-After verifying each task, request **an independent review** from a subagent with self-contained context:
+Only if the user explicitly requests delegation may the orchestrator spawn **at most one direct child**, with no nested delegation and exactly one writer per worktree. Select an explicitly configured cheaper model with low reasoning effort only when the runtime can enforce the override. Never silently inherit a costly parent model or escalate. If cost constraints cannot be enforced, do the work in the main session and disclose the limitation.
 
-- Objective, AC, active task, paths to spec/plan/tasks, and relevant constraints.
-- Exact base and diff (including new files) and consumers to read.
-- Executed commands and observed outputs, without presenting them as conclusive proof of correctness.
-- Request an acceptance and quality review: finding, file/line, impact, and verification step. Request a concise, explicit verdict; no separate report file.
+Independent reviews belong **exclusively** to `$speclet-review`, invoked manually by the user after the implementation. Do not commission a review per task or a final review automatically. Reviewer availability or verdict is **not** a prerequisite for task verification, local commits or implementation closure.
 
-Contrast findings against code before accepting them. The review identifies non-compliance, real bugs, and insufficient tests; it must not demand unrelated refactoring for stylistic preferences. Apply the **"Rulings, not stalls"** principle: when encountering minor technical discrepancies, stylistic preferences, or harmless ambiguities that do not break AC or public contracts, the orchestrator issues a reasoned technical ruling, documents it in the notes of `tasks.md`, and continues execution without stalling the loop.
-
-Fix accepted blocking findings; re-run affected tests and review the updated diff. Maximum **two correction rounds per task** after the initial review. If a true blocker persists that cannot be resolved via technical ruling, record it and pause the loop with the task pending. Non-blocking observations may remain justified.
-
-If independent review is unavailable, declare the limitation and halt before committing. Do not silently substitute self-review or fake approvals. Do not produce review reports, JSON catalogs, or mandatory diaries.
+Maintain TDD and the required acceptance checks on **each task** before committing. No passing test should be misrepresented as an independent code review.
 
 ## Commit and Progress
 
-Only after verification and review pass:
+Only after the task's required verification passes:
 
 1. Inspect the diff and stage only task-related files, along with necessary tests and fixtures. Never stage unrelated changes or `.speclet/**`.
 2. Create a local commit per task following repository style with a concise description in Spanish (e.g., `git commit -m "feat(scope): descripción"`). Append Jira issue key only if one exists; do not invent one. Never create empty commits.
-3. In `tasks.md`, record executed commands/exit codes, verified ACs, verdict, relevant notes (including technical rulings if any), and commit SHA. Mark `[x]` only then, and clear the active task marker.
-4. Continue without asking "should I continue?". A task satisfied by an earlier commit may only be closed after verifying evidence and review; cite the existing SHA without creating redundant commits.
+3. In `tasks.md`, record executed commands/exit codes, verified ACs, relevant notes (including technical rulings if any), and commit SHA. Mark `[x]` only then, and clear the active task marker. Manual review is a separate, optional state.
+4. Continue without asking "should I continue?". A task satisfied by an earlier commit may only be closed after verifying the actual evidence; cite the existing SHA without redundant commits.
 
 If a commit fails, keep the task pending and explain the error; do not redo already verified implementation. Any change made to code after review invalidates that review.
 
-## Closing and Final Review
+## Closing After Implementation (No Automatic Review)
 
-Execute the planned integration verification. Before declaring completion, perform a final closing review using the **3D Review Rubric**:
+1. Execute planned integration verification and check that all ACs and task tests have real evidence. Look for accidental temporary files and unrelated staged changes. This is a lightweight implementation gate, **not a 3D independent reviewer**.
+2. If a required check fails, record the blocker in `tasks.md` and leave it pending; never misreport success or automatically revert valid commits.
+3. When all tasks and integration checks pass, set `Estado: Implementado` in `tasks.md` (legacy `Terminado` remains readable). Record `Revisión manual: Pendiente` unless an unchanged HEAD was already explicitly reviewed. Do not imply independent approval.
+4. Stop after informing the user of commits, tests and limitations. Explain that `$speclet-review` is an **optional manual command** for whole-change review. **Do not invoke it, a reviewer subagent, or a review retry automatically.**
+5. `$speclet-archive` is also manual and can archive an implemented change without review, warning explicitly if that review was skipped or is stale.
 
-1. **Completeness:** Verify all ACs from `spec.md` and test coverage from `plan.md` are satisfied by the final combined diff.
-2. **Contract Integration:** Verify public APIs, consumers, migrations, and interfaces align without unintended breaking changes.
-3. **Cruft and Cleanliness:** Ensure no debug logs, temporary test scaffolding, leftover TODOs, commented-out dead code, or unintended tracked files remain.
+When subsequent implementation changes HEAD, the prior review's HEAD is outdated until a new explicit `$speclet-review`. The review skill owns the 3D rubric and its advisory findings.
 
-If the change spans multiple components or contracts, commission an independent review of the combined diff. If closing verification fails, record the blocker in `tasks.md`; do not mark complete or automatically revert valid task commits.
+Provide ready-to-run post-merge commands on request; do not force interactive execution. Push, PR, merge, deployments and publication require explicit user authorization.
 
-Update overall status to `Terminado` in `tasks.md` only after successful closing. Reply to the user in Spanish with the outcome, commit list, test results, and any genuine limitations. Offer `$speclet-archive` to cleanly move `.speclet/changes/<name>/` to `.speclet/archive/YYYY-MM-<name>/` without cluttering the repository. Provide ready-to-run post-merge commands (merge, worktree/branch cleanup, and verification commands) ready to copy or execute on request, without forcing interactive execution. Do not create separate diaries, handoff files, or extra reports. Push, PR, merge, deployments, and publishing require explicit user authorization; do not execute them automatically or force interactive prompts to do so.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Speclet Review"
+  short_description: "Revisión manual del cambio implementado"
+  default_prompt: "Usa $speclet-review para revisar el cambio completo. No modifiques implementación ni crees commits."

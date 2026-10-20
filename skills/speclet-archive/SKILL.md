@@ -1,6 +1,6 @@
 ---
 name: speclet-archive
-description: Archive a completed Speclet change from .speclet/changes/<name>/ to .speclet/archive/YYYY-MM-<name>/, updating the index and keeping the workspace clean. Use after loop completion; does not delete code or git history.
+description: Archive an implemented Speclet change, retaining its Markdown artifacts and optional manual-review record; never auto-review.
 license: MIT
 metadata:
   workflow: speclet
@@ -19,16 +19,17 @@ Archive finished Speclet changes to keep `.speclet/changes/` clean while preserv
 
 ## 1. Input and Target Resolution
 
-1. Look in `.speclet/changes/<name>/`. If a specific change path is provided, use it. Otherwise, look for changes where `tasks.md` has `Estado: Terminado`.
+1. Look in `.speclet/changes/<name>/`. If a specific change path is provided, use it. Otherwise, look for changes where `tasks.md` has `Estado: Implementado` (or legacy `Estado: Terminado`).
 2. If multiple completed changes exist, list them and ask the user in Spanish to pick.
 3. If a change is still `Estado: Pendiente` or in progress, warn the user and do not archive unless explicitly requested ("forzar archivo").
+4. Read any `## Revisión manual` record in `tasks.md`. If missing, pending, failed or stale relative to the reviewed HEAD, warn explicitly. **Review is advisory, not an archive prerequisite. Never invoke `$speclet-review` or spawn a reviewer automatically.**
 
 ## 2. Archiving Process
 
 1. Determine the archive destination folder:
    `.speclet/archive/YYYY-MM-<name>/` (using current year and month, e.g., `.speclet/archive/2026-10-auth-jwt/`).
 2. If the destination directory does not exist, create it.
-3. Move `spec.md`, `plan.md`, and `tasks.md` from `.speclet/changes/<name>/` to the archive directory.
+3. Move `spec.md`, `plan.md`, and `tasks.md` (preserving any manual-review metadata within `tasks.md`) from `.speclet/changes/<name>/` to the archive directory.
 4. If `.speclet/changes/<name>/` is now empty, remove the empty directory.
 5. Update or create `.speclet/archive/INDEX.md` with a clean Markdown table / list entry:
    - Date: `YYYY-MM-DD`
@@ -39,4 +40,4 @@ Archive finished Speclet changes to keep `.speclet/changes/` clean while preserv
 
 ## 3. Output
 
-Confirm to the user in Spanish that the change has been archived cleanly, display the path to the archived change, and confirm that `.speclet/changes/` is ready for the next task.
+Confirm to the user in Spanish that the change has been archived cleanly, display the destination and whether a current manual review exists, without inventing approval. Confirm that `.speclet/changes/` is ready for the next task.

@@ -1,13 +1,13 @@
 {
   "name": "speclet",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Skills para desarrollo de software iterativo y guiado por especificaciones con agentes de IA",
   "main": "bin/cli.js",
   "bin": {
     "speclet": "bin/cli.js"
   },
   "scripts": {
-    "test": "node bin/cli.js --list",
+    "test": "node --test tests/*.test.js && node bin/cli.js --list",
     "list": "node bin/cli.js --list",
     "prompt": "node bin/cli.js --prompt"
   },

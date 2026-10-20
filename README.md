@@ -16,6 +16,7 @@ Diseñado para ser directo, ligero, centrado en Markdown y sin sobreingeniería.
 - **Seleccion multiple**: Preguntas cortas con opciones concretas para pair programming agil.
 - **Worktrees consultados**: Desarrollo aislado en ramas limpias sin tocar main sin autorizacion.
 - **Verificacion con evidencia**: Pruebas antes de commits ("evidence before assertions").
+- **Review manual y económico**: `speclet-loop` nunca invoca reviewers; `speclet-review` verifica el cambio entero cuando el usuario lo solicita.
 - **Simplicidad**: Menor cambio completo posible, eliminando relleno conversacional.
 
 ---
@@ -48,7 +49,7 @@ Instala y configura las skills de Speclet en este entorno:
    (o a nivel de proyecto: npx -y skills add danielcastro-dev/speclet -y)
 
 2. Confirma las skills disponibles:
-   - Speclet Core: speclet-rules, speclet-draft, speclet-plan, speclet-loop, speclet-archive, speclet-jira
+   - Speclet Core: speclet-rules, speclet-draft, speclet-plan, speclet-loop, speclet-review, speclet-archive, speclet-jira
    - Ingenieria independiente: systematic-debugging, test-driven-development, verification-before-completion, production-monitoring
    - Modos auxiliares: ponytail, caveman
 
@@ -60,20 +61,24 @@ Instala y configura las skills de Speclet en este entorno:
 ## Flujo de trabajo
 
 ```text
-  speclet-rules         speclet-draft         speclet-plan          speclet-loop          speclet-archive (o jira)
-  (Config inicial) ──>  (Definicion)    ──>  (Plan tecnico)   ──>   (Ejecucion)     ──>    (Archivado y orden)
-       │                     │                     │                     │                     │
-       ▼                     ▼                     ▼                     ▼                     ▼
-    rules.md              spec.md               plan.md               tasks.md              Historico en
- (Invariantes/DB)      (Criterios AC)      (Focos/Limites)       (Commits locales)       archive/ e index
+  speclet-rules (opcional) -> speclet-draft -> speclet-plan -> speclet-loop
+                                                         |
+                                                   Implementado
+                                                         |
+                                                (solo si lo pides)
+                                                         v
+                                                   speclet-review
+                                                         |
+                                                  speclet-archive
 ```
 
 1. **`$speclet-rules`** *(Opcional / Por repositorio)*: Inspecciona el stack y genera/actualiza `.speclet/rules.md` con las reglas de oro del repo (no duplicar lógica según Ponytail, claves PK/FK, índices obligatorios de BD y seguridad).
 2. **`$speclet-draft`**: Analiza el proyecto respetando `rules.md` y aclara requisitos mediante preguntas breves de seleccion multiple antes de redactar `spec.md`.
 3. **`$speclet-plan`**: Convierte el spec aprobado en un plan tecnico minimo (`plan.md`) y lista de tareas ejecutables (`tasks.md`). Respeta las invariantes del repo (reutilización de helpers, índices de BD) y fija focos de revisión con tests obligatorios.
-4. **`$speclet-loop`**: Ejecuta las tareas con worktree consultado, ciclo TDD, revision independiente por subagente, resolucion agil de dudas tecnicas menores ("Rulings, not stalls"), rúbrica 3D de cierre y commits locales.
-5. **`$speclet-archive`**: Archiva el cambio terminado en `.speclet/archive/YYYY-MM-<nombre>/` y actualiza el índice cronológico para mantener `.speclet/changes/` despejado.
-6. **`$speclet-jira`** *(Opcional)*: Prepara la historia o reporte de entrega basado en la evidencia y commits reales cuando se requiere traspaso.
+4. **`$speclet-loop`**: Ejecuta todas las tareas con worktree consultado, TDD, tests y commits locales por tarea. No invoca subagentes ni reviewers automáticamente; termina con `Estado: Implementado`.
+5. **`$speclet-review`** *(Opcional / Manual)*: Revisa el diff completo con rúbrica 3D (completitud, corrección y coherencia), usando como máximo un subagente económico si es posible seleccionar su modelo. Nunca corrige automáticamente.
+6. **`$speclet-archive`**: Archiva el cambio implementado en `.speclet/archive/YYYY-MM-<nombre>/` y actualiza el índice cronológico para mantener `.speclet/changes/` despejado.
+7. **`$speclet-jira`** *(Opcional)*: Prepara la historia o reporte de entrega basado en la evidencia y commits reales cuando se requiere traspaso.
 
 ---
 
@@ -97,7 +102,8 @@ Ejecuta `$speclet-rules` para generar o personalizar `.speclet/rules.md` (o `rul
 | **`speclet-rules`** | `$speclet-rules` | Inicializa o actualiza `rules.md` con las reglas de oro del repo y de base de datos. |
 | **`speclet-draft`** | `$speclet-draft` | Aclara requisitos mediante opciones multiples y genera `spec.md`. |
 | **`speclet-plan`** | `$speclet-plan` | Define arquitectura minima, casos limite, reglas de DB/Ponytail y tareas en `tasks.md`. |
-| **`speclet-loop`** | `$speclet-loop` | Ejecuta de forma autonoma con TDD, revision independiente, rúbrica 3D y commits atomicos. |
+| **`speclet-loop`** | `$speclet-loop` | Ejecuta todas las tareas con TDD, tests y commits sin reviewers automáticos. |
+| **`speclet-review`** | `$speclet-review` | Revisión integral manual del cambio completo, sin correcciones automáticas. |
 | **`speclet-archive`** | `$speclet-archive` | Mueve cambios terminados a `.speclet/archive/` y actualiza el índice histórico. |
 | **`speclet-jira`** | `$speclet-jira` | Genera tickets o reportes de cierre con evidencia real. |
 
@@ -135,7 +141,8 @@ speclet/
 │   ├── speclet-rules/             # Inicializacion de reglas de repo y DB
 │   ├── speclet-draft/             # Definicion guiada de requerimientos
 │   ├── speclet-plan/              # Planificacion tecnica con casos limite
-│   ├── speclet-loop/              # Ejecucion autonoma, TDD y revision
+│   ├── speclet-loop/              # Ejecucion autonoma, TDD y commits
+│   ├── speclet-review/            # Revision integral manual
 │   ├── speclet-archive/           # Archivado historico y limpieza
 │   ├── speclet-jira/              # Traspaso y tickets con evidencia
 │   ├── systematic-debugging/      # Investigacion de causa raiz (Superpowers)
@@ -144,6 +151,8 @@ speclet/
 │   ├── production-monitoring/     # Observabilidad, OTEL y metricas en produccion
 │   ├── ponytail/                  # Pragmatismo senior (Dietrich Gebert)
 │   └── caveman/                   # Chat conciso (Julius Brussee)
+├── tests/
+│   └── workflow.test.js           # Invariantes de revisión manual
 ├── templates/
 │   └── rules.example.md           # Plantilla de invariantes de repo y DB
 ├── package.json

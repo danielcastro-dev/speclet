@@ -33,3 +33,12 @@ test('skill is present in distribution and catalog', () => {
   assert.match(read('README.md'), /speclet-review/);
   assert.match(read('skills/speclet-review/agents/openai.yaml'), /\$speclet-review/);
 });
+test('readable-code enforces linear flow, guard clauses and brownfield folder architecture', () => {
+  const value = read('skills/readable-code/SKILL.md');
+  assert.match(value, /Guard Clauses/);
+  assert.match(value, /Linear Flow/);
+  assert.match(value, /Brownfield Projects/);
+  assert.match(value, /Anti-Flat-Dumping/);
+  assert.match(read('bin/cli.js'), /readable-code/);
+  assert.match(read('README.md'), /readable-code/);
+});

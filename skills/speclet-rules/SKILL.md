@@ -46,23 +46,28 @@ Ensure directory `.speclet/` exists. Write `.speclet/rules.md` containing:
 Este archivo define las reglas arquitectónicas, de modelado de datos y convenciones de código **no negociables** para este repositorio.
 Los agentes y desarrolladores deben consultar y respetar estas directrices en `speclet-draft`, `speclet-plan` y `speclet-loop`.
 
-## 1. Código y Reutilización (Filosofía Ponytail)
+## 1. Código y Reutilización (Ponytail & readable-code)
 - No duplicar lógica: antes de escribir una función nueva, verificar si ya existe un helper o servicio equivalente.
-- Extraer helpers limpios y testeables si un patrón se usa en más de un lugar.
+- Extraer helpers limpios y testeables solo si un patrón se usa en más de un lugar; no crear micro-wrappers innecesarios.
+- Flujo lineal (Human-First): código de arriba a abajo con guard clauses y early returns; prohibido el troceado artificial por métricas de complejidad ciclomática.
 - Simplicidad y tipado estricto sin sobreingeniería.
 
-## 2. Base de Datos y Persistencia
+## 2. Arquitectura de Carpetas (Brownfield-First & Anti-Flat-Dumping)
+- En proyectos existentes (Brownfield), respetar estrictamente las carpetas y convenciones actuales del repo.
+- En código nuevo (Greenfield), prohibido el flat dumping: separar capas en `routes/`, `services/`, `db/models/`, `utils/`, `tests/`.
+
+## 3. Base de Datos y Persistencia
 - Primary Keys (PK) consistentes e inmutables.
 - Foreign Keys (FK) explícitas con restricciones de integridad referencial.
 - Índices obligatorios en columnas FK, campos de búsqueda frecuente y filtros WHERE habituales.
 - Operaciones multitabla siempre dentro de transacciones atómicas.
 
-## 3. APIs, Seguridad y Observabilidad
+## 4. APIs, Seguridad y Observabilidad
 - Formato uniforme de respuestas y códigos HTTP semánticos.
 - Prohibido loguear contraseñas, tokens JWT o credenciales sensibles.
 - Health checks funcionales y estructuración de logs.
 
-## 4. Testing y Calidad
+## 5. Testing y Calidad
 - Pruebas antes de commits (TDD / evidencia real comprobada).
 ```
 

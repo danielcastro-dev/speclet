@@ -50,7 +50,7 @@ Instala y configura las skills de Speclet en este entorno:
 
 2. Confirma las skills disponibles:
    - Speclet Core: speclet-rules, speclet-draft, speclet-plan, speclet-loop, speclet-review, speclet-archive, speclet-jira
-   - Ingenieria independiente: systematic-debugging, test-driven-development, verification-before-completion, production-monitoring
+   - Ingenieria independiente: systematic-debugging, test-driven-development, verification-before-completion, production-monitoring, readable-code
    - Modos auxiliares: ponytail, caveman
 
 3. Avisame cuando este listo para comenzar con $speclet-draft (o $speclet-rules si el proyecto es nuevo).
@@ -85,7 +85,8 @@ Instala y configura las skills de Speclet en este entorno:
 ## Reglas del Proyecto (`rules.md`)
 
 Ejecuta `$speclet-rules` para generar o personalizar `.speclet/rules.md` (o `rules.md` en la raíz) con las directrices de tu repositorio:
-- **Filosofía Ponytail:** No duplicar lógica; si una función o patrón se repite, extraer un helper reutilizable.
+- **Filosofía Ponytail & readable-code:** No duplicar lógica; si una función o patrón se repite, extraer un helper reutilizable. Código lineal de arriba a abajo con *guard clauses* (early returns), prohibiendo el troceado artificial de funciones por complejidad ciclomática.
+- **Arquitectura de carpetas (Brownfield-first):** Respetar estrictamente la estructura actual del repositorio existente; en código nuevo, prohibido el *flat dumping* (separar rutas, servicios, db/modelos y utilidades).
 - **Base de datos:** Reglas de Primary Keys, Foreign Keys explícitas con restricciones de integridad, e índices obligatorios en columnas de búsqueda o filtros WHERE frecuentes.
 - **Arquitectura:** Esquema de respuestas de endpoints, redacción de tokens en logs y políticas de testing.
 
@@ -115,6 +116,7 @@ Skills autonomas para calidad, depuracion y monitoreo en produccion:
 
 | Skill | Proposito | Regla central |
 | :--- | :--- | :--- |
+| **`readable-code`** | Código lineal de arriba a abajo, guard clauses, funciones profundas y carpetas estructuradas. | La comprensión humana y la lectura secuencial priman sobre métricas ciegas de complejidad ciclomática. |
 | **`systematic-debugging`** | Aislamiento de causa raiz ante bugs o fallos de CI. | Prohibido proponer codigo sin investigacion de causa raiz previa. |
 | **`test-driven-development`** | Desarrollo guiado por pruebas (TDD). | Escribe el test primero, comprueba que falle y luego implementa lo minimo. |
 | **`verification-before-completion`** | Verificacion con evidencia fresca antes de commits. | Prohibido afirmar exito sin ejecucion del comando y salida exit 0 en el turno. |
@@ -149,6 +151,7 @@ speclet/
 │   ├── test-driven-development/   # Ciclo TDD (Superpowers)
 │   ├── verification-before-completion/ # Puerta de evidencia previa al commit (Superpowers)
 │   ├── production-monitoring/     # Observabilidad, OTEL y metricas en produccion
+│   ├── readable-code/             # Codigo lineal, guard clauses y carpetas
 │   ├── ponytail/                  # Pragmatismo senior (Dietrich Gebert)
 │   └── caveman/                   # Chat conciso (Julius Brussee)
 ├── tests/

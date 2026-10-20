@@ -5,16 +5,27 @@ Los agentes y desarrolladores deben consultar y respetar estas directrices en `s
 
 ---
 
-## 1. Código y Reutilización (Filosofía Ponytail)
+## 1. Código y Reutilización (Filosofía Ponytail & readable-code)
 
 - **No duplicar lógica:** Antes de escribir una función o algoritmo nuevo, inspeccionar si ya existe un helper, servicio o utilidad equivalente en el proyecto.
 - **Extraer helpers limpios:** Si un patrón o cálculo se utiliza en dos o más lugares, extraer un helper reutilizable, bien tipado y testeable, en vez de copiar y pegar código.
+- **Flujo lineal (Human-First):** Escribir código que se lea de arriba a abajo como una historia secuencial. Priorizar la comprensión humana por encima de métricas ciegas de complejidad ciclomática.
+- **Guard Clauses (Early Returns):** Despejar casos borde y errores al inicio (`if (!valido) return;`). Mantener el camino feliz plano y sin pirámides de anidamiento.
+- **Prohibido el troceado artificial (Anti-Shallow Functions):** No despedazar funciones claras en micro-wrappers de 1 o 2 líneas solo para calmar linters estáticos; esto dispersa la carga cognitiva.
 - **Simplicidad ante todo:** No introducir abstracciones prematuras ni librerías externas si se puede resolver limpiamente con las dependencias existentes.
 - **Tipado estricto:** Prohibido el uso de tipos genéricos sin verificar (`any` o casts ciegos).
 
 ---
 
-## 2. Base de Datos y Persistencia
+## 2. Arquitectura de Carpetas (Brownfield-First & Anti-Flat-Dumping)
+
+- **Proyectos existentes (Brownfield):** Respetar estrictamente la estructura de directorios y convenciones actuales del repositorio. Nunca inventar carpetas paralelas ni cambiar el estilo organizativo existente.
+- **Proyectos nuevos o módulos nuevos (Greenfield):** Prohibido el *flat dumping* (amontonar controladores, modelos y helpers en la raíz o en una sola carpeta).
+  - Organizar en capas limpias o por módulos: `routes/` (transporte), `services/` (lógica de negocio), `db/` o `models/` (persistencia), `utils/` (helpers puros) y `tests/`.
+
+---
+
+## 3. Base de Datos y Persistencia
 
 - **Primary Keys (PK):** Todas las tablas/entidades deben contar con PK inmutable (`UUIDv7` o entero autoincremental según el stack).
 - **Foreign Keys (FK) e Integridad:**
@@ -29,7 +40,7 @@ Los agentes y desarrolladores deben consultar y respetar estas directrices en `s
 
 ---
 
-## 3. APIs, Red y Seguridad
+## 4. APIs, Red y Seguridad
 
 - **Contrato de API uniforme:** Todo endpoint debe responder con un esquema consistente de payload (ej: `{ success: true, data: ... }` o `{ success: false, error: { code, message } }`).
 - **Seguridad y Redacción:**
@@ -41,7 +52,7 @@ Los agentes y desarrolladores deben consultar y respetar estas directrices en `s
 
 ---
 
-## 4. Testing y Verificación
+## 5. Testing y Verificación
 
 - Seguir TDD: Escribir o identificar la prueba que falla antes de dar por concluida la implementación.
 - La evidencia manda: Ninguna tarea se marca como completada sin comando de verificación real y su salida exitosa.

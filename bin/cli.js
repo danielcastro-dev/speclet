@@ -25,7 +25,7 @@ const LLM_PROMPT = `Instala y configura las skills de Speclet en este entorno:
    (o a nivel de proyecto: npx -y skills add danielcastro-dev/speclet -y)
 
 2. Confirma las skills disponibles:
-   - Speclet Core: speclet-rules, speclet-draft, speclet-plan, speclet-loop, speclet-review, speclet-archive, speclet-jira
+   - Speclet Core: speclet-rules, speclet-draft, speclet-plan, speclet-loop, speclet-review, speclet-archive, speclet-pr, speclet-jira
    - Ingenieria independiente: systematic-debugging, test-driven-development, verification-before-completion, production-monitoring, readable-code
    - Modos auxiliares: ponytail, caveman
 

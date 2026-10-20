@@ -49,7 +49,7 @@ Instala y configura las skills de Speclet en este entorno:
    (o a nivel de proyecto: npx -y skills add danielcastro-dev/speclet -y)
 
 2. Confirma las skills disponibles:
-   - Speclet Core: speclet-rules, speclet-draft, speclet-plan, speclet-loop, speclet-review, speclet-archive, speclet-jira
+   - Speclet Core: speclet-rules, speclet-draft, speclet-plan, speclet-loop, speclet-review, speclet-archive, speclet-pr, speclet-jira
    - Ingenieria independiente: systematic-debugging, test-driven-development, verification-before-completion, production-monitoring, readable-code
    - Modos auxiliares: ponytail, caveman
 
@@ -65,10 +65,12 @@ Instala y configura las skills de Speclet en este entorno:
                                                          |
                                                    Implementado
                                                          |
-                                                (solo si lo pides)
-                                                         v
-                                                   speclet-review
-                                                         |
+                                        ┌────────────────┴────────────────┐
+                                        ▼                                 ▼
+                                  speclet-review (opcional)          speclet-pr (/pr)
+                                        │                                 │
+                                        └────────────────┬────────────────┘
+                                                         ▼
                                                   speclet-archive
 ```
 
@@ -77,8 +79,9 @@ Instala y configura las skills de Speclet en este entorno:
 3. **`$speclet-plan`**: Convierte el spec aprobado en un plan tecnico minimo (`plan.md`) y lista de tareas ejecutables (`tasks.md`). Respeta las invariantes del repo (reutilización de helpers, índices de BD) y fija focos de revisión con tests obligatorios.
 4. **`$speclet-loop`**: Ejecuta todas las tareas con worktree consultado, TDD, tests y commits locales por tarea. No invoca subagentes ni reviewers automáticamente; termina con `Estado: Implementado`.
 5. **`$speclet-review`** *(Opcional / Manual)*: Revisa el diff completo con rúbrica 3D (completitud, corrección y coherencia), usando como máximo un subagente económico si es posible seleccionar su modelo. Nunca corrige automáticamente.
-6. **`$speclet-archive`**: Archiva el cambio implementado en `.speclet/archive/YYYY-MM-<nombre>/` y actualiza el índice cronológico para mantener `.speclet/changes/` despejado.
-7. **`$speclet-jira`** *(Opcional)*: Prepara la historia o reporte de entrega basado en la evidencia y commits reales cuando se requiere traspaso.
+6. **`$speclet-pr`** *(Opcional / Formato `/pr`)*: Prepara y abre el Pull Request en GitHub con formato humano escaneable en 30 segundos (resumen visual, evidencia de tests y Merge Danger/alertas de entorno).
+7. **`$speclet-archive`**: Archiva el cambio implementado en `.speclet/archive/YYYY-MM-<nombre>/` y actualiza el índice cronológico para mantener `.speclet/changes/` despejado.
+8. **`$speclet-jira`** *(Opcional)*: Prepara la historia o reporte de entrega basado en la evidencia y commits reales cuando se requiere traspaso.
 
 ---
 
@@ -105,6 +108,7 @@ Ejecuta `$speclet-rules` para generar o personalizar `.speclet/rules.md` (o `rul
 | **`speclet-plan`** | `$speclet-plan` | Define arquitectura minima, casos limite, reglas de DB/Ponytail y tareas en `tasks.md`. |
 | **`speclet-loop`** | `$speclet-loop` | Ejecuta todas las tareas con TDD, tests y commits sin reviewers automáticos. |
 | **`speclet-review`** | `$speclet-review` | Revisión integral manual del cambio completo, sin correcciones automáticas. |
+| **`speclet-pr`** | `$speclet-pr` (o `/pr`) | Prepara y abre el PR en GitHub con formato humano `/pr` (resumen visual, evidencia y Merge Danger). |
 | **`speclet-archive`** | `$speclet-archive` | Mueve cambios terminados a `.speclet/archive/` y actualiza el índice histórico. |
 | **`speclet-jira`** | `$speclet-jira` | Genera tickets o reportes de cierre con evidencia real. |
 
@@ -145,6 +149,7 @@ speclet/
 │   ├── speclet-plan/              # Planificacion tecnica con casos limite
 │   ├── speclet-loop/              # Ejecucion autonoma, TDD y commits
 │   ├── speclet-review/            # Revision integral manual
+│   ├── speclet-pr/                # Generacion de PR humano (/pr) y apertura
 │   ├── speclet-archive/           # Archivado historico y limpieza
 │   ├── speclet-jira/              # Traspaso y tickets con evidencia
 │   ├── systematic-debugging/      # Investigacion de causa raiz (Superpowers)

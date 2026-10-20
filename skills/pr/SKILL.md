@@ -1,13 +1,13 @@
 ---
-name: speclet-pr
+name: pr
 description: Prepare and open human-readable Pull Requests (or GitLab MRs) using the /pr format (Visual Summary, Real Evidence, Merge Danger & Team Alerts). Anti-AI-slop, compatible with GitHub (gh) and GitLab (glab).
 license: MIT
 metadata:
-  workflow: speclet
-  phase: delivery
+  workflow: delivery
+  phase: pull-request
 ---
 
-# Speclet PR (`/pr`)
+# PR (`/pr`)
 
 Create human-centric, high-signal Pull Requests (GitHub) or Merge Requests (GitLab) based on the **`/pr` format** (inspired by Matt Pocock and modern engineering blogs). Designed for fast reviews in small teams without corporate bloat, file dumps, or AI slop.
 
@@ -30,15 +30,19 @@ Create human-centric, high-signal Pull Requests (GitHub) or Merge Requests (GitL
 ## 1. Context Gathering
 
 1. **Verify Branch:** Ensure you are on a feature branch, not directly on `main` or `master`.
-2. **Detect Forge (GitHub vs GitLab):**
+2. **Determine Target Base Branch:**
+   - Detect the base branch this feature branched from (check `plan.md`, git tracking branch, or default branch via `git remote show origin | grep 'HEAD branch'`).
+   - If not obvious, ask or confirm with the user.
+   - **Crucial:** Always carry this target `<base-branch>` forward so the PR is opened against the intended branch instead of blindly defaulting to the repo's main branch.
+3. **Detect Forge (GitHub vs GitLab):**
    - Check remote URL: `git config --get remote.origin.url`
    - Detect if the repository is on GitHub (`github.com`) or GitLab (`gitlab.com` or custom self-hosted GitLab).
-3. **Read Speclet Artifacts (if available):**
+4. **Read Speclet Artifacts (if available):**
    - Extract intent and user problem from `spec.md`.
    - Extract executed test commands, exit codes, and commit SHAs from `tasks.md`.
-4. **Inspect Git Diff:**
-   - Run `git log origin/main..HEAD --oneline` (or against target base branch).
-   - Run `git diff origin/main...HEAD --stat` to grasp scope.
+5. **Inspect Git Diff:**
+   - Run `git log <base-branch>..HEAD --oneline` to see branch commits.
+   - Run `git diff <base-branch>...HEAD --stat` to grasp scope.
 
 ---
 
@@ -70,14 +74,14 @@ exact test command and exit code 0, console output of passing test, or curl resp
    ```bash
    git push -u origin <current-branch>
    ```
-3. **Open PR/MR with the detected Forge CLI:**
+3. **Open PR/MR with the detected Forge CLI passing the base branch explicitly:**
    - **For GitHub (`gh` CLI):**
      ```bash
-     gh pr create --title "<type>(<scope>): <concise description>" --body "<body>"
+     gh pr create --base "<base-branch>" --title "<type>(<scope>): <concise description>" --body "<body>"
      ```
    - **For GitLab (`glab` CLI):**
      ```bash
-     glab mr create --title "<type>(<scope>): <concise description>" --description "<body>" --remove-source-branch
+     glab mr create --target-branch "<base-branch>" --title "<type>(<scope>): <concise description>" --description "<body>" --remove-source-branch
      ```
    - If CLI is not authenticated or unavailable, output the complete markdown ready to paste along with the direct URL printed by Git during push.
 4. **Output:** Provide the clickable URL to the opened Pull/Merge Request in the chat.

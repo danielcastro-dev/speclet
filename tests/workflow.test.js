@@ -42,13 +42,13 @@ test('readable-code enforces linear flow, guard clauses and brownfield folder ar
   assert.match(read('bin/cli.js'), /readable-code/);
   assert.match(read('README.md'), /readable-code/);
 });
-test('speclet-pr formats PRs with /pr structure and supports github and gitlab', () => {
-  const value = read('skills/speclet-pr/SKILL.md');
+test('pr formats PRs with /pr structure, explicit base branch, and supports github and gitlab', () => {
+  const value = read('skills/pr/SKILL.md');
   assert.match(value, /Summary/);
   assert.match(value, /Evidence/);
   assert.match(value, /Merge Danger/);
-  assert.match(value, /gh pr create/);
-  assert.match(value, /glab mr create/);
-  assert.match(read('bin/cli.js'), /speclet-pr/);
-  assert.match(read('README.md'), /speclet-pr/);
+  assert.match(value, /gh pr create --base/);
+  assert.match(value, /glab mr create --target-branch/);
+  assert.match(read('bin/cli.js'), /\bpr\b/);
+  assert.match(read('README.md'), /\/pr\b/);
 });

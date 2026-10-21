@@ -72,3 +72,13 @@ test('handoff creates portable transition document in temp directory without wor
   assert.match(read('README.md'), /handoff/);
   assert.match(read('skills/handoff/agents/openai.yaml'), /display_name: "Handoff"/);
 });
+test('retro evaluates session friction to propose automated checks and guardrails', () => {
+  const value = read('skills/retro/SKILL.md');
+  assert.match(value, /Automated checks/);
+  assert.match(value, /Navigation pointers/);
+  assert.match(value, /Coding standards/);
+  assert.match(value, /No-ops/);
+  assert.match(read('bin/cli.js'), /retro/);
+  assert.match(read('README.md'), /retro/);
+  assert.match(read('skills/retro/agents/openai.yaml'), /display_name: "Retro"/);
+});

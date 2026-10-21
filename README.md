@@ -39,7 +39,7 @@ Instala y configura las skills de Speclet en este entorno:
 
 2. Confirma las skills disponibles:
    - Speclet Core: speclet-rules, speclet-draft, speclet-plan, speclet-loop, speclet-review, speclet-archive, speclet-jira
-   - Ingenieria independiente: pr, merge-risk, handoff, readable-code, systematic-debugging, test-driven-development, verification-before-completion, production-monitoring
+   - Ingenieria independiente: pr, merge-risk, handoff, retro, readable-code, systematic-debugging, test-driven-development, verification-before-completion, production-monitoring
    - Modos auxiliares: ponytail, caveman
 
 3. Avisame cuando este listo para comenzar con $speclet-draft (o $speclet-rules si el proyecto es nuevo).
@@ -117,6 +117,7 @@ Herramientas independientes que funcionan tanto dentro del flujo SDD como de for
 | **`pr`** | `$pr` (o `/pr`) | Prepara y abre el PR en GitHub (`gh`) o GitLab (`glab`) con formato escaneable en 30 segundos (resumen visual, evidencia de tests y Merge Danger), respetando la rama base. |
 | **`merge-risk`** | `merge-risk` | Evalúa el riesgo de mergear una rama o PR contra 5 dimensiones ponderadas (alineación, blast radius, verificación, reversibilidad y observabilidad) con veredicto conciso (`low`, `medium`, `high`). |
 | **`handoff`** | `/handoff` | Compacta la sesión en un documento markdown portátil en `/tmp` con decisiones, punteros y skills sugeridas para que otro agente, harness o colega continúe sin fricción. |
+| **`retro`** | `/retro` | Retrospectiva de sesión: analiza fricciones del agente y propone mejoras al entorno (chequeos automáticos, linters, punteros de navegación o limpieza de no-ops) en lugar de inflar las instrucciones en texto. |
 
 ### Calidad y Arquitectura de Código
 | Skill | Propósito | Regla central |
@@ -155,6 +156,7 @@ speclet/
 │   ├── pr/                        # Generación y apertura de PR humano (/pr)
 │   ├── merge-risk/                # Auditoría de riesgo pre-merge (Warp/Matt Pocock)
 │   ├── handoff/                   # Compactación y traspaso de sesión portátil (Matt Pocock)
+│   ├── retro/                     # Retrospectiva de sesión y guardrails (Matt Pocock)
 │   ├── readable-code/             # Código lineal, guard clauses y carpetas
 │   ├── systematic-debugging/      # Investigación de causa raíz (Superpowers)
 │   ├── test-driven-development/   # Ciclo TDD (Superpowers)
@@ -183,8 +185,8 @@ Incluye e integra componentes desarrollados por la comunidad de software libre:
   Creados por **Jesse Vincent** ([obra/superpowers](https://github.com/obra/superpowers)) bajo Licencia MIT.  
   *Nota:* Estas skills son propiedad intelectual de sus autores originales y se incorporan como dependencias recomendadas.
 
-- **Matt Pocock Skills (`handoff`, `/pr`)**:  
-  Conceptos de handoff portátil y estructura humana de PR creados por **Matt Pocock** ([mattpocock/skills](https://github.com/mattpocock/skills)) bajo Licencia MIT.
+- **Matt Pocock Skills (`handoff`, `/pr`, `retro`)**:  
+  Conceptos de handoff portátil, estructura humana de PR y retrospectiva de sesión creados por **Matt Pocock** ([mattpocock/skills](https://github.com/mattpocock/skills)) bajo Licencia MIT.
 
 - **Merge Risk (`merge-risk`)**:  
   Inspirado en el concepto original de *Merge Danger* de **Matt Pocock** y adaptado de la implementación de **Warp** ([warpdotdev/common-skills](https://github.com/warpdotdev/common-skills)) bajo Licencia MIT.

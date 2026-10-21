@@ -4,31 +4,20 @@
 [![skills.sh](https://img.shields.io/badge/skills.sh-danielcastro--dev%2Fspeclet-black)](https://skills.sh)
 [![Compatible with](https://img.shields.io/badge/Agentes-Claude%20Code%20%7C%20Codex%20%7C%20Cursor%20%7C%20Antigravity-purple)]()
 
-Flujo personal de desarrollo guiado por especificaciones para agentes de IA (Claude Code, OpenAI Codex, Antigravity, Cursor, Windsurf).
+Kit personal portátil de ingeniería de software y desarrollo guiado por especificaciones (**Spec-Driven Development / SDD**) para agentes de IA (Claude Code, OpenAI Codex, Antigravity, Cursor, Windsurf).
 
-Diseñado para ser directo, ligero, centrado en Markdown y sin sobreingeniería.
-
----
-
-## Filosofia
-
-- **Markdown puro**: Sin esquemas JSON rígidos ni metadatos innecesarios.
-- **Seleccion multiple**: Preguntas cortas con opciones concretas para pair programming agil.
-- **Worktrees consultados**: Desarrollo aislado en ramas limpias sin tocar main sin autorizacion.
-- **Verificacion con evidencia**: Pruebas antes de commits ("evidence before assertions").
-- **Review manual y económico**: `speclet-loop` nunca invoca reviewers; `speclet-review` verifica el cambio entero cuando el usuario lo solicita.
-- **Simplicidad**: Menor cambio completo posible, eliminando relleno conversacional.
+Diseñado para instalarse en cualquier máquina en 30 segundos y contar de inmediato con un flujo estricto de calidad, arquitectura limpia, TDD y entrega sin *AI-slop*.
 
 ---
 
-## Como instalar
+## ⚡ Instalación Express (PC nueva en 1 minuto)
 
-### Opcion 1: Con npx skills (Recomendado)
+### Opción 1: Con npx skills (Recomendado)
 
 Utiliza el gestor universal de skills para agentes ([skills.sh](https://skills.sh)):
 
 ```bash
-# Global para todos tus agentes (Codex, Claude Code, Cursor, etc.):
+# Global para todos tus agentes en el sistema (Codex, Claude Code, Cursor, etc.):
 npx skills add danielcastro-dev/speclet -g
 
 # O solo para el proyecto actual (.agents/skills/):
@@ -37,9 +26,9 @@ npx skills add danielcastro-dev/speclet
 
 ---
 
-### Opcion 2: Prompt para que tu LLM lo instale por ti
+### Opción 2: Prompt para que tu LLM lo instale por ti
 
-Copia y pega este prompt en el chat de tu agente:
+Copia y pega este prompt en el chat de tu agente en cualquier máquina nueva:
 
 ```text
 Instala y configura las skills de Speclet en este entorno:
@@ -49,8 +38,8 @@ Instala y configura las skills de Speclet en este entorno:
    (o a nivel de proyecto: npx -y skills add danielcastro-dev/speclet -y)
 
 2. Confirma las skills disponibles:
-   - Speclet Core: speclet-rules, speclet-draft, speclet-plan, speclet-loop, speclet-review, pr, speclet-archive, speclet-jira
-   - Ingenieria independiente: merge-risk, readable-code, systematic-debugging, test-driven-development, verification-before-completion, production-monitoring
+   - Speclet Core: speclet-rules, speclet-draft, speclet-plan, speclet-loop, speclet-review, speclet-archive, speclet-jira
+   - Ingenieria independiente: pr, merge-risk, handoff, readable-code, systematic-debugging, test-driven-development, verification-before-completion, production-monitoring
    - Modos auxiliares: ponytail, caveman
 
 3. Avisame cuando este listo para comenzar con $speclet-draft (o $speclet-rules si el proyecto es nuevo).
@@ -58,115 +47,123 @@ Instala y configura las skills de Speclet en este entorno:
 
 ---
 
-## Flujo de trabajo
+## 🔄 1. Flujo Spec-Driven Development (SDD)
+
+El desarrollo guiado por especificaciones elimina el "vibe coding": ningún agente escribe código productivo sin antes acordar los requisitos, planificar la arquitectura mínima y aislar el trabajo en un Git worktree.
+
+### Diagrama del ciclo de vida
 
 ```text
-  speclet-rules (opcional) -> speclet-draft -> speclet-plan -> speclet-loop
-                                                         |
-                                                   Implementado
-                                                         |
-                                        ┌────────────────┴────────────────┐
-                                        ▼                                 ▼
-                                  speclet-review (opcional)            pr (/pr)
-                                        │                                 │
-                                        │                                 ▼
-                                        │                          merge-risk (opcional)
-                                        │                                 │
-                                        └────────────────┬────────────────┘
-                                                         ▼
-                                                  speclet-archive
+  speclet-rules (invariantes de repo y BD)
+         │
+         ▼
+   speclet-draft (aclaración de requerimientos -> spec.md)
+         │
+         ▼
+   speclet-plan (arquitectura mínima y focos de revisión -> plan.md + tasks.md)
+         │
+         ▼
+   speclet-loop (TDD en git worktree consultado + commits atómicos por tarea)
+         │
+         ├─────────────────────────────────────────┐
+         ▼                                         ▼
+   speclet-review (auditoría manual 3D)          pr (/pr) (apertura GitHub/GitLab)
+         │                                         │
+         │                                         ▼
+         │                                  merge-risk (auditoría pre-merge)
+         │                                         │
+         └────────────────────┬────────────────────┘
+                              ▼
+                       speclet-archive (limpieza y registro histórico)
+                              │
+                              ▼
+                       speclet-jira (traspaso con evidencia real)
 ```
 
-1. **`$speclet-rules`** *(Opcional / Por repositorio)*: Inspecciona el stack y genera/actualiza `.speclet/rules.md` con las reglas de oro del repo (no duplicar lógica según Ponytail, claves PK/FK, índices obligatorios de BD y seguridad).
-2. **`$speclet-draft`**: Analiza el proyecto respetando `rules.md` y aclara requisitos mediante preguntas breves de seleccion multiple antes de redactar `spec.md`.
-3. **`$speclet-plan`**: Convierte el spec aprobado en un plan tecnico minimo (`plan.md`) y lista de tareas ejecutables (`tasks.md`). Respeta las invariantes del repo (reutilización de helpers, índices de BD) y fija focos de revisión con tests obligatorios.
-4. **`$speclet-loop`**: Ejecuta todas las tareas con worktree consultado, TDD, tests y commits locales por tarea. No invoca subagentes ni reviewers automáticamente; termina con `Estado: Implementado`.
-5. **`$speclet-review`** *(Opcional / Manual)*: Revisa el diff completo con rúbrica 3D (completitud, corrección y coherencia), usando como máximo un subagente económico si es posible seleccionar su modelo. Nunca corrige automáticamente.
-6. **`$pr` (o `/pr`)** *(Opcional / Entrega)*: Prepara y abre el Pull Request en GitHub (`gh`) o Merge Request en GitLab (`glab`) con formato humano escaneable en 30 segundos (resumen visual, evidencia de tests y Merge Danger/alertas de entorno), pasando explícitamente la rama base.
-7. **`merge-risk`** *(Opcional / Pre-merge)*: Evalúa el riesgo de mergear una rama o PR contra 5 dimensiones ponderadas (alineación, blast radius, verificación, reversibilidad y detección de errores), emitiendo veredicto conciso (`low`, `medium`, `high`) antes de mezclar a `main`.
-8. **`$speclet-archive`**: Archiva el cambio implementado en `.speclet/archive/YYYY-MM-<nombre>/` y actualiza el índice cronológico para mantener `.speclet/changes/` despejado.
-9. **`$speclet-jira`** *(Opcional)*: Prepara la historia o reporte de entrega basado en la evidencia y commits reales cuando se requiere traspaso.
+### Principios del flujo
+
+1. **Markdown puro:** Sin JSONs rígidos ni burocracia de herramientas externas; las especificaciones viven en `.speclet/`.
+2. **Selección múltiple:** El agente aclara dudas con preguntas concretas y opciones en lugar de asumir a ciegas.
+3. **Worktrees aislados:** Cada cambio corre en su propio árbol de trabajo de Git consultado previamente.
+4. **TDD obligatorio:** Rojo -> Verde -> Refactor antes de dar por buena cualquier tarea.
+5. **Evidencia antes de afirmaciones:** Ninguna tarea se cierra sin el comando de verificación real y su salida exitosa en terminal.
+6. **Revisión económica y humana:** `speclet-loop` nunca lanza subagentes revisores automáticamente; la revisión es un acto consciente del desarrollador.
 
 ---
 
-## Reglas del Proyecto (`rules.md`)
+## 🧠 2. Speclet Core (El motor de especificaciones)
 
-Ejecuta `$speclet-rules` para generar o personalizar `.speclet/rules.md` (o `rules.md` en la raíz) con las directrices de tu repositorio:
-- **Filosofía Ponytail & readable-code:** No duplicar lógica; si una función o patrón se repite, extraer un helper reutilizable. Código lineal de arriba a abajo con *guard clauses* (early returns), prohibiendo el troceado artificial de funciones por complejidad ciclomática.
-- **Arquitectura de carpetas (Brownfield-first):** Respetar estrictamente la estructura actual del repositorio existente; en código nuevo, prohibido el *flat dumping* (separar rutas, servicios, db/modelos y utilidades).
-- **Base de datos:** Reglas de Primary Keys, Foreign Keys explícitas con restricciones de integridad, e índices obligatorios en columnas de búsqueda o filtros WHERE frecuentes.
-- **Arquitectura:** Esquema de respuestas de endpoints, redacción de tokens en logs y políticas de testing.
+Módulos diseñados para estructurar y ejecutar cambios controlados:
 
-*Consulta la plantilla en [`templates/rules.example.md`](./templates/rules.example.md).*
-
----
-
-## Catalogo de Skills
-
-### Speclet Core
-
-| Skill | Invocacion | Proposito |
+| Skill | Invocación | Propósito |
 | :--- | :--- | :--- |
-| **`speclet-rules`** | `$speclet-rules` | Inicializa o actualiza `rules.md` con las reglas de oro del repo y de base de datos. |
-| **`speclet-draft`** | `$speclet-draft` | Aclara requisitos mediante opciones multiples y genera `spec.md`. |
-| **`speclet-plan`** | `$speclet-plan` | Define arquitectura minima, casos limite, reglas de DB/Ponytail y tareas en `tasks.md`. |
-| **`speclet-loop`** | `$speclet-loop` | Ejecuta todas las tareas con TDD, tests y commits sin reviewers automáticos. |
-| **`speclet-review`** | `$speclet-review` | Revisión integral manual del cambio completo, sin correcciones automáticas. |
-| **`pr`** | `$pr` (o `/pr`) | Prepara y abre el PR en GitHub (`gh`) o GitLab (`glab`) con formato humano `/pr` (resumen visual, evidencia y Merge Danger). |
-| **`speclet-archive`** | `$speclet-archive` | Mueve cambios terminados a `.speclet/archive/` y actualiza el índice histórico. |
-| **`speclet-jira`** | `$speclet-jira` | Genera tickets o reportes de cierre con evidencia real. |
+| **`speclet-rules`** | `$speclet-rules` | Inspecciona el stack y genera `.speclet/rules.md` con las invariantes del repo (reutilización de helpers, PK/FK e índices de BD). |
+| **`speclet-draft`** | `$speclet-draft` | Entrevista interactiva para acordar requisitos y redactar `spec.md`. |
+| **`speclet-plan`** | `$speclet-plan` | Desglosa la arquitectura mínima y las tareas atómicas con tests en `tasks.md`. |
+| **`speclet-loop`** | `$speclet-loop` | Ejecuta las tareas en git worktree con TDD y commits atómicos sin reviewers automáticos. |
+| **`speclet-review`** | `$speclet-review` | Auditoría manual e integral del diff contra la rúbrica 3D (completitud, corrección y coherencia). |
+| **`speclet-archive`** | `$speclet-archive` | Mueve cambios terminados a `.speclet/archive/` para mantener el árbol despejado. |
+| **`speclet-jira`** | `$speclet-jira` | Redacta tickets de Jira o mensajes de cierre basados en la evidencia real. |
 
 ---
 
-### Habilidades de Ingenieria Independientes
+## 🛠️ 3. Skills de Ingeniería y Productividad
 
-Skills autonomas para calidad, depuracion y monitoreo en produccion:
+Herramientas independientes que funcionan tanto dentro del flujo SDD como de forma autónoma en el día a día:
 
-| Skill | Proposito | Regla central |
+### Entrega, Auditoría y Transición
+| Skill | Invocación | Propósito |
 | :--- | :--- | :--- |
-| **`merge-risk`** | Auditoría de riesgo previo al merge en 5 dimensiones ponderadas (Blast Radius, Reversibilidad, Tests, Observabilidad, Scope). | Evaluar criticidad e impacto antes de mezclar a producción; nunca mergear cambios destructivos o no verificados a ciegas. |
-| **`readable-code`** | Código lineal de arriba a abajo, guard clauses, funciones profundas y carpetas estructuradas. | La comprensión humana y la lectura secuencial priman sobre métricas ciegas de complejidad ciclomática. |
-| **`systematic-debugging`** | Aislamiento de causa raiz ante bugs o fallos de CI. | Prohibido proponer codigo sin investigacion de causa raiz previa. |
-| **`test-driven-development`** | Desarrollo guiado por pruebas (TDD). | Escribe el test primero, comprueba que falle y luego implementa lo minimo. |
-| **`verification-before-completion`** | Verificacion con evidencia fresca antes de commits. | Prohibido afirmar exito sin ejecucion del comando y salida exit 0 en el turno. |
-| **`production-monitoring`** | Observabilidad en produccion, OpenTelemetry, trazas, logs estructurados, metricas y SLOs. | La observabilidad es fundacional desde el dia uno, no un agregado posterior. |
+| **`pr`** | `$pr` (o `/pr`) | Prepara y abre el PR en GitHub (`gh`) o GitLab (`glab`) con formato escaneable en 30 segundos (resumen visual, evidencia de tests y Merge Danger), respetando la rama base. |
+| **`merge-risk`** | `merge-risk` | Evalúa el riesgo de mergear una rama o PR contra 5 dimensiones ponderadas (alineación, blast radius, verificación, reversibilidad y observabilidad) con veredicto conciso (`low`, `medium`, `high`). |
+| **`handoff`** | `/handoff` | Compacta la sesión en un documento markdown portátil en `/tmp` con decisiones, punteros y skills sugeridas para que otro agente, harness o colega continúe sin fricción. |
+
+### Calidad y Arquitectura de Código
+| Skill | Propósito | Regla central |
+| :--- | :--- | :--- |
+| **`readable-code`** | Código lineal de arriba a abajo, guard clauses (early returns), módulos profundos y carpetas estructuradas. | La comprensión humana y la lectura secuencial priman sobre métricas ciegas de complejidad ciclomática. |
+| **`test-driven-development`** | Desarrollo guiado por pruebas (TDD). | Escribe el test primero, comprueba que falle y luego implementa lo mínimo. |
+| **`systematic-debugging`** | Aislamiento metódico de causa raíz ante bugs o fallos de CI. | Prohibido proponer código sin investigación previa comprobable. |
+| **`verification-before-completion`** | Verificación con evidencia fresca antes de commits. | Prohibido afirmar éxito sin ejecutar el comando y validar salida en el turno. |
+| **`production-monitoring`** | Observabilidad en producción: OpenTelemetry, trazas, logs estructurados, métricas y SLOs. | La observabilidad es fundacional desde el día uno, no un agregado posterior. |
 
 ---
 
-### Modos Auxiliares
+## 🎭 4. Modos Auxiliares (Personalidad del Agente)
 
-| Skill | Proposito |
+| Modo | Propósito |
 | :--- | :--- |
-| **`ponytail`** | Desarrollador senior pragmatico: el menor cambio que resuelve el problema por completo, sin sobreingenieria ni codigo especulativo. |
-| **`caveman`** | Respuestas concisas y directas al grano en espanol, eliminando el relleno conversacional sin perder rigor tecnico. |
+| **`ponytail`** | Desarrollador senior pragmático: el menor cambio completo que resuelve el problema, sin sobreingeniería ni código especulativo. |
+| **`caveman`** | Respuestas concisas y directas al grano en español, eliminando el relleno conversacional sin perder rigor técnico. |
 
 ---
 
-## Estructura del repositorio
+## 📁 Estructura del Repositorio
 
 ```text
 speclet/
 ├── bin/
-│   └── cli.js                     # CLI ligero para listar o instalar skills
+│   └── cli.js                     # CLI ligero para listar, prompt o instalar skills
 ├── skills/
-│   ├── speclet-rules/             # Inicializacion de reglas de repo y DB
-│   ├── speclet-draft/             # Definicion guiada de requerimientos
-│   ├── speclet-plan/              # Planificacion tecnica con casos limite
-│   ├── speclet-loop/              # Ejecucion autonoma, TDD y commits
-│   ├── speclet-review/            # Revision integral manual
-│   ├── pr/                        # Generacion de PR humano (/pr) y apertura (GitHub/GitLab)
-│   ├── merge-risk/                # Auditoria de riesgo pre-merge (Warp/Matt Pocock)
-│   ├── speclet-archive/           # Archivado historico y limpieza
+│   ├── speclet-rules/             # Inicialización de reglas de repo y DB
+│   ├── speclet-draft/             # Definición guiada de requerimientos
+│   ├── speclet-plan/              # Planificación técnica con casos límite
+│   ├── speclet-loop/              # Ejecución autónoma, TDD y commits
+│   ├── speclet-review/            # Revisión integral manual
+│   ├── speclet-archive/           # Archivado histórico y limpieza
 │   ├── speclet-jira/              # Traspaso y tickets con evidencia
-│   ├── systematic-debugging/      # Investigacion de causa raiz (Superpowers)
+│   ├── pr/                        # Generación y apertura de PR humano (/pr)
+│   ├── merge-risk/                # Auditoría de riesgo pre-merge (Warp/Matt Pocock)
+│   ├── handoff/                   # Compactación y traspaso de sesión portátil (Matt Pocock)
+│   ├── readable-code/             # Código lineal, guard clauses y carpetas
+│   ├── systematic-debugging/      # Investigación de causa raíz (Superpowers)
 │   ├── test-driven-development/   # Ciclo TDD (Superpowers)
 │   ├── verification-before-completion/ # Puerta de evidencia previa al commit (Superpowers)
-│   ├── production-monitoring/     # Observabilidad, OTEL y metricas en produccion
-│   ├── readable-code/             # Codigo lineal, guard clauses y carpetas
+│   ├── production-monitoring/     # Observabilidad, OTEL y métricas en producción
 │   ├── ponytail/                  # Pragmatismo senior (Dietrich Gebert)
 │   └── caveman/                   # Chat conciso (Julius Brussee)
 ├── tests/
-│   └── workflow.test.js           # Invariantes de revisión manual
+│   └── workflow.test.js           # Invariantes de pruebas automatizadas
 ├── templates/
 │   └── rules.example.md           # Plantilla de invariantes de repo y DB
 ├── package.json
@@ -176,7 +173,7 @@ speclet/
 
 ---
 
-## Creditos y Atribuciones
+## 📜 Créditos y Atribuciones
 
 Este repositorio representa el flujo de trabajo personal de **[Daniel Castro](https://github.com/danielcastro-dev)**, publicado bajo licencia **MIT**.
 
@@ -184,10 +181,16 @@ Incluye e integra componentes desarrollados por la comunidad de software libre:
 
 - **Superpowers (`systematic-debugging`, `test-driven-development`, `verification-before-completion`)**:  
   Creados por **Jesse Vincent** ([obra/superpowers](https://github.com/obra/superpowers)) bajo Licencia MIT.  
-  *Nota:* Estas skills son propiedad intelectual de sus autores originales y se incorporan como dependencias independientes recomendadas.
+  *Nota:* Estas skills son propiedad intelectual de sus autores originales y se incorporan como dependencias recomendadas.
+
+- **Matt Pocock Skills (`handoff`, `/pr`)**:  
+  Conceptos de handoff portátil y estructura humana de PR creados por **Matt Pocock** ([mattpocock/skills](https://github.com/mattpocock/skills)) bajo Licencia MIT.
+
+- **Merge Risk (`merge-risk`)**:  
+  Inspirado en el concepto original de *Merge Danger* de **Matt Pocock** y adaptado de la implementación de **Warp** ([warpdotdev/common-skills](https://github.com/warpdotdev/common-skills)) bajo Licencia MIT.
 
 - **Production Monitoring (`production-monitoring`)**:  
-  Skill de observabilidad y monitoreo en produccion basado en estandares OpenTelemetry, SRE y patrones de observabilidad para servicios distribuidos.
+  Skill de observabilidad y monitoreo en producción basado en estándares OpenTelemetry y prácticas SRE.
 
 - **Ponytail (`ponytail`)**:  
   Creado por **Dietrich Gebert** ([DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail)) bajo Licencia MIT.
@@ -195,8 +198,5 @@ Incluye e integra componentes desarrollados por la comunidad de software libre:
 - **Caveman (`caveman`)**:  
   Creado por **Julius Brussee** ([JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman)) bajo Licencia MIT / Apache 2.0.
 
-- **Merge Risk (`merge-risk`)**:  
-  Inspirado en el concepto original de *Merge Danger* de **Matt Pocock** ([mattpocock/skills](https://github.com/mattpocock/skills)) y adaptado de la implementación de **Warp** ([warpdotdev/common-skills](https://github.com/warpdotdev/common-skills)) bajo Licencia MIT.
-
-- **Inspiraciones**:  
-  Inspirado en el catalogo de skills de **Matt Pocock** ([mattpocock/skills](https://github.com/mattpocock/skills)) y el concepto de especificaciones vivas de **OpenSpec** ([Fission-AI/openspec](https://github.com/Fission-AI/openspec)).
+- **Inspiraciones adicionales**:  
+  Inspirado en el concepto de especificaciones vivas de **OpenSpec** ([Fission-AI/openspec](https://github.com/Fission-AI/openspec)).

@@ -26,7 +26,7 @@ const LLM_PROMPT = `Instala y configura las skills de Speclet en este entorno:
 
 2. Confirma las skills disponibles:
    - Speclet Core: speclet-rules, speclet-draft, speclet-plan, speclet-loop, speclet-review, speclet-archive, speclet-jira
-   - Ingenieria independiente: pr, readable-code, systematic-debugging, test-driven-development, verification-before-completion, production-monitoring
+   - Ingenieria independiente: pr, merge-risk, readable-code, systematic-debugging, test-driven-development, verification-before-completion, production-monitoring
    - Modos auxiliares: ponytail, caveman
 
 3. Avisame cuando este listo para comenzar con $speclet-draft.`;

@@ -52,3 +52,14 @@ test('pr formats PRs with /pr structure, explicit base branch, and supports gith
   assert.match(read('bin/cli.js'), /\bpr\b/);
   assert.match(read('README.md'), /\/pr\b/);
 });
+test('merge-risk evaluates PR merge risk across 5 weighted dimensions', () => {
+  const value = read('skills/merge-risk/SKILL.md');
+  assert.match(value, /Alignment/);
+  assert.match(value, /Impact & Blast Radius/);
+  assert.match(value, /Verification/);
+  assert.match(value, /Rollback Cost/);
+  assert.match(value, /Error Detection/);
+  assert.match(value, /Score = Σ\(veredicto × peso\)/);
+  assert.match(read('bin/cli.js'), /merge-risk/);
+  assert.match(read('README.md'), /merge-risk/);
+});

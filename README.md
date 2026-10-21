@@ -50,7 +50,7 @@ Instala y configura las skills de Speclet en este entorno:
 
 2. Confirma las skills disponibles:
    - Speclet Core: speclet-rules, speclet-draft, speclet-plan, speclet-loop, speclet-review, pr, speclet-archive, speclet-jira
-   - Ingenieria independiente: systematic-debugging, test-driven-development, verification-before-completion, production-monitoring, readable-code
+   - Ingenieria independiente: merge-risk, readable-code, systematic-debugging, test-driven-development, verification-before-completion, production-monitoring
    - Modos auxiliares: ponytail, caveman
 
 3. Avisame cuando este listo para comenzar con $speclet-draft (o $speclet-rules si el proyecto es nuevo).
@@ -69,6 +69,9 @@ Instala y configura las skills de Speclet en este entorno:
                                         ▼                                 ▼
                                   speclet-review (opcional)            pr (/pr)
                                         │                                 │
+                                        │                                 ▼
+                                        │                          merge-risk (opcional)
+                                        │                                 │
                                         └────────────────┬────────────────┘
                                                          ▼
                                                   speclet-archive
@@ -80,8 +83,9 @@ Instala y configura las skills de Speclet en este entorno:
 4. **`$speclet-loop`**: Ejecuta todas las tareas con worktree consultado, TDD, tests y commits locales por tarea. No invoca subagentes ni reviewers automáticamente; termina con `Estado: Implementado`.
 5. **`$speclet-review`** *(Opcional / Manual)*: Revisa el diff completo con rúbrica 3D (completitud, corrección y coherencia), usando como máximo un subagente económico si es posible seleccionar su modelo. Nunca corrige automáticamente.
 6. **`$pr` (o `/pr`)** *(Opcional / Entrega)*: Prepara y abre el Pull Request en GitHub (`gh`) o Merge Request en GitLab (`glab`) con formato humano escaneable en 30 segundos (resumen visual, evidencia de tests y Merge Danger/alertas de entorno), pasando explícitamente la rama base.
-7. **`$speclet-archive`**: Archiva el cambio implementado en `.speclet/archive/YYYY-MM-<nombre>/` y actualiza el índice cronológico para mantener `.speclet/changes/` despejado.
-8. **`$speclet-jira`** *(Opcional)*: Prepara la historia o reporte de entrega basado en la evidencia y commits reales cuando se requiere traspaso.
+7. **`merge-risk`** *(Opcional / Pre-merge)*: Evalúa el riesgo de mergear una rama o PR contra 5 dimensiones ponderadas (alineación, blast radius, verificación, reversibilidad y detección de errores), emitiendo veredicto conciso (`low`, `medium`, `high`) antes de mezclar a `main`.
+8. **`$speclet-archive`**: Archiva el cambio implementado en `.speclet/archive/YYYY-MM-<nombre>/` y actualiza el índice cronológico para mantener `.speclet/changes/` despejado.
+9. **`$speclet-jira`** *(Opcional)*: Prepara la historia o reporte de entrega basado en la evidencia y commits reales cuando se requiere traspaso.
 
 ---
 
@@ -120,6 +124,7 @@ Skills autonomas para calidad, depuracion y monitoreo en produccion:
 
 | Skill | Proposito | Regla central |
 | :--- | :--- | :--- |
+| **`merge-risk`** | Auditoría de riesgo previo al merge en 5 dimensiones ponderadas (Blast Radius, Reversibilidad, Tests, Observabilidad, Scope). | Evaluar criticidad e impacto antes de mezclar a producción; nunca mergear cambios destructivos o no verificados a ciegas. |
 | **`readable-code`** | Código lineal de arriba a abajo, guard clauses, funciones profundas y carpetas estructuradas. | La comprensión humana y la lectura secuencial priman sobre métricas ciegas de complejidad ciclomática. |
 | **`systematic-debugging`** | Aislamiento de causa raiz ante bugs o fallos de CI. | Prohibido proponer codigo sin investigacion de causa raiz previa. |
 | **`test-driven-development`** | Desarrollo guiado por pruebas (TDD). | Escribe el test primero, comprueba que falle y luego implementa lo minimo. |
@@ -150,6 +155,7 @@ speclet/
 │   ├── speclet-loop/              # Ejecucion autonoma, TDD y commits
 │   ├── speclet-review/            # Revision integral manual
 │   ├── pr/                        # Generacion de PR humano (/pr) y apertura (GitHub/GitLab)
+│   ├── merge-risk/                # Auditoria de riesgo pre-merge (Warp/Matt Pocock)
 │   ├── speclet-archive/           # Archivado historico y limpieza
 │   ├── speclet-jira/              # Traspaso y tickets con evidencia
 │   ├── systematic-debugging/      # Investigacion de causa raiz (Superpowers)
@@ -188,6 +194,9 @@ Incluye e integra componentes desarrollados por la comunidad de software libre:
 
 - **Caveman (`caveman`)**:  
   Creado por **Julius Brussee** ([JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman)) bajo Licencia MIT / Apache 2.0.
+
+- **Merge Risk (`merge-risk`)**:  
+  Inspirado en el concepto original de *Merge Danger* de **Matt Pocock** ([mattpocock/skills](https://github.com/mattpocock/skills)) y adaptado de la implementación de **Warp** ([warpdotdev/common-skills](https://github.com/warpdotdev/common-skills)) bajo Licencia MIT.
 
 - **Inspiraciones**:  
   Inspirado en el catalogo de skills de **Matt Pocock** ([mattpocock/skills](https://github.com/mattpocock/skills)) y el concepto de especificaciones vivas de **OpenSpec** ([Fission-AI/openspec](https://github.com/Fission-AI/openspec)).

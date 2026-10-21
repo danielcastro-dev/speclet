@@ -63,3 +63,12 @@ test('merge-risk evaluates PR merge risk across 5 weighted dimensions', () => {
   assert.match(read('bin/cli.js'), /merge-risk/);
   assert.match(read('README.md'), /merge-risk/);
 });
+test('handoff creates portable transition document in temp directory without workspace pollution', () => {
+  const value = read('skills/handoff/SKILL.md');
+  assert.match(value, /handoff/);
+  assert.match(value, /\$TMPDIR/);
+  assert.match(value, /Suggested skills/);
+  assert.match(read('bin/cli.js'), /handoff/);
+  assert.match(read('README.md'), /handoff/);
+  assert.match(read('skills/handoff/agents/openai.yaml'), /display_name: "Handoff"/);
+});
